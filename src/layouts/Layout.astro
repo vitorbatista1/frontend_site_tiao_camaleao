@@ -1,0 +1,23 @@
+---
+// src/layouts/Layout.astro
+import "../styles/global.css";
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{Astro.props.title || "Tião Camaleão – Cantigas com o nome da criança"}</title>
+    <meta
+      name="description"
+      content={Astro.props.description || "Cantigas infantis personalizadas com o nome da sua criança. Mais de 2.000 nomes gravados em estúdio. Presente único que vira memória de família."}
+    />
+    {Astro.props.slot}
+  </head>
+  <body>
+    <div class="min-h-screen overflow-hidden bg-background">
+      <slot />
+    </div>
+  </body>
+</html>

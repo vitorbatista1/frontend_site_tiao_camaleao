@@ -1,0 +1,567 @@
+---
+import { Image } from "astro:assets";
+import "../styles/global.css";
+import FaqAccordion from "../components/FaqAccordion.tsx";
+import ModalController from "../components/ModalController.tsx";
+import CampaignProducts from "../components/CampaignProducts.tsx";
+import CampaignCombo from "../components/CampaignCombo.tsx";
+import {
+  Music,
+  Heart,
+  Play,
+  Lock,
+  Mail,
+  Phone,
+  Instagram,
+  Gift,
+  MessageCircle,
+} from "../components/Icons.tsx";
+
+import heroChildren from "../assets/hero-children.jpg";
+import chameleon from "../assets/chameleon-mascot.png";
+import kidHeadphones from "../assets/kid-headphones.jpg";
+import musician from "../assets/musician.jpg";
+import familyCollage from "../assets/family-collage.jpg";
+import studio from "../assets/studio.jpg";
+
+import rostoFeliz from "../assets/benefits/emoji_feliz.png";
+import coracao from "../assets/benefits/coracao.png";
+import globo from "../assets/benefits/globo.png";
+import jogoPeca from "../assets/benefits/jogo_peca.png";
+import nuvemCoracao from "../assets/benefits/nuvem_coracao.png";
+import nuvems from "../assets/benefits/nuvems.png";
+
+interface Props {
+  campaignId: string;
+}
+
+const { campaignId } = Astro.props;
+
+const benefits = [
+  {
+    icon: rostoFeliz,
+    title: "A criança se reconhece",
+    text: "Quando a criança ouve o próprio nome na música, os olhinhos brilham. Um momento de alegria que você vai querer registrar.",
+  },
+  {
+    icon: globo,
+    title: "Para quem está longe, mas quer manter o Brasil por perto",
+    text: "Para famílias fora do Brasil: as cantigas mantêm o vínculo, a língua, o carinho e as memórias vivas, mesmo à distância.",
+  },
+  {
+    icon: coracao,
+    title: "Uma lembrança que fica para sempre",
+    text: "Um dia essa criança vai crescer, ouvir essa cantiga… e lembrar do carinho de quem deu esse presente.",
+  },
+  {
+    icon: nuvemCoracao,
+    title: "Um presente diferente de tudo que voce ja comprou",
+    text: "Brinquedo passa. Roupa deixa de servir. Esse presente vira memória, afeto e história de família.",
+  },
+  {
+    icon: jogoPeca,
+    title: "Aprender brincando",
+    text: "Enquanto se diverte, a criança aprende a ouvir, esperar e prestar atenção.",
+  },
+  {
+    icon: nuvems,
+    title: "Estimula a fala",
+    text: "A música ajuda a criança a reconhecer sons, palavras e a se comunicar melhor naturalmente.",
+  },
+];
+
+const testimonialPrints = [
+  { id: 1, label: "Print depoimento 1" },
+  { id: 2, label: "Print depoimento 2" },
+  { id: 3, label: "Print depoimento 3" },
+];
+
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tião Camaleão – Cantigas com o nome da criança</title>
+    <meta
+      name="description"
+      content="Cantigas infantis personalizadas com o nome da sua criança. Mais de 2.000 nomes gravados em estúdio. Presente único que vira memória de família."
+    />
+  </head>
+  <body>
+    <ModalController client:load />
+
+    <div class="min-h-screen overflow-hidden bg-background">
+      <!-- Top strip -->
+      <div
+        class="bg-accent py-2 text-center text-sm font-bold uppercase tracking-wider text-accent-foreground"
+      >
+        <span aria-hidden="true">💚</span> Desde 2013 encantando famílias <span
+          aria-hidden="true">💚</span
+        >
+      </div>
+
+      <!-- HERO -->
+      <header class="relative isolate overflow-hidden" style={{ background: "white" }}>
+        <div
+          class="container relative z-10 grid items-center gap-10 py-14 md:grid-cols-2 md:py-24"
+        >
+          <div>
+            <p class="mb-3 text-sm font-extrabold uppercase tracking-widest text-grape">
+              Um jeito especial de marcar a infância
+            </p>
+            <h1 class="text-5xl leading-[1.05] text-foreground md:text-6xl lg:text-7xl">
+              Cantigas com o<br />
+              <span class="text-primary">nome da criança</span>
+            </h1>
+            <p class="mt-5 max-w-md text-lg text-foreground/80">
+              A maioria dos presentes passa… <strong>esse fica!</strong> Um abraço
+              sonoro que vira memória de família.
+            </p>
+            <div class="mt-7 flex flex-wrap gap-4">
+              <a href="#produtos" class="btn-pop btn-coral" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">Quero comprar</a>
+              <a href="#amostra" class="btn-pop btn-green">
+                <Play className="h-4 w-4" /> Pedir amostra grátis
+              </a>
+            </div>
+          </div>
+          <div class="relative">
+            <div
+              class="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-[2.5rem] border-8 border-card shadow-[var(--shadow-card)]"
+            >
+              <Image
+                src={heroChildren}
+                alt="Crianças sorrindo enquanto cantam cantigas personalizadas"
+                width={1280}
+                height={960}
+                class="h-full w-full object-cover"
+              />
+            </div>
+            <Image
+              src={chameleon}
+              alt=""
+              aria-hidden="true"
+              width={768}
+              height={768}
+              class="float-slow absolute -bottom-6 -left-6 hidden h-40 w-40 md:block"
+            />
+            <Music className="absolute -right-2 top-6 h-10 w-10 text-coral wiggle" />
+            <Music className="absolute -left-4 top-1/3 h-8 w-8 text-grape wiggle" />
+          </div>
+        </div>
+      </header>
+
+      <!-- GREEN BAND -->
+      <section class="relative py-16" style={{ background: "var(--gradient-grass)" }}>
+        <div class="container grid items-center gap-10 md:grid-cols-2">
+          <div class="relative mx-auto w-full max-w-sm">
+            <div
+              class="overflow-hidden rounded-[2rem] border-8 border-accent shadow-[var(--shadow-card)]"
+            >
+              <Image
+                src={kidHeadphones}
+                alt="Criança ouvindo cantigas com fone amarelo"
+                width={800}
+                height={800}
+                class="h-full w-full object-cover"
+                loading="lazy"
+              />
+            </div>
+            <Music className="absolute -left-6 top-4 h-10 w-10 text-accent wiggle" />
+          </div>
+          <div class="text-primary-foreground">
+            <h2 class="text-4xl md:text-5xl">
+              Um presente para ouvir hoje<br />
+              e lembrar para sempre!
+            </h2>
+            <p class="mt-4 max-w-md text-lg text-primary-foreground/90">
+              As cantigas chegam por download em minutos. É só apertar o play e
+              ver os olhinhos brilharem.
+            </p>
+            <a href="#produtos" class="btn-pop btn-sun mt-7" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">Quero ouvir</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- SAMPLE -->
+      <section
+        id="amostra"
+        class="relative py-16"
+        style={{ background: "hsl(var(--secondary))" }}
+      >
+        <div class="container grid items-center gap-10 md:grid-cols-2">
+          <div class="text-secondary-foreground">
+            <p class="mb-2 text-sm font-extrabold uppercase tracking-widest text-accent">
+              Veja a reação quando a
+            </p>
+            <h2 class="text-4xl md:text-5xl">
+              Criança ouve o próprio<br />nome na música
+            </h2>
+            <p class="mt-4 max-w-md text-lg text-secondary-foreground/90">
+              Quer ver a reação da SUA CRIANÇA? Clique no botão abaixo e receba
+              uma cantiga gratuita.
+            </p>
+            <a href="#contato" class="btn-pop btn-green mt-7">
+              <Gift className="h-4 w-4" /> Pedir amostra grátis
+            </a>
+          </div>
+          <div
+            class="relative mx-auto aspect-video w-full max-w-md overflow-hidden rounded-[2rem] border-8 border-card shadow-[var(--shadow-card)]"
+          >
+            <div class="absolute inset-0 bg-gradient-to-br from-grape to-coral"></div>
+            <button
+              type="button"
+              aria-label="Reproduzir vídeo"
+              class="absolute inset-0 flex items-center justify-center transition-transform hover:scale-105"
+            >
+              <span
+                class="grid h-20 w-20 place-items-center rounded-full bg-card text-coral shadow-[var(--shadow-button)]"
+              >
+                <Play className="h-9 w-9 fill-current" />
+              </span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- BENEFITS -->
+      <section class="bg-gray-100 py-20">
+        <div class="container">
+          <p class="text-center text-lg font-extrabold uppercase tracking-widest text-gray-400">
+            POR QUE AS FAMÍLIAS AMAM
+          </p>
+          <h2 class="mt-2 text-center text-4xl text-gray-600 md:text-5xl">
+            Muito mais que cantigas
+          </h2>
+          <div class="mt-12 mx-auto max-w-5xl">
+            <div class="grid gap-6 grid-cols-1 md:grid-cols-2">
+              {
+                benefits.map(({ icon, title, text }) => (
+                  <article
+                    class="card-pop border-2 border-border rounded-2xl transition-all hover:scale-[1.02] relative"
+                    style={{ backgroundColor: "#6ab248" }}
+                  >
+                    <div class="flex justify-center -mt-14 mb-2">
+                      <Image
+                        src={icon}
+                        alt=""
+                        class="h-32 w-32 md:h-36 md:w-36 object-contain drop-shadow-xl"
+                        loading="lazy"
+                      />
+                    </div>
+                    <h3 class="text-3xl font-bold text-white mb-4 text-center mt-2">{title}</h3>
+                    <p class="text-base text-white/90 leading-relaxed text-justify px-6 pb-6">{text}</p>
+                  </article>
+                ))
+              }
+            </div>
+          </div>
+          <div class="mt-12 text-center">
+            <a href="#produtos" class="btn-pop btn-coral" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">QUERO COMPRAR</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- TESTIMONIALS -->
+      <section class="py-20" style={{ background: "hsl(var(--secondary))" }}>
+        <div class="container">
+          <p class="text-center text-lg font-extrabold uppercase tracking-widest text-accent">
+            Depoimentos
+          </p>
+          <h2 class="mt-2 text-center text-4xl text-secondary-foreground md:text-5xl">
+            De quem já viveu esse momento
+          </h2>
+          <p class="mt-3 text-center text-secondary-foreground/90">
+            Prints reais de mensagens de famílias que receberam suas cantigas.
+          </p>
+          <div class="mt-12 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+            {
+              testimonialPrints.map((t) => (
+                <article class="card-pop flex aspect-[4/5] flex-col items-center justify-center border-2 border-dashed border-primary/40 bg-muted/60 text-center">
+                  <div class="mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
+                    <MessageCircle className="h-7 w-7" />
+                  </div>
+                  <p class="px-4 font-bold text-foreground">{t.label}</p>
+                  <p class="mt-1 px-4 text-sm text-muted-foreground">
+                    Adicione aqui o screenshot do depoimento
+                  </p>
+                </article>
+              ))
+            }
+          </div>
+          <div class="mt-12 text-center">
+            <a href="#produtos" class="btn-pop btn-coral" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">Eu também quero</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- NAMES -->
+      <section class="bg-background py-20">
+        <div class="container grid items-center gap-12 md:grid-cols-2">
+          <div class="relative">
+            <Image
+              src={chameleon}
+              alt="Tião Camaleão tocando violão"
+              width={768}
+              height={768}
+              class="float-slow mx-auto w-72 md:w-96"
+              loading="lazy"
+            />
+            <div class="absolute left-4 top-2 rounded-full bg-coral px-4 py-1.5 text-sm font-bold text-coral-foreground shadow-[var(--shadow-pop)]">
+              Benício
+            </div>
+            <div class="absolute right-2 top-10 rounded-full bg-grape px-4 py-1.5 text-sm font-bold text-grape-foreground shadow-[var(--shadow-pop)]">
+              Maria Clara
+            </div>
+            <div class="absolute bottom-12 left-0 rounded-full bg-accent px-4 py-1.5 text-sm font-bold text-accent-foreground shadow-[var(--shadow-pop)]">
+              Dudu
+            </div>
+          </div>
+          <div>
+            <h2 class="text-4xl text-foreground md:text-5xl">
+              Mais de <span class="text-primary">2.000 nomes</span><br />
+              já gravados em estúdio
+            </h2>
+            <p class="mt-4 text-lg text-muted-foreground">
+              Temos um grande acervo, incluindo nomes raros, compostos, apelidos
+              e até nomes estrangeiros.
+            </p>
+            <div class="mt-6 rounded-2xl border-2 border-border bg-muted p-5">
+              <p class="font-bold text-foreground">E se não tiver o nome que eu quero?</p>
+              <p class="mt-1 text-muted-foreground">
+                Sem problema! Fazemos a gravação personalizada sob encomenda,
+                com entrega em até 7 dias e um pequeno acréscimo de estúdio.
+              </p>
+            </div>
+            <a href="#produtos" class="btn-pop btn-coral mt-6" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">Quero comprar</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRODUCTS — dynamic per campaign -->
+      <CampaignProducts campaignId={campaignId} client:load />
+
+      <!-- COMBO -->
+      <CampaignCombo campaignId={campaignId} client:load />
+
+      <!-- MUSICIAN 1 -->
+      <section class="bg-background py-20">
+        <div class="container grid items-center gap-12 md:grid-cols-2">
+          <div class="relative mx-auto w-full max-w-sm">
+            <div
+              aria-hidden="true"
+              class="absolute -left-6 top-6 h-72 w-72 rounded-full md:h-80 md:w-80"
+              style={{ background: "hsl(var(--primary-glow) / 0.6)" }}
+            ></div>
+            <Image
+              src={musician}
+              alt="Bruno Grossi, voz do Tião Camaleão, com violão"
+              width={900}
+              height={1100}
+              class="relative h-full w-full rounded-2xl object-cover shadow-[var(--shadow-card)]"
+              loading="lazy"
+            />
+            <Music className="absolute -left-4 top-2 h-10 w-10 text-coral wiggle" />
+            <Music className="absolute -left-10 top-16 h-7 w-7 text-secondary wiggle" />
+          </div>
+          <div>
+            <p class="mb-2 text-sm font-extrabold uppercase tracking-widest text-grape">
+              A diferença está na voz, na intenção<br />e no cuidado em cada detalhe
+            </p>
+            <h2 class="text-4xl text-foreground md:text-5xl">
+              Quem dá voz ao Tião é<br />
+              <span class="text-primary">um músico de verdade</span>
+            </h2>
+            <p class="mt-5 text-lg text-muted-foreground">
+              A voz do Tião Camaleão é interpretada pelo{" "}
+              <strong class="text-foreground">Bruno Grossi</strong>, músico
+              formado em Música Popular pela UFMG, com mais de 20 anos de experiência.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- MUSICIAN 2 -->
+      <section class="relative py-20 text-grape-foreground" style={{ background: "var(--gradient-grape)" }}>
+        <div class="container grid items-center gap-12 md:grid-cols-2">
+          <div class="space-y-5 text-center md:text-left">
+            <p class="text-lg leading-relaxed text-grape-foreground/95">
+              Além de músico, ele também é o pai da <strong>Malu</strong>, e conhece de perto o que encanta uma criança de verdade.
+            </p>
+            <p class="text-lg leading-relaxed text-grape-foreground/95">
+              Ao longo dos anos, já ensinou música para muitas crianças e desenvolveu um olhar sensível para esse universo.
+            </p>
+          </div>
+          <div class="relative mx-auto w-full max-w-md">
+            <Image
+              src={familyCollage}
+              alt="Mosaico de famílias e crianças encantadas com as cantigas"
+              width={1024}
+              height={1024}
+              class="rounded-3xl shadow-[var(--shadow-card)]"
+              loading="lazy"
+            />
+            <Heart className="absolute -bottom-4 -left-4 h-16 w-16 fill-coral text-coral float-slow" aria-hidden="true" />
+          </div>
+        </div>
+      </section>
+
+      <!-- MUSICIAN 3 -->
+      <section class="relative bg-background py-20">
+        <svg
+          aria-hidden="true"
+          class="absolute left-0 right-0 top-0 h-16 w-full text-grape/40"
+          viewBox="0 0 1200 60"
+          preserveAspectRatio="none"
+        >
+          <path d="M0 40 Q 200 0 400 30 T 800 30 T 1200 20" fill="none" stroke="currentColor" stroke-width="1.5"></path>
+          <path d="M0 50 Q 200 10 400 40 T 800 40 T 1200 30" fill="none" stroke="currentColor" stroke-width="1.5"></path>
+        </svg>
+        <div class="container grid items-center gap-12 pt-10 md:grid-cols-2">
+          <div class="relative mx-auto w-full max-w-md">
+            <Image
+              src={studio}
+              alt="Estúdio de gravação onde as cantigas são produzidas"
+              width={1100}
+              height={800}
+              class="rounded-3xl shadow-[var(--shadow-card)]"
+              loading="lazy"
+            />
+            <Music className="absolute -top-4 right-6 h-9 w-9 text-grape wiggle" />
+          </div>
+          <div class="space-y-5 text-foreground">
+            <p class="text-lg leading-relaxed text-muted-foreground">
+              Por isso, cada cantiga não é só uma gravação. É uma interpretação feita com{" "}
+              <strong class="text-foreground">intenção, emoção e qualidade de estúdio</strong>.
+            </p>
+            <p class="text-lg leading-relaxed text-muted-foreground">
+              Porque no fim… a criança percebe. E é isso que faz esse momento ser tão especial.
+            </p>
+            <a href="#produtos" class="btn-pop btn-coral mt-2" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">Quero comprar</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="bg-[#6ab248] py-20">
+        <div class="container max-w-5xl">
+          <div class="flex flex-col items-center gap-8 md:flex-row md:justify-between">
+            <div class="text-center md:text-left">
+              <p class="text-sm font-extrabold uppercase tracking-widest text-white">Tire suas dúvidas</p>
+              <h2 class="mt-2 text-4xl text-white md:text-5xl">Perguntas frequentes</h2>
+            </div>
+            <div>
+              <img src="/sua-imagem.png" alt="FAQ" class="w-40 md:w-56" />
+            </div>
+          </div>
+          <div class="mt-12">
+            <FaqAccordion client:visible />
+          </div>
+          <div
+            id="contato"
+            class="mt-12 rounded-3xl p-10 text-center"
+            style={{ background: "hsl(96 55% 80%)" }}
+          >
+            <p class="text-base font-bold uppercase tracking-wider text-foreground">
+              Ainda ficou com alguma dúvida?
+            </p>
+            <p class="mt-2 text-foreground/80">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
+            <a
+              href="#"
+              class="btn-pop mt-5"
+              style={{
+                background: "hsl(142 65% 42%)",
+                color: "hsl(0 0% 100%)",
+                boxShadow: "0 6px 0 0 hsl(142 70% 22% / 0.4)",
+              }}
+            >
+              Preciso de mais informações
+              <span class="ml-1 grid h-6 w-6 place-items-center rounded-full bg-card text-primary">
+                <MessageCircle className="h-3.5 w-3.5" />
+              </span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <footer>
+        <div class="bg-card py-14">
+          <div class="container">
+            <div class="mx-auto flex h-24 w-64 items-center justify-center rounded-2xl border-2 border-dashed border-border bg-muted/40 text-sm font-medium text-muted-foreground">
+              Espaço para o logo
+            </div>
+            <h3
+              class="mt-6 text-center text-2xl text-foreground md:text-3xl"
+              style={{ fontFamily: "Fredoka, sans-serif" }}
+            >
+              Cantigas feitas com carinho,<br />da nossa família para a sua
+            </h3>
+            <div class="mx-auto mt-10 grid max-w-3xl gap-8 text-sm text-muted-foreground sm:grid-cols-2">
+              <div class="space-y-3 sm:border-r sm:border-border sm:pr-8 sm:text-right">
+                <p class="flex items-start gap-2 sm:justify-end">
+                  <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" />
+                  <span class="font-bold text-foreground">Compra segura</span>
+                </p>
+                <p>Pagamentos via Mercado Pago</p>
+                <p>Entrega digital rápida e segura</p>
+              </div>
+              <div class="space-y-3 sm:pl-2">
+                <p class="flex items-center gap-2">
+                  <span class="grid h-6 w-6 place-items-center rounded-full bg-secondary text-secondary-foreground">
+                    <Mail className="h-3.5 w-3.5" />
+                  </span>
+                  ivan@tiaocamaleao.com.br
+                </p>
+                <p class="flex items-center gap-2">
+                  <span class="grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-foreground">
+                    <Phone className="h-3.5 w-3.5" />
+                  </span>
+                  (37) 99199-6545
+                </p>
+                <p class="flex items-center gap-2">
+                  <span
+                    class="grid h-6 w-6 place-items-center rounded-full text-card"
+                    style={{ background: "linear-gradient(135deg, hsl(330 80% 55%), hsl(28 100% 60%))" }}
+                  >
+                    <Instagram className="h-3.5 w-3.5" />
+                  </span>
+                  tiaocamaleao
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="py-8 text-center text-xs leading-relaxed"
+          style={{ background: "hsl(var(--secondary))", color: "hsl(0 0% 100%)" }}
+        >
+          <p>© {year} Tião Camaleão – Todos os direitos reservados</p>
+          <p class="mt-3 text-secondary-foreground/90">
+            A marca Tião Camaleão é operada pela Agência<br />
+            Futuro Marketing Ltda – CNPJ: 15.727.842/0001-17
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <script is:inline>
+      document.addEventListener("click", function (e) {
+        var btn = e.target.closest("[data-buy]");
+        if (!btn) return;
+        e.preventDefault();
+        window.dispatchEvent(
+          new CustomEvent("open-modal", {
+            detail: {
+              name: btn.getAttribute("data-buy-name") || "Cantigas Personalizadas",
+              price: btn.getAttribute("data-buy-price") || "R$ 47,00",
+              combo: btn.hasAttribute("data-buy-combo"),
+            },
+          })
+        );
+      });
+    </script>
+  </body>
+</html>

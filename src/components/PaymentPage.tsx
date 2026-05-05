@@ -1,0 +1,530 @@
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import CardForm from './CardForm.tsx';
+import { ArrowLeft, Lock, CheckCircle, Music, Heart, Zap, Gift, TrendingUp, X } from './Icons.tsx';
+
+interface OrderData {
+  customerData: {
+    fullName: string;
+    email: string;
+    telefone: string;
+    cpf?: string;
+  };
+  children: Array<{
+    id: string;
+    name: string;
+    selectedAlbums?: string[];
+    albumResult?: { display_name?: string };
+  }>;
+  useCustomName: boolean;
+  productName: string;
+  productPrice: string;
+  total: string;
+}
+
+interface OrderBump {
+  id: string;
+  title: string;
+  description: string;
+  originalPrice: number;
+  offerPrice: number;
+  icon: 'zap' | 'gift' | 'trending';
+  popularText: string;
+}
+
+const OrderBumpItem = React.memo(({
+  bump,
+  isSelected,
+  onSelect
+}: {
+  bump: OrderBump;
+  isSelected: boolean;
+  onSelect: (selected: boolean) => void;
+}) => {
+  const savings = bump.originalPrice - bump.offerPrice;
+  const savingsPercent = Math.round((savings / bump.originalPrice) * 100);
+
+  const getIcon = () => {
+    switch (bump.icon) {
+      case 'zap': return <Zap className="h-8 w-8 text-yellow-500" />;
+      case 'gift': return <Gift className="h-8 w-8 text-pink-500" />;
+      case 'trending': return <TrendingUp className="h-8 w-8 text-green-500" />;
+      default: return <Zap className="h-8 w-8 text-yellow-500" />;
+    }
+  };
+
+  return (
+    <div
+      className={`relative rounded-2xl p-5 cursor-pointer transition-all duration-300 ${
+        isSelected
+          ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-400 shadow-lg scale-[1.02]'
+          : 'bg-white border-2 border-gray-200 hover:border-yellow-300 hover:shadow-md'
+      }`}
+      onClick={() => onSelect(!isSelected)}
+    >
+      <div className="absolute -top-3 -right-3 z-10">
+        <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg">
+          🔥 -{savingsPercent}% OFF
+        </div>
+      </div>
+
+      {bump.popularText && (
+        <div className="absolute -top-3 -left-3 z-10">
+          <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+            ⭐ {bump.popularText}
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-start gap-4">
+        <div className={`flex-shrink-0 w-16 h-16 rounded-xl flex items-center justify-center transition-all ${
+          isSelected ? 'bg-yellow-100 scale-110' : 'bg-gray-50'
+        }`}>
+          {getIcon()}
+        </div>
+
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <h3 className="font-bold text-lg text-gray-900">{bump.title}</h3>
+            {isSelected && <CheckCircle className="h-5 w-5 text-green-500 animate-bounce" />}
+          </div>
+          <p className="text-gray-600 text-sm mb-3">{bump.description}</p>
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className="text-gray-400 line-through text-sm">
+              R$ {bump.originalPrice.toFixed(2)}
+            </span>
+            <span className="text-2xl font-bold text-green-600">
+              R$ {bump.offerPrice.toFixed(2)}
+            </span>
+            <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">
+              Economize R$ {savings.toFixed(2)}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex-shrink-0">
+          <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
+            isSelected ? 'bg-green-500 border-green-500 shadow-md' : 'border-gray-400 bg-white'
+          }`}>
+            {isSelected && <CheckCircle className="h-4 w-4 text-white" />}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// const UpsellModal = React.memo(({ onClose, onViewBumps }: { onClose: () => void; onViewBumps: () => void }) => (
+//   <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+//     <div className="bg-white rounded-2xl max-w-md w-full p-6 relative">
+//       <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+//         <X className="h-5 w-5" />
+//       </button>
+//       <div className="text-center">
+//         <div className="text-7xl mb-4 animate-bounce">🎁</div>
+//         <h3 className="text-2xl font-bold mb-2 text-gray-900">Espere! Você vai perder isso!</h3>
+//         <p className="text-gray-600 mb-4">
+//           Outros clientes economizaram em média{' '}
+//           <span className="font-bold text-green-600 text-lg">R$ 87,00</span> adicionando esses bônus!
+//         </p>
+//         <div className="bg-yellow-50 rounded-xl p-3 mb-4">
+//           <p className="text-sm text-yellow-800">
+//             ⚡ <span className="font-bold">OFERTA POR TEMPO LIMITADO</span> ⚡
+//           </p>
+//         </div>
+//         <div className="flex gap-3">
+//           <button
+//             onClick={onClose}
+//             className="flex-1 border-2 border-gray-300 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition"
+//           >
+//             Não, obrigado
+//           </button>
+//           <button
+//             onClick={onViewBumps}
+//             className="flex-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-3 rounded-xl font-bold hover:shadow-lg transition-all duration-300"
+//           >
+//             Ver bônus agora 🎁
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   </div>
+// ));
+
+const MemoizedCardForm = React.memo(({
+  amount,
+  email,
+  customerName,
+  cpf,
+  selectedAlbums,
+}: {
+  amount: string;
+  email: string;
+  customerName: string;
+  cpf?: string;
+  selectedAlbums?: { albumId: string; childName: string }[];
+}) => (
+  <CardForm
+    step={3}
+    amount={amount}
+    publicKey={import.meta.env.PUBLIC_MP_PUBLIC_KEY || ''}
+    email={email}
+    customerName={customerName}
+    cpf={cpf}
+    selectedAlbums={selectedAlbums}
+  />
+));
+
+export default function PaymentPage() {
+  const [orderData, setOrderData] = useState<OrderData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedBumps, setSelectedBumps] = useState<string[]>([]);
+  const [showBumpModal, setShowBumpModal] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(300);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+
+  const bumps: OrderBump[] = [
+    {
+      id: 'physical',
+      title: '🎵 CD Físico Personalizado',
+      description: 'Receba o CD físico com capa exclusiva, encarte e dedicatória especial para seu filho',
+      originalPrice: 97.00,
+      offerPrice: 47.00,
+      icon: 'gift',
+      popularText: 'Mais Vendido'
+    },
+    {
+      id: 'ebook',
+      title: '📚 E-book Atividades Musicais',
+      description: '20 atividades lúdicas para desenvolver o amor pela música nas crianças',
+      originalPrice: 49.00,
+      offerPrice: 19.90,
+      icon: 'trending',
+      popularText: 'Recomendado'
+    },
+    {
+      id: 'vip',
+      title: '🎓 Comunidade VIP',
+      description: 'Acesso vitalício ao grupo exclusivo com dicas semanais e materiais extras',
+      originalPrice: 149.00,
+      offerPrice: 67.00,
+      icon: 'zap',
+      popularText: 'Oferta Única'
+    }
+  ];
+
+  useEffect(() => {
+    const savedData = localStorage.getItem('orderData');
+    if (savedData) {
+      setOrderData(JSON.parse(savedData));
+    }
+    setIsLoading(false);
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) { clearInterval(timer); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (showSuccessAlert) {
+      const timer = setTimeout(() => setShowSuccessAlert(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessAlert]);
+
+  const handleBack = useCallback(() => { window.location.href = '/'; }, []);
+
+  const calculateTotalWithBumps = useMemo(() => {
+    const baseTotal = parseFloat(orderData?.total || '0');
+    const bumpsTotal = selectedBumps.reduce((total, bumpId) => {
+      const bump = bumps.find(b => b.id === bumpId);
+      return total + (bump?.offerPrice || 0);
+    }, 0);
+    return baseTotal + bumpsTotal;
+  }, [orderData, selectedBumps]);
+
+  const calculateSavings = useMemo(() => {
+    return selectedBumps.reduce((total, bumpId) => {
+      const bump = bumps.find(b => b.id === bumpId);
+      return total + ((bump?.originalPrice || 0) - (bump?.offerPrice || 0));
+    }, 0);
+  }, [selectedBumps]);
+
+  const formatTime = useCallback(() => {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }, [timeLeft]);
+
+  const handleAddBump = useCallback((bumpId: string, selected: boolean) => {
+    if (selected) {
+      setSelectedBumps(prev => [...prev, bumpId]);
+      setShowSuccessAlert(true);
+    } else {
+      setSelectedBumps(prev => prev.filter(id => id !== bumpId));
+    }
+  }, []);
+
+  const handlePaymentClick = useCallback(() => {
+    if (selectedBumps.length === 0) setShowBumpModal(true);
+  }, [selectedBumps.length]);
+
+  const handleViewBumps = useCallback(() => {
+    setShowBumpModal(false);
+    document.getElementById('order-bumps')?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  const formattedAmount = useMemo(() => {
+    return `R$ ${calculateTotalWithBumps.toFixed(2).replace('.', ',')}`;
+  }, [calculateTotalWithBumps]);
+
+  // Monta selectedAlbums para o CardForm a partir dos dados das crianças
+  const selectedAlbumsForPayment = useMemo(() => {
+    if (!orderData) return [];
+    return orderData.children.flatMap((child) =>
+      (child.selectedAlbums ?? []).map((albumId) => ({
+        albumId,
+        childName: child.albumResult?.display_name ?? child.name,
+      }))
+    );
+  }, [orderData]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary mx-auto mb-4" />
+          <p className="text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!orderData) {
+    return (
+      <div className="text-center py-12 max-w-md mx-auto px-4">
+        <div className="bg-yellow-50 rounded-2xl p-8 border-2 border-yellow-200">
+          <Music className="h-16 w-16 text-yellow-600 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Nenhum pedido encontrado</h2>
+          <p className="text-gray-600 mb-6">Parece que você não tem nenhum pedido em andamento.</p>
+          <button
+            onClick={handleBack}
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-secondary text-white px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            Voltar para a loja
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <button
+        onClick={handleBack}
+        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors group"
+      >
+        <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+        Voltar
+      </button>
+{/* 
+      {showBumpModal && (
+        <UpsellModal
+          onClose={() => setShowBumpModal(false)}
+          onViewBumps={handleViewBumps}
+        />
+      )} */}
+
+      {/* Alert de sucesso */}
+      {showSuccessAlert && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-4 py-3 rounded-xl shadow-lg animate-in slide-in-from-top-2">
+          ✅ Bônus adicionado!
+        </div>
+      )}
+
+      <div className="grid gap-8 lg:grid-cols-2">
+        {/* Coluna esquerda */}
+        <div className="space-y-6">
+          {/* Order Bumps */}
+          <div id="order-bumps" className="scroll-mt-4">
+            {timeLeft > 0 && (
+              <div className="bg-gradient-to-r from-red-500 to-orange-500 rounded-t-2xl p-3 text-white text-center animate-pulse">
+                <div className="flex items-center justify-center gap-2">
+                  <Zap className="h-5 w-5 animate-pulse" />
+                  <span className="font-bold">⚡ OFERTA RELÂMPAGO - EXPIRA EM:</span>
+                  <span className="font-mono bg-white/20 px-3 py-1 rounded-lg font-bold text-lg">
+                    {formatTime()}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className={`bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-400 ${
+              timeLeft > 0 ? 'rounded-t-none' : 'rounded-t-2xl'
+            } rounded-b-2xl p-6`}>
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-400 px-5 py-2 rounded-full text-white text-sm font-bold mb-4 shadow-lg">
+                  🎁 SÓ HOJE 🎁
+                </div>
+                <h3 className="text-3xl font-bold text-gray-900 mb-2">
+                  Complete seu Kit com esses{' '}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                    SUPER BÔNUS
+                  </span>
+                </h3>
+                <p className="text-gray-600">
+                  Adicione agora e ganhe <span className="font-bold text-green-600 text-lg">50% OFF</span>
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                {bumps.map((bump) => (
+                  <OrderBumpItem
+                    key={bump.id}
+                    bump={bump}
+                    isSelected={selectedBumps.includes(bump.id)}
+                    onSelect={(selected) => handleAddBump(bump.id, selected)}
+                  />
+                ))}
+              </div>
+
+              {selectedBumps.length > 0 && (
+                <div className="mt-4 bg-gradient-to-r from-green-100 to-emerald-100 border-l-4 border-green-500 rounded-xl p-4">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                    <p className="font-bold text-green-800">
+                      🎉 Você economizou R$ {calculateSavings.toFixed(2)}!
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Resumo do Pedido */}
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden sticky top-6">
+            <div className="bg-gradient-to-r from-primary to-secondary p-6 text-white">
+              <h2 className="text-2xl font-bold flex items-center gap-2">🎵 Resumo do Pedido</h2>
+              <p className="text-white/90 mt-1">Revise os dados antes de finalizar</p>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div className="border-b border-gray-100 pb-4">
+                <h3 className="font-semibold text-gray-700 mb-2">Produto</h3>
+                <p className="text-gray-900 font-medium">{orderData.productName}</p>
+              </div>
+
+              <div className="border-b border-gray-100 pb-4">
+                <h3 className="font-semibold text-gray-700 mb-2">👤 Dados do Cliente</h3>
+                <div className="space-y-1 text-sm">
+                  <p><span className="text-gray-500">Nome:</span> <span className="font-medium">{orderData.customerData.fullName}</span></p>
+                  <p><span className="text-gray-500">E-mail:</span> <span className="font-medium">{orderData.customerData.email}</span></p>
+                  <p><span className="text-gray-500">Telefone:</span> <span className="font-medium">{orderData.customerData.telefone}</span></p>
+                </div>
+              </div>
+
+              <div className="border-b border-gray-100 pb-4">
+                <h3 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <Heart className="h-4 w-4" /> Crianças
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {orderData.children.map((child) => (
+                    <span key={child.id} className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">
+                      {child.name}
+                    </span>
+                  ))}
+                </div>
+                {/* Álbuns selecionados por criança */}
+                {orderData.children.some(c => (c.selectedAlbums ?? []).length > 0) && (
+                  <div className="mt-2 space-y-1">
+                    {orderData.children.map((child) => {
+                      if (!child.selectedAlbums?.length) return null;
+                      return (
+                        <p key={child.id} className="text-xs text-gray-500">
+                          <span className="font-medium">{child.albumResult?.display_name ?? child.name}:</span>{' '}
+                          {child.selectedAlbums.join(', ')}
+                        </p>
+                      );
+                    })}
+                  </div>
+                )}
+                {orderData.useCustomName && (
+                  <p className="text-xs text-primary mt-2">✨ Inclui nome personalizado (+ R$ 30,00)</p>
+                )}
+              </div>
+
+              {selectedBumps.length > 0 && (
+                <div className="border-b border-gray-100 pb-4">
+                  <h3 className="font-semibold text-gray-700 mb-2">🎁 Bônus adicionados</h3>
+                  <div className="space-y-1">
+                    {selectedBumps.map(bumpId => {
+                      const bump = bumps.find(b => b.id === bumpId);
+                      return (
+                        <div key={bumpId} className="flex justify-between text-sm">
+                          <span>{bump?.title}</span>
+                          <span className="text-green-600 font-bold">+ R$ {bump?.offerPrice.toFixed(2)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-4">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-gray-700">Total:</span>
+                  <span className="text-3xl font-bold text-primary">
+                    R$ {calculateTotalWithBumps.toFixed(2).replace('.', ',')}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 mt-2 text-center">Em até 12x no cartão</p>
+              </div>
+
+              <div className="flex items-center justify-center gap-2 text-green-600 bg-green-50 rounded-xl p-3">
+                <Lock className="h-4 w-4" />
+                <span className="text-sm font-medium">Compra 100% segura</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Coluna direita - Pagamento */}
+        <div className="space-y-6">
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+            <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 text-white">
+              <h2 className="text-2xl font-bold">💳 Pagamento</h2>
+              <p className="text-white/90 mt-1">Escolha a forma de pagamento</p>
+            </div>
+
+            <div className="p-6" onClick={handlePaymentClick}>
+              <MemoizedCardForm
+                amount={formattedAmount}
+                email={orderData.customerData.email}
+                customerName={orderData.customerData.fullName}
+                cpf={orderData.customerData.cpf ?? ""}
+                selectedAlbums={selectedAlbumsForPayment}
+              />
+            </div>
+          </div>
+
+          <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-gray-900">Garantia de satisfação</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  Se não ficar satisfeito, devolvemos 100% do seu dinheiro em até 7 dias.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
