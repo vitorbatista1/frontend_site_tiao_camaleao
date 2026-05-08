@@ -34,7 +34,8 @@ export default function FaqAccordion() {
         return (
           <div
             key={item.q}
-            className="overflow-hidden rounded-2xl border-2 border-border bg-card"
+            className="overflow-hidden rounded-2xl border-2 border-border"
+            style={{ backgroundColor: open ? "#fffbcc" : "#f8e505" }}
           >
             <button
               type="button"

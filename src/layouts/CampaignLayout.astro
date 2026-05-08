@@ -6,23 +6,14 @@ import ModalController from "../components/ModalController.tsx";
 import CampaignProducts from "../components/CampaignProducts.tsx";
 import CampaignCombo from "../components/CampaignCombo.tsx";
 import {
-  Music,
-  Heart,
-  Play,
-  Lock,
-  Mail,
-  Phone,
-  Instagram,
-  Gift,
-  MessageCircle,
+  Music, Heart, Play, Lock, Mail, Phone, Instagram, MessageCircle,
+  Star, ChevronLeft, ChevronRight, ShoppingCart
 } from "../components/Icons.tsx";
 
-import heroChildren from "../assets/hero-children.jpg";
-import chameleon from "../assets/chameleon-mascot.png";
-import kidHeadphones from "../assets/kid-headphones.jpg";
-import musician from "../assets/musician.jpg";
-import familyCollage from "../assets/family-collage.jpg";
-import studio from "../assets/studio.jpg";
+import kidHeadphones from "../../public/imagens/menino.png";
+import musician from "../../public/imagens/musico_.png";
+import familyCollage from "../../public/imagens/familia.png";
+import studio from "../../public/imagens/studio.png";
 
 import rostoFeliz from "../assets/benefits/emoji_feliz.png";
 import coracao from "../assets/benefits/coracao.png";
@@ -55,7 +46,7 @@ const benefits = [
   },
   {
     icon: nuvemCoracao,
-    title: "Um presente diferente de tudo que voce ja comprou",
+    title: "Um presente diferente de tudo que você já comprou",
     text: "Brinquedo passa. Roupa deixa de servir. Esse presente vira memória, afeto e história de família.",
   },
   {
@@ -68,12 +59,6 @@ const benefits = [
     title: "Estimula a fala",
     text: "A música ajuda a criança a reconhecer sons, palavras e a se comunicar melhor naturalmente.",
   },
-];
-
-const testimonialPrints = [
-  { id: 1, label: "Print depoimento 1" },
-  { id: 2, label: "Print depoimento 2" },
-  { id: 3, label: "Print depoimento 3" },
 ];
 
 const year = new Date().getFullYear();
@@ -89,145 +74,228 @@ const year = new Date().getFullYear();
       name="description"
       content="Cantigas infantis personalizadas com o nome da sua criança. Mais de 2.000 nomes gravados em estúdio. Presente único que vira memória de família."
     />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Aristotelica+Pro&display=swap"
+        rel="stylesheet"
+      />
   </head>
   <body>
     <ModalController client:load />
 
-    <div class="min-h-screen overflow-hidden bg-background">
-      <!-- Top strip -->
-      <div
-        class="bg-accent py-2 text-center text-sm font-bold uppercase tracking-wider text-accent-foreground"
-      >
-        <span aria-hidden="true">💚</span> Desde 2013 encantando famílias <span
-          aria-hidden="true">💚</span
-        >
-      </div>
+    <div class="min-h-screen overflow-x-hidden bg-background">
 
+      <!-- TOP STRIP -->
+<div
+  class="py-5 text-center text-lg font-bold uppercase tracking-widest"
+  style="background-color: #69B34C; color: #fff;"
+>
+<span style="color: #F2E300; font-size: 15px;">💛</span>
+
+<span style="font-size: 20px;">
+  Desde 2013 encantando famílias
+</span>
+
+<span style="color: #F2E300; font-size: 15px;">💛</span>
+</div>
       <!-- HERO -->
-      <header class="relative isolate overflow-hidden" style={{ background: "white" }}>
+      <header class="relative overflow-hidden flex flex-col" style="min-height: 520px;">
+        <img
+          src="/imagens/background_hero.png"
+          alt=""
+          aria-hidden="true"
+          class="absolute inset-0 w-full h-full object-cover object-center"
+        />
+        <!-- Gradiente cobre o fundo para legibilidade -->
         <div
-          class="container relative z-10 grid items-center gap-10 py-14 md:grid-cols-2 md:py-24"
-        >
-          <div>
-            <p class="mb-3 text-sm font-extrabold uppercase tracking-widest text-grape">
-              Um jeito especial de marcar a infância
-            </p>
-            <h1 class="text-5xl leading-[1.05] text-foreground md:text-6xl lg:text-7xl">
-              Cantigas com o<br />
-              <span class="text-primary">nome da criança</span>
-            </h1>
-            <p class="mt-5 max-w-md text-lg text-foreground/80">
-              A maioria dos presentes passa… <strong>esse fica!</strong> Um abraço
-              sonoro que vira memória de família.
-            </p>
-            <div class="mt-7 flex flex-wrap gap-4">
-              <a href="#produtos" class="btn-pop btn-coral" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">Quero comprar</a>
-              <a href="#amostra" class="btn-pop btn-green">
-                <Play className="h-4 w-4" /> Pedir amostra grátis
-              </a>
-            </div>
-          </div>
-          <div class="relative">
-            <div
-              class="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-[2.5rem] border-8 border-card shadow-[var(--shadow-card)]"
-            >
-              <Image
-                src={heroChildren}
-                alt="Crianças sorrindo enquanto cantam cantigas personalizadas"
-                width={1280}
-                height={960}
-                class="h-full w-full object-cover"
-              />
-            </div>
-            <Image
-              src={chameleon}
-              alt=""
-              aria-hidden="true"
-              width={768}
-              height={768}
-              class="float-slow absolute -bottom-6 -left-6 hidden h-40 w-40 md:block"
-            />
-            <Music className="absolute -right-2 top-6 h-10 w-10 text-coral wiggle" />
-            <Music className="absolute -left-4 top-1/3 h-8 w-8 text-grape wiggle" />
-          </div>
+          class="absolute inset-0"
+          style="background: linear-gradient(to right, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.88) 45%, rgba(255,255,255,0.3) 75%, transparent 100%);"
+        ></div>
+
+        <!-- Logo centralizada no topo, dentro do hero -->
+        <div class="relative z-10 w-full flex justify-center pt-4 pb-2">
+          <img
+            src="/imagens/logo.png"
+            alt="Tião Camaleão"
+            class="w-64 md:w-80 lg:w-96"
+            style="height: auto;"
+          />
         </div>
+
+        <!-- Texto do hero -->
+<div
+  class="relative z-10 container flex items-center flex-1 py-6 md:py-10"
+>
+  <div class="w-full max-w-2xl -mt-6 md:-mt-12">
+    <p
+      class="text-sm md:text-base font-extrabold uppercase tracking-widest mb-3"
+      style="color: #888; letter-spacing: 0.14em;"
+    >
+      Um jeito especial de marcar a infância
+    </p>
+
+    <h1
+      class="font-bold leading-tight"
+      style="font-size: clamp(42px, 7vw, 88px); color: #333; line-height: 1.05;"
+    >
+      Cantigas com o<br />nome da criança
+    </h1>
+
+    <p
+      class="mt-5 font-bold"
+      style="font-size: clamp(20px, 2.5vw, 30px); color: #4caf50;"
+    >
+      A maioria dos presentes passa… esse fica!
+    </p>
+
+    <div class="mt-10">
+      <a
+        href="#produtos"
+        class="btn-pop inline-flex items-center gap-3 uppercase tracking-wide"
+        style="
+          background: #e53e3e;
+          color: #fff;
+          box-shadow: 0 6px 0 0 #9b1c1c;
+          font-size: 18px;
+          padding: 18px 34px;
+        "
+        data-buy
+        data-buy-name="Cantigas Personalizadas"
+        data-buy-price="R$ 47,00"
+      >
+        Quero comprar <span style="font-size: 22px;">🛒</span>
+      </a>
+    </div>
+  </div>
+</div>
       </header>
 
       <!-- GREEN BAND -->
-      <section class="relative py-16" style={{ background: "var(--gradient-grass)" }}>
-        <div class="container grid items-center gap-10 md:grid-cols-2">
-          <div class="relative mx-auto w-full max-w-sm">
-            <div
-              class="overflow-hidden rounded-[2rem] border-8 border-accent shadow-[var(--shadow-card)]"
-            >
-              <Image
-                src={kidHeadphones}
-                alt="Criança ouvindo cantigas com fone amarelo"
-                width={800}
-                height={800}
-                class="h-full w-full object-cover"
-                loading="lazy"
-              />
-            </div>
-            <Music className="absolute -left-6 top-4 h-10 w-10 text-accent wiggle" />
-          </div>
-          <div class="text-primary-foreground">
-            <h2 class="text-4xl md:text-5xl">
-              Um presente para ouvir hoje<br />
-              e lembrar para sempre!
-            </h2>
-            <p class="mt-4 max-w-md text-lg text-primary-foreground/90">
-              As cantigas chegam por download em minutos. É só apertar o play e
-              ver os olhinhos brilharem.
-            </p>
-            <a href="#produtos" class="btn-pop btn-sun mt-7" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">Quero ouvir</a>
-          </div>
-        </div>
-      </section>
+<section
+  class="relative py-24 md:py-32 overflow-hidden"
+  style="background-color: #6ab248; min-height: 750px;"
+>
+  <div class="container grid items-center gap-4 md:grid-cols-2">
+
+    <!-- IMAGEM -->
+    <div class="relative mx-auto w-full flex justify-end">
+      <Image
+        src={kidHeadphones}
+        alt="Criança ouvindo cantigas com fone amarelo"
+        width={600}
+        height={600}
+        class="w-full max-w-sm md:max-w-md h-auto object-contain drop-shadow-xl"
+        loading="lazy"
+      />
+    </div>
+
+    <!-- TEXTO -->
+    <div class="text-primary-foreground text-center md:text-left">
+      <h2
+        class="font-bold leading-tight"
+        style="font-size: clamp(32px, 4vw, 64px); line-height: 1.15;"
+      >
+        Um presente<br />para ouvir hoje
+      </h2>
+
+      <p class="mt-3 max-w-md text-lg text-primary-foreground/90">
+        e lembrar para sempre!
+      </p>
+
+      <a
+        href="#produtos"
+        class="btn-pop mt-7"
+        style="background: #e53e3e; color: #fff; box-shadow: 0 6px 0 0 #9b1c1c;"
+        data-buy
+        data-buy-name="Cantigas Personalizadas"
+      >
+        Quero ouvir
+      </a>
+    </div>
+
+  </div>
+</section>
 
       <!-- SAMPLE -->
-      <section
-        id="amostra"
-        class="relative py-16"
-        style={{ background: "hsl(var(--secondary))" }}
-      >
-        <div class="container grid items-center gap-10 md:grid-cols-2">
-          <div class="text-secondary-foreground">
-            <p class="mb-2 text-sm font-extrabold uppercase tracking-widest text-accent">
-              Veja a reação quando a
-            </p>
-            <h2 class="text-4xl md:text-5xl">
-              Criança ouve o próprio<br />nome na música
-            </h2>
-            <p class="mt-4 max-w-md text-lg text-secondary-foreground/90">
-              Quer ver a reação da SUA CRIANÇA? Clique no botão abaixo e receba
-              uma cantiga gratuita.
-            </p>
-            <a href="#contato" class="btn-pop btn-green mt-7">
-              <Gift className="h-4 w-4" /> Pedir amostra grátis
-            </a>
-          </div>
-          <div
-            class="relative mx-auto aspect-video w-full max-w-md overflow-hidden rounded-[2rem] border-8 border-card shadow-[var(--shadow-card)]"
-          >
-            <div class="absolute inset-0 bg-gradient-to-br from-grape to-coral"></div>
-            <button
-              type="button"
-              aria-label="Reproduzir vídeo"
-              class="absolute inset-0 flex items-center justify-center transition-transform hover:scale-105"
-            >
-              <span
-                class="grid h-20 w-20 place-items-center rounded-full bg-card text-coral shadow-[var(--shadow-button)]"
-              >
-                <Play className="h-9 w-9 fill-current" />
-              </span>
-            </button>
+      <section id="amostra" class="relative w-full">
+
+        <!-- Faixa azul escura: título + celular (celular vaza 100px sobre o azul claro) -->
+        <div class="w-full pt-12 pb-0 md:pt-16" style="background: #00AEEF;">
+          <div class="container max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-end justify-between gap-8">
+
+            <!-- Título -->
+            <div class="flex-1 text-center md:text-right text-white pb-10">
+              <p class="mb-2 text-sm font-extrabold uppercase tracking-widest" style="color: #FFFFFF;">
+                Veja a reação quando a
+              </p>
+              <h2 class="text-4xl md:text-6xl font-bold leading-tight">
+                Criança ouve o<br />próprio nome<br />na música
+              </h2>
+            </div>
+
+            <!-- Celular: vaza 100px para dentro do azul claro -->
+            <div class="flex-1 flex justify-center md:justify-start" style="position: relative; z-index: 10; margin-bottom: -100px;">
+              <div class="relative p-3 rounded-[2.5rem] shadow-2xl w-64 md:w-72" style="background: #1D4ED8;">
+                <div class="relative overflow-hidden rounded-[2rem] bg-black" style="aspect-ratio: 9/16;">
+                  <div class="absolute inset-0 bg-gradient-to-br from-grape to-coral"></div>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <button
+                      type="button"
+                      aria-label="Reproduzir vídeo"
+                      class="grid h-16 w-16 place-items-center rounded-full shadow-lg transition-transform hover:scale-110"
+                      style="background: #FF3B30;"
+                    >
+                      <Play className="h-8 w-8 fill-white text-white ml-1" />
+                    </button>
+                  </div>
+                  <div class="absolute bottom-4 left-1/2 -translate-x-1/2">
+                    <Heart className="h-10 w-10 fill-red-500 text-red-500 drop-shadow-md" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
+
+        <!-- Faixa azul claro: CTA (celular passa por cima) -->
+        <div class="w-full" style="background: #E0F7FF; padding-top: 1rem; padding-bottom: 1.5rem;">
+          <div class="container max-w-6xl mx-auto px-6 flex flex-col md:flex-row gap-8">
+            <!-- Coluna esquerda: alinhada ao título acima -->
+            <div class="flex-1 text-center md:text-right" style="padding-top: 110px;">
+              <h3 class="font-bold text-lg md:text-xl" style="color: #1D4ED8;">
+                Quer ver a reação da SUA CRIANÇA?
+              </h3>
+              <p class="mt-1 text-sm md:text-base" style="color: #1D4ED8;">
+                Clique no botão abaixo e receba uma cantiga.
+              </p>
+              <a
+                href="#contato"
+                class="mt-4 inline-flex items-center gap-3 text-white px-6 py-3 rounded-full font-bold shadow-lg transition-transform hover:scale-105 md:ml-auto"
+                style="background: #72BC44;"
+              >
+                PEDIR AMOSTRA GRÁTIS
+                <span class="grid h-7 w-7 place-items-center rounded-full bg-white">
+                  <svg class="h-4 w-4" style="color: #72BC44;" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-4.821 4.754a8.132 8.132 0 01-3.984-1.03l-.286-.17-2.96.776.791-2.887-.186-.296a8.14 8.14 0 01-1.247-4.346c0-4.519 3.674-8.19 8.19-8.19a8.19 8.19 0 018.19 8.19c0 4.52-3.674 8.19-8.19 8.19m0-18.054C7.452 1.082 2.591 5.943 2.591 11.956c0 1.92.487 3.793 1.412 5.46L2.4 23l5.688-1.491a9.357 9.357 0 004.515 1.156c6.012 0 10.874-4.861 10.874-10.873 0-2.864-1.115-5.556-3.141-7.581C18.303 2.197 15.612 1.082 12.651 1.082z" />
+                  </svg>
+                </span>
+              </a>
+            </div>
+            <!-- Coluna direita: espaço para o celular (mesmo flex-1) -->
+            <div class="flex-1 hidden md:block"></div>
+          </div>
+        </div>
+
+        <!-- Faixa azul escura abaixo do azul claro -->
+        <div class="w-full py-10" style="background: #00AEEF;"></div>
+
       </section>
 
       <!-- BENEFITS -->
-      <section class="bg-gray-100 py-20">
+      <section
+        class="relative py-20"
+        style="background-image: url('/imagens/fundo.png'); background-size: auto; background-repeat: repeat; background-color: #f3f4f6;"
+      >
         <div class="container">
           <p class="text-center text-lg font-extrabold uppercase tracking-widest text-gray-400">
             POR QUE AS FAMÍLIAS AMAM
@@ -235,178 +303,282 @@ const year = new Date().getFullYear();
           <h2 class="mt-2 text-center text-4xl text-gray-600 md:text-5xl">
             Muito mais que cantigas
           </h2>
-          <div class="mt-12 mx-auto max-w-5xl">
-            <div class="grid gap-6 grid-cols-1 md:grid-cols-2">
+          <div class="mt-20 mx-auto max-w-5xl">
+            <div class="grid gap-x-6 gap-y-20 grid-cols-1 md:grid-cols-2">
               {
                 benefits.map(({ icon, title, text }) => (
                   <article
-                    class="card-pop border-2 border-border rounded-2xl transition-all hover:scale-[1.02] relative"
+                    class="card-pop border-2 border-border rounded-2xl transition-all hover:scale-[1.02] relative pt-14"
                     style={{ backgroundColor: "#6ab248" }}
                   >
-                    <div class="flex justify-center -mt-14 mb-2">
+                    <div class="absolute -top-12 left-0 right-0 flex justify-center">
                       <Image
                         src={icon}
                         alt=""
-                        class="h-32 w-32 md:h-36 md:w-36 object-contain drop-shadow-xl"
+                        class="h-24 w-24 md:h-28 md:w-28 object-contain drop-shadow-xl"
                         loading="lazy"
                       />
                     </div>
-                    <h3 class="text-3xl font-bold text-white mb-4 text-center mt-2">{title}</h3>
+                    <h3 class="text-2xl font-bold text-white mb-3 text-center px-4">{title}</h3>
                     <p class="text-base text-white/90 leading-relaxed text-justify px-6 pb-6">{text}</p>
                   </article>
                 ))
               }
             </div>
           </div>
-          <div class="mt-12 text-center">
-            <a href="#produtos" class="btn-pop btn-coral" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">QUERO COMPRAR</a>
+          <div class="mt-16 text-center">
+            <a
+              href="#produtos"
+              class="btn-pop btn-coral"
+              data-buy
+              data-buy-name="Cantigas Personalizadas"
+              data-buy-price="R$ 47,00"
+            >
+              QUERO COMPRAR
+            </a>
           </div>
         </div>
       </section>
 
       <!-- TESTIMONIALS -->
-      <section class="py-20" style={{ background: "hsl(var(--secondary))" }}>
-        <div class="container">
-          <p class="text-center text-lg font-extrabold uppercase tracking-widest text-accent">
+      <section class="bg-[#00AAFF] py-16 px-4 flex flex-col items-center">
+        <div class="text-center mb-8">
+          <h3 class="text-white text-sm uppercase tracking-widest mb-2 opacity-90">
             Depoimentos
-          </p>
-          <h2 class="mt-2 text-center text-4xl text-secondary-foreground md:text-5xl">
+          </h3>
+          <h2 class="text-white text-3xl md:text-4xl font-bold">
             De quem já viveu esse momento
           </h2>
-          <p class="mt-3 text-center text-secondary-foreground/90">
-            Prints reais de mensagens de famílias que receberam suas cantigas.
-          </p>
-          <div class="mt-12 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+        </div>
+
+        <div
+          class="relative bg-[#1D82F5] rounded-3xl p-8 md:p-12 w-full max-w-4xl min-h-[400px] flex flex-col items-center justify-center"
+        >
+          <div class="absolute -top-16 -left-4 md:-top-20 md:-left-16 w-36 md:w-64 z-10">
+            <img
+              src="/imagens/mascote.png"
+              alt="Mascote Camaleão"
+              class="w-full h-auto"
+            />
+          </div>
+
+          <div class="absolute top-6 right-8 flex gap-1">
             {
-              testimonialPrints.map((t) => (
-                <article class="card-pop flex aspect-[4/5] flex-col items-center justify-center border-2 border-dashed border-primary/40 bg-muted/60 text-center">
-                  <div class="mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
-                    <MessageCircle className="h-7 w-7" />
-                  </div>
-                  <p class="px-4 font-bold text-foreground">{t.label}</p>
-                  <p class="mt-1 px-4 text-sm text-muted-foreground">
-                    Adicione aqui o screenshot do depoimento
-                  </p>
-                </article>
+              [0, 1, 2, 3, 4].map((i) => (
+                <Star className="fill-yellow-400 text-yellow-400 w-6 h-6 md:w-8 md:h-8" />
               ))
             }
           </div>
-          <div class="mt-12 text-center">
-            <a href="#produtos" class="btn-pop btn-coral" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">Eu também quero</a>
-          </div>
-        </div>
-      </section>
 
-      <!-- NAMES -->
-      <section class="bg-background py-20">
-        <div class="container grid items-center gap-12 md:grid-cols-2">
-          <div class="relative">
-            <Image
-              src={chameleon}
-              alt="Tião Camaleão tocando violão"
-              width={768}
-              height={768}
-              class="float-slow mx-auto w-72 md:w-96"
-              loading="lazy"
-            />
-            <div class="absolute left-4 top-2 rounded-full bg-coral px-4 py-1.5 text-sm font-bold text-coral-foreground shadow-[var(--shadow-pop)]">
-              Benício
-            </div>
-            <div class="absolute right-2 top-10 rounded-full bg-grape px-4 py-1.5 text-sm font-bold text-grape-foreground shadow-[var(--shadow-pop)]">
-              Maria Clara
-            </div>
-            <div class="absolute bottom-12 left-0 rounded-full bg-accent px-4 py-1.5 text-sm font-bold text-accent-foreground shadow-[var(--shadow-pop)]">
-              Dudu
-            </div>
+          <div
+            class="w-full bg-white/10 rounded-2xl h-64 border-2 border-dashed border-white/20 flex items-center justify-center"
+          >
+            <p class="text-white/60 italic">Espaço para os depoimentos</p>
           </div>
-          <div>
-            <h2 class="text-4xl text-foreground md:text-5xl">
-              Mais de <span class="text-primary">2.000 nomes</span><br />
-              já gravados em estúdio
-            </h2>
-            <p class="mt-4 text-lg text-muted-foreground">
-              Temos um grande acervo, incluindo nomes raros, compostos, apelidos
-              e até nomes estrangeiros.
-            </p>
-            <div class="mt-6 rounded-2xl border-2 border-border bg-muted p-5">
-              <p class="font-bold text-foreground">E se não tiver o nome que eu quero?</p>
-              <p class="mt-1 text-muted-foreground">
-                Sem problema! Fazemos a gravação personalizada sob encomenda,
-                com entrega em até 7 dias e um pequeno acréscimo de estúdio.
-              </p>
-            </div>
-            <a href="#produtos" class="btn-pop btn-coral mt-6" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">Quero comprar</a>
-          </div>
-        </div>
-      </section>
 
+          <button
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-white hover:scale-110 transition"
+            aria-label="Anterior"
+          >
+            <ChevronLeft size={40} strokeWidth={3} />
+          </button>
+          <button
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:scale-110 transition"
+            aria-label="Próximo"
+          >
+            <ChevronRight size={40} strokeWidth={3} />
+          </button>
+        </div>
+
+        <button
+          class="mt-10 bg-[#FF0000] hover:bg-red-600 text-white font-bold py-4 px-8 rounded-full flex items-center gap-3 shadow-lg transition-transform active:scale-95"
+          data-buy
+          data-buy-name="Cantigas Personalizadas"
+          data-buy-price="R$ 47,00"
+        >
+          EU TAMBÉM QUERO
+          <ShoppingCart size={20} />
+        </button>
+      </section>
+          <section class="bg-white py-16 pt-28 font-sans overflow-hidden">
+            <div class="container mx-auto flex flex-col md:flex-row items-center justify-center gap-0 px-6">
+              
+              <div class="z-20 flex flex-col items-center text-center md:items-end md:text-right md:w-1/2 md:pr-4">
+                
+                  <h2 class="text-[38px] font-light leading-[1.1] text-[#4D4D4D] md:text-[50px]">
+                    Mais de 2.000 nomes<br />
+                    já gravados em estúdio
+                  </h2>
+
+                <p class="mt-6 text-[18px] leading-relaxed text-[#666666] max-w-[450px]">
+                  Temos um grande acervo, incluindo nomes raros, compostos, apelidos e até nomes estrangeiros.
+                </p>
+
+                  <div class="mt-8 inline-block rounded-full bg-[#00AEEF] px-6 py-2 text-white shadow-md">
+                    <p class="text-lg font-medium">
+                      E se não tiver o nome que eu quero?
+                    </p>
+                  </div>
+
+                <p class="mt-4 text-[16px] text-[#666666] max-w-[420px]">
+                  Sem problema! Nós fazemos a gravação personalizada do nome sob encomenda, com entrega em até 7 dias e um pequeno acréscimo de estúdio.
+                </p>
+
+                <a
+                   href="#produtos"
+                    class="mt-8 flex items-center gap-3 rounded-full bg-[#FF0000] px-7 py-3 text-lg font-semibold uppercase tracking-wider text-white shadow-lg transition-transform hover:scale-105"
+                  >
+                    Quero comprar
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="9" cy="21" r="1"></circle>
+                      <circle cx="20" cy="21" r="1"></circle>
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                  </a>
+                  </div>
+
+              <div class="relative mt-12 md:mt-0 md:w-1/2 flex justify-start">
+                
+                <img
+                  src="/imagens/cantor_nomes.png" 
+                  alt="Cantor Personalizado"
+                  class="relative z-10 w-full max-w-[550px] object-contain md:-ml-10"
+                />
+              </div>
+
+            </div>
+          </section>
       <!-- PRODUCTS — dynamic per campaign -->
       <CampaignProducts campaignId={campaignId} client:load />
 
-      <!-- COMBO -->
+      <!-- COMBO — dynamic per campaign -->
       <CampaignCombo campaignId={campaignId} client:load />
+<!-- MUSICIAN 1 -->
+<section class="relative bg-white pt-16 pb-0 overflow-hidden">
 
-      <!-- MUSICIAN 1 -->
-      <section class="bg-background py-20">
-        <div class="container grid items-center gap-12 md:grid-cols-2">
-          <div class="relative mx-auto w-full max-w-sm">
-            <div
-              aria-hidden="true"
-              class="absolute -left-6 top-6 h-72 w-72 rounded-full md:h-80 md:w-80"
-              style={{ background: "hsl(var(--primary-glow) / 0.6)" }}
-            ></div>
-            <Image
-              src={musician}
-              alt="Bruno Grossi, voz do Tião Camaleão, com violão"
-              width={900}
-              height={1100}
-              class="relative h-full w-full rounded-2xl object-cover shadow-[var(--shadow-card)]"
-              loading="lazy"
-            />
-            <Music className="absolute -left-4 top-2 h-10 w-10 text-coral wiggle" />
-            <Music className="absolute -left-10 top-16 h-7 w-7 text-secondary wiggle" />
-          </div>
-          <div>
-            <p class="mb-2 text-sm font-extrabold uppercase tracking-widest text-grape">
-              A diferença está na voz, na intenção<br />e no cuidado em cada detalhe
-            </p>
-            <h2 class="text-4xl text-foreground md:text-5xl">
-              Quem dá voz ao Tião é<br />
-              <span class="text-primary">um músico de verdade</span>
-            </h2>
-            <p class="mt-5 text-lg text-muted-foreground">
-              A voz do Tião Camaleão é interpretada pelo{" "}
-              <strong class="text-foreground">Bruno Grossi</strong>, músico
-              formado em Música Popular pela UFMG, com mais de 20 anos de experiência.
-            </p>
-          </div>
-        </div>
-      </section>
+  <div class="container flex flex-col md:flex-row items-end gap-0">
 
-      <!-- MUSICIAN 2 -->
-      <section class="relative py-20 text-grape-foreground" style={{ background: "var(--gradient-grape)" }}>
-        <div class="container grid items-center gap-12 md:grid-cols-2">
-          <div class="space-y-5 text-center md:text-left">
-            <p class="text-lg leading-relaxed text-grape-foreground/95">
-              Além de músico, ele também é o pai da <strong>Malu</strong>, e conhece de perto o que encanta uma criança de verdade.
-            </p>
-            <p class="text-lg leading-relaxed text-grape-foreground/95">
-              Ao longo dos anos, já ensinou música para muitas crianças e desenvolveu um olhar sensível para esse universo.
-            </p>
-          </div>
-          <div class="relative mx-auto w-full max-w-md">
-            <Image
-              src={familyCollage}
-              alt="Mosaico de famílias e crianças encantadas com as cantigas"
-              width={1024}
-              height={1024}
-              class="rounded-3xl shadow-[var(--shadow-card)]"
-              loading="lazy"
-            />
-            <Heart className="absolute -bottom-4 -left-4 h-16 w-16 fill-coral text-coral float-slow" aria-hidden="true" />
-          </div>
-        </div>
-      </section>
+    <!-- IMAGEM -->
+    <div 
+      class="relative flex-shrink-0 w-full md:w-[620px] flex justify-center items-end"
+      style="margin-bottom: -80px; transform: translateY(-40px);"
+    >
+      <Image
+        src={musician}
+        alt="Bruno Grossi, voz do Tião Camaleão, com sua filha"
+        width={1000}
+        height={1200}
+        class="relative z-10 h-[520px] md:h-[720px] w-auto object-contain object-bottom block"
+        loading="lazy"
+        style="margin-bottom: 0; vertical-align: bottom;"
+      />
+    </div>
+
+    <!-- TEXTO -->
+    <div class="flex-1 px-4 md:px-0 md:-ml-10 pb-10 md:pb-24">
+
+      <p 
+        class="mb-5 uppercase tracking-widest text-left"
+        style="
+          color: #9CA3AF;
+          font-size: 16px;
+          letter-spacing: 0.18em;
+        "
+      >
+        A diferença está na voz, na intenção<br />
+        e no cuidado em cada detalhe
+      </p>
+
+      <h2
+        class="leading-tight text-left"
+        style="
+          color: #898989;
+          font-size: clamp(48px, 5vw, 76px);
+          line-height: 1.02;
+        "
+      >
+        Quem dá voz ao Tião é<br />
+        um músico de verdade
+      </h2>
+
+      <p
+        class="mt-7 text-left"
+        style="
+          color: #6B7280;
+          font-size: 26px;
+          line-height: 1.55;
+          max-width: 720px;
+        "
+      >
+        A voz do Tião Camaleão é interpretada pelo
+        <strong style="color: #111827;">
+          Bruno Grossi
+        </strong>,
+        músico formado em Música Popular pela UFMG,
+        com mais de 20 anos de experiência.
+      </p>
+
+    </div>
+
+  </div>
+</section>
+<!-- MUSICIAN 2 -->
+<!-- MUSICIAN 2 -->
+<section
+  class="py-20 overflow-hidden"
+  style="background-color: #8c52ff;"
+>
+  <div class="container flex flex-col-reverse items-center gap-8 md:flex-row md:gap-4">
+
+    <!-- TEXTO -->
+    <div class="w-full md:w-[48%] text-center md:text-left">
+
+      <p
+        style="
+          color: rgba(255,255,255,0.95);
+          font-size: 28px;
+          line-height: 1.8;
+        "
+      >
+        Além de músico, ele também é o pai da
+        <strong style="font-weight: 700;">
+          Malu
+        </strong>,
+        e conhece de perto o que encanta uma
+        criança de verdade.
+      </p>
+
+      <p
+        class="mt-8"
+        style="
+          color: rgba(255,255,255,0.95);
+          font-size: 28px;
+          line-height: 1.8;
+        "
+      >
+        Ao longo dos anos, já ensinou música para
+        muitas crianças e desenvolveu um olhar
+        sensível para esse universo.
+      </p>
+
+    </div>
+
+    <!-- IMAGEM -->
+    <div class="relative flex w-full justify-center md:w-[52%]">
+
+      <Image
+        src={familyCollage}
+        alt="Mosaico de famílias e crianças encantadas com as cantigas"
+        width={1200}
+        height={1200}
+        class="w-full max-w-[620px] rounded-[28px] object-cover"
+        loading="lazy"
+      />
+
+    </div>
+
+  </div>
+</section>
 
       <!-- MUSICIAN 3 -->
       <section class="relative bg-background py-20">
@@ -429,7 +601,6 @@ const year = new Date().getFullYear();
               class="rounded-3xl shadow-[var(--shadow-card)]"
               loading="lazy"
             />
-            <Music className="absolute -top-4 right-6 h-9 w-9 text-grape wiggle" />
           </div>
           <div class="space-y-5 text-foreground">
             <p class="text-lg leading-relaxed text-muted-foreground">
@@ -439,59 +610,64 @@ const year = new Date().getFullYear();
             <p class="text-lg leading-relaxed text-muted-foreground">
               Porque no fim… a criança percebe. E é isso que faz esse momento ser tão especial.
             </p>
-            <a href="#produtos" class="btn-pop btn-coral mt-2" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">Quero comprar</a>
           </div>
         </div>
       </section>
 
-      <!-- FAQ -->
-      <section class="bg-[#6ab248] py-20">
-        <div class="container max-w-5xl">
-          <div class="flex flex-col items-center gap-8 md:flex-row md:justify-between">
-            <div class="text-center md:text-left">
-              <p class="text-sm font-extrabold uppercase tracking-widest text-white">Tire suas dúvidas</p>
-              <h2 class="mt-2 text-4xl text-white md:text-5xl">Perguntas frequentes</h2>
-            </div>
-            <div>
-              <img src="/sua-imagem.png" alt="FAQ" class="w-40 md:w-56" />
-            </div>
+    <!-- FAQ -->
+    <section class="py-20" style="background-color: #6ab248;">
+      <div class="container max-w-5xl">
+        <div class="flex flex-col items-center gap-4 md:flex-row md:justify-between md:items-end">
+          <div class="text-center md:text-left">
+            <p class="text-base font-extrabold uppercase tracking-widest text-white">Tire suas dúvidas</p>
+            <h2 class="mt-1 whitespace-nowrap text-4xl text-white sm:text-5xl md:text-6xl lg:text-7xl">Perguntas frequentes</h2>
           </div>
-          <div class="mt-12">
-            <FaqAccordion client:visible />
-          </div>
-          <div
-            id="contato"
-            class="mt-12 rounded-3xl p-10 text-center"
-            style={{ background: "hsl(96 55% 80%)" }}
-          >
-            <p class="text-base font-bold uppercase tracking-wider text-foreground">
-              Ainda ficou com alguma dúvida?
-            </p>
-            <p class="mt-2 text-foreground/80">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
-            <a
-              href="#"
-              class="btn-pop mt-5"
-              style={{
-                background: "hsl(142 65% 42%)",
-                color: "hsl(0 0% 100%)",
-                boxShadow: "0 6px 0 0 hsl(142 70% 22% / 0.4)",
-              }}
-            >
-              Preciso de mais informações
-              <span class="ml-1 grid h-6 w-6 place-items-center rounded-full bg-card text-primary">
-                <MessageCircle className="h-3.5 w-3.5" />
-              </span>
-            </a>
+          <div class="-mb-4">
+            <img src="../../public/imagens/tiao_duvida.png" alt="FAQ" class="w-56 md:w-72 lg:w-80" />
           </div>
         </div>
-      </section>
+        <div class="mt-12">
+          <FaqAccordion client:visible />
+        </div>
+      </div>
+    </section>
 
+<!--BOTAO DE DUVIDA DO FAQ -->
+<section class="bg-[#cae2a6] py-20 text-center">
+  <p class="font-bold text-2xl md:text-3xl">AINDA FICOU COM ALGUMA DÚVIDA?</p>
+  <p class="mt-2 text-foreground/80 text-lg md:text-xl">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
+  
+<a
+  href="https://wa.me/5537933003534?text=Olá!%20Tenho%20dúvidas%20sobre%20as%20cantigas%20personalizadas%20e%20gostaria%20de%20mais%20informações."
+  target="_blank"
+  rel="noopener noreferrer"
+  class="btn-pop mt-5 inline-flex items-center gap-2"
+  style={{
+    background: "hsl(142 65% 42%)",
+    color: "hsl(0 0% 100%)",
+    padding: "16px 32px",
+    borderRadius: "40px",
+    textDecoration: "none",
+    fontWeight: "400",
+    fontSize: "20px",
+  }}
+>
+  <span>Preciso de mais informações</span>
+  <span class="grid h-7 w-7 place-items-center rounded-full bg-white text-[hsl(142_65%_42%)]">
+    <MessageCircle className="h-4 w-4" />
+  </span>
+</a>
+</section>
       <!-- FOOTER -->
       <footer>
         <div class="bg-card py-14">
           <div class="container">
-            <div class="mx-auto flex h-24 w-64 items-center justify-center rounded-2xl border-2 border-dashed border-border bg-muted/40 text-sm font-medium text-muted-foreground">
-              Espaço para o logo
+            <div class="mx-auto flex h-40 w-96 items-center justify-center rounded-2xl overflow-hidden">
+              <img 
+                src="../../public/imagens/logo.png" 
+                alt="Logo Tião Camaleão" 
+                class="h-full w-full object-contain"
+              />
             </div>
             <h3
               class="mt-6 text-center text-2xl text-foreground md:text-3xl"
@@ -510,25 +686,45 @@ const year = new Date().getFullYear();
               </div>
               <div class="space-y-3 sm:pl-2">
                 <p class="flex items-center gap-2">
-                  <span class="grid h-6 w-6 place-items-center rounded-full bg-secondary text-secondary-foreground">
-                    <Mail className="h-3.5 w-3.5" />
-                  </span>
-                  ivan@tiaocamaleao.com.br
-                </p>
-                <p class="flex items-center gap-2">
-                  <span class="grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-foreground">
-                    <Phone className="h-3.5 w-3.5" />
-                  </span>
-                  (37) 99199-6545
-                </p>
-                <p class="flex items-center gap-2">
-                  <span
-                    class="grid h-6 w-6 place-items-center rounded-full text-card"
-                    style={{ background: "linear-gradient(135deg, hsl(330 80% 55%), hsl(28 100% 60%))" }}
+                  <a
+                    href="mailto:ivan@tiaocamaleao.com.br"
+                    class="flex items-center gap-2 hover:opacity-80 transition-opacity"
                   >
-                    <Instagram className="h-3.5 w-3.5" />
-                  </span>
-                  tiaocamaleao
+                    <span class="grid h-6 w-6 place-items-center rounded-full bg-secondary text-secondary-foreground">
+                      <Mail className="h-3.5 w-3.5" />
+                    </span>
+                    ivan@tiaocamaleao.com.br
+                  </a>
+                </p>
+
+                <p class="flex items-center gap-2">
+                  <a
+                    href="https://wa.me/5537991996545"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                  >
+                    <span class="grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-foreground">
+                      <Phone className="h-3.5 w-3.5" />
+                    </span>
+                    (37) 99199-6545
+                  </a>
+                </p>
+                <p class="flex items-center gap-2">
+                  <a
+                    href="https://instagram.com/tiaocamaleao"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                  >
+                    <span
+                      class="grid h-6 w-6 place-items-center rounded-full text-card"
+                      style={{ background: "linear-gradient(135deg, hsl(330 80% 55%), hsl(28 100% 60%))" }}
+                    >
+                      <Instagram className="h-3.5 w-3.5" />
+                    </span>
+                    tiaocamaleao
+                  </a>
                 </p>
               </div>
             </div>

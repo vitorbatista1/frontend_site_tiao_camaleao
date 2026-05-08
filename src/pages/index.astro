@@ -145,12 +145,38 @@ const year = new Date().getFullYear();
             >
               Um jeito especial de marcar a infância
             </p>
-            <h1
-              class="text-5xl leading-[1.05] text-foreground md:text-6xl lg:text-7xl"
-            >
-              Cantigas com o<br />
-              <span class="text-primary">nome da criança</span>
-            </h1>
+            <div class="relative inline-block">
+              <h1
+                class="text-5xl leading-[1.05] text-foreground md:text-6xl lg:text-7xl"
+              >
+                Cantigas com o<br />
+                <span class="relative inline-block">
+                  <span class="relative z-10 text-primary">nome da criança</span>
+                  <!-- Imagem decorativa atrás do texto -->
+                  <img 
+                    src="https://cdn-icons-png.flaticon.com/512/2920/2920247.png"
+                    alt=""
+                    class="absolute -top-6 -right-8 h-14 w-14 opacity-30 md:-top-8 md:-right-10 md:h-20 md:w-20 rotate-12"
+                    loading="lazy"
+                    aria-hidden="true"
+                  />
+                  <img 
+                    src="https://cdn-icons-png.flaticon.com/512/616/616490.png"
+                    alt=""
+                    class="absolute -bottom-5 -left-6 h-10 w-10 opacity-25 md:-bottom-6 md:-left-8 md:h-14 md:w-14 -rotate-12"
+                    loading="lazy"
+                    aria-hidden="true"
+                  />
+                  <img 
+                    src="https://cdn-icons-png.flaticon.com/512/1995/1995572.png"
+                    alt=""
+                    class="absolute top-1/2 -right-10 h-8 w-8 opacity-20 md:-right-12 md:h-10 md:w-10"
+                    loading="lazy"
+                    aria-hidden="true"
+                  />
+                </span>
+              </h1>
+            </div>
             <p class="mt-5 max-w-md text-lg text-foreground/80">
               A maioria dos presentes passa… <strong>esse fica!</strong> Um abraço
               sonoro que vira memória de família.

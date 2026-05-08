@@ -19,6 +19,7 @@ export {
   CheckCircle,
   TrendingUp,
   Zap,
+  Star,
 } from "lucide-react";
 
 export const QrCode = ({ className = "h-5 w-5" }) => (
