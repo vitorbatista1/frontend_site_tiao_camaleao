@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react';
-import album1Img from '../../public/imagens/album1.png';
-import album2Img from '../../public/imagens/album2.png';
 
 const API_URL = import.meta.env.PUBLIC_API_URL;
 
@@ -42,7 +40,13 @@ function CheckIcon() {
   );
 }
 
-export default function CampaignCombo({ campaignId }: { campaignId: string }) {
+interface Props {
+  campaignId: string;
+  album1Src: string;
+  album2Src: string;
+}
+
+export default function CampaignCombo({ campaignId, album1Src, album2Src }: Props) {
   const [combo, setCombo] = useState<Combo | null>(null);
 
   useEffect(() => {
@@ -108,13 +112,17 @@ export default function CampaignCombo({ campaignId }: { campaignId: string }) {
             <div className="my-10 flex justify-center items-end gap-4">
               <div className="flex">
                 <img
-                  src={album1Img.src}
+                  src={album1Src}
                   alt="Cantigas Personalizadas 1"
+                  width={450}
+                  height={450}
                   className="w-36 md:w-44"
                 />
                 <img
-                  src={album2Img.src}
+                  src={album2Src}
                   alt="Cantigas Personalizadas 2"
+                  width={450}
+                  height={450}
                   className="w-36 md:w-44 -ml-10"
                 />
               </div>

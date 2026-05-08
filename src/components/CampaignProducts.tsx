@@ -1,14 +1,11 @@
 // CampaignProducts.tsx
 import { ShoppingCart, Play } from "./Icons.tsx";
-import album1Img from '../../public/imagens/album1.png';
-import album2Img from '../../public/imagens/album2.png';
 
-const albums = [
+const albumData = [
   {
     id: 1,
     title: "Álbum 1",
     price: "R$ 47,00",
-    image: album1Img.src,
     tracks: [
       "Apresentação",
       "Ciranda Cirandinha – personalizada",
@@ -29,7 +26,6 @@ const albums = [
     id: 2,
     title: "Álbum 2",
     price: "R$ 47,00",
-    image: album2Img.src,
     tracks: [
       "Apresentação",
       "Sabiá na Gaiola – personalizada",
@@ -47,7 +43,15 @@ const albums = [
   },
 ];
 
-export default function CampaignProducts({ campaignId }: { campaignId: string }) {
+interface Props {
+  campaignId: string;
+  album1Src: string;
+  album2Src: string;
+}
+
+export default function CampaignProducts({ campaignId, album1Src, album2Src }: Props) {
+  const albums = albumData.map((a, i) => ({ ...a, image: i === 0 ? album1Src : album2Src }));
+
   return (
     <section id="produtos" style={{ background: "#6ab248" }} className="py-14 px-4">
       <h2 className="text-center text-3xl md:text-4xl font-bold text-white mb-16">
@@ -66,6 +70,8 @@ export default function CampaignProducts({ campaignId }: { campaignId: string })
               <img
                 src={album.image}
                 alt={album.title}
+                width={450}
+                height={450}
                 className="w-48 md:w-56 object-contain drop-shadow-xl"
               />
             </div>

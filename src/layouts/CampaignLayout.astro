@@ -1,5 +1,5 @@
 ---
-import { Image } from "astro:assets";
+import { Image, getImage } from "astro:assets";
 import "../styles/global.css";
 import FaqAccordion from "../components/FaqAccordion.tsx";
 import ModalController from "../components/ModalController.tsx";
@@ -9,6 +9,9 @@ import {
   Music, Heart, Play, Lock, Mail, Phone, Instagram, MessageCircle,
   Star, ChevronLeft, ChevronRight, ShoppingCart
 } from "../components/Icons.tsx";
+
+import album1Raw from "../assets/album1.png";
+import album2Raw from "../assets/album2.png";
 
 import kidHeadphones from "../../public/imagens/menino.png";
 import musician from "../../public/imagens/musico_.png";
@@ -32,6 +35,11 @@ interface Props {
 }
 
 const { campaignId } = Astro.props;
+
+const [album1Opt, album2Opt] = await Promise.all([
+  getImage({ src: album1Raw, format: "webp", width: 450, height: 450 }),
+  getImage({ src: album2Raw, format: "webp", width: 450, height: 450 }),
+]);
 
 const benefits = [
   {
@@ -126,6 +134,8 @@ const year = new Date().getFullYear();
           <Image
             src={logoImg}
             alt="Tião Camaleão"
+            widths={[256, 384, 512, 768]}
+            sizes="(max-width: 768px) 256px, (max-width: 1024px) 320px, 384px"
             width={768}
             height={432}
             class="w-64 md:w-80 lg:w-96"
@@ -469,10 +479,10 @@ const year = new Date().getFullYear();
             </div>
           </section>
       <!-- PRODUCTS — dynamic per campaign -->
-      <CampaignProducts campaignId={campaignId} client:visible />
+      <CampaignProducts campaignId={campaignId} album1Src={album1Opt.src} album2Src={album2Opt.src} client:visible />
 
       <!-- COMBO — dynamic per campaign -->
-      <CampaignCombo campaignId={campaignId} client:visible />
+      <CampaignCombo campaignId={campaignId} album1Src={album1Opt.src} album2Src={album2Opt.src} client:visible />
 <!-- MUSICIAN 1 -->
 <section class="relative bg-white pt-16 pb-0 overflow-hidden">
 
