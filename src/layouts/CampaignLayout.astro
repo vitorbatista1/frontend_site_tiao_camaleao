@@ -36,13 +36,18 @@ interface Props {
 
 const { campaignId } = Astro.props;
 
-const [album1_sm, album1_lg, album2_sm, album2_lg, heroOpt] = await Promise.all([
+const [album1_sm, album1_lg, album2_sm, album2_lg, hero_sm, hero_md, hero_lg] = await Promise.all([
   getImage({ src: album1Raw, format: "webp", width: 256, height: 256 }),
   getImage({ src: album1Raw, format: "webp", width: 448, height: 448 }),
   getImage({ src: album2Raw, format: "webp", width: 256, height: 256 }),
   getImage({ src: album2Raw, format: "webp", width: 448, height: 448 }),
+  getImage({ src: criancasHero, format: "webp", width: 768 }),
+  getImage({ src: criancasHero, format: "webp", width: 1280 }),
   getImage({ src: criancasHero, format: "webp", width: 1920 }),
 ]);
+
+const heroSrcset = `${hero_sm.src} 768w, ${hero_md.src} 1280w, ${hero_lg.src} 1920w`;
+const heroSizes = "(max-width: 768px) 768px, (max-width: 1280px) 1280px, 1920px";
 
 const album1Srcset = `${album1_sm.src} 256w, ${album1_lg.src} 448w`;
 const album2Srcset = `${album2_sm.src} 256w, ${album2_lg.src} 448w`;
@@ -94,10 +99,7 @@ const year = new Date().getFullYear();
       name="description"
       content="Cantigas infantis personalizadas com o nome da sua criança. Mais de 2.000 nomes gravados em estúdio. Presente único que vira memória de família."
     />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=optional" />
-    <link rel="preload" as="image" href={heroOpt.src} type="image/webp" />
+    <link rel="preload" as="image" href={hero_lg.src} imagesrcset={heroSrcset} imagesizes={heroSizes} type="image/webp" />
   </head>
   <body>
     <ModalController client:idle />
@@ -118,7 +120,9 @@ const year = new Date().getFullYear();
 <!-- HERO -->
 <header class="relative bg-white overflow-hidden flex flex-col" style="min-height: clamp(480px, 56vw, 650px);">
   <img
-    src={heroOpt.src}
+    src={hero_lg.src}
+    srcset={heroSrcset}
+    sizes={heroSizes}
     alt=""
     aria-hidden="true"
     class="absolute bottom-0 right-0 h-[90%] md:h-full w-auto pointer-events-none select-none"
