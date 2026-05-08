@@ -14,6 +14,11 @@ import kidHeadphones from "../../public/imagens/menino.png";
 import musician from "../../public/imagens/musico_.png";
 import familyCollage from "../../public/imagens/familia.png";
 import studio from "../../public/imagens/studio.png";
+import backgroundHero from "../../public/imagens/background_hero.png";
+import logoImg from "../../public/imagens/logo.png";
+import mascoteImg from "../../public/imagens/mascote.png";
+import cantorNomesImg from "../../public/imagens/cantor_nomes.png";
+import tiaoDuvidaImg from "../../public/imagens/tiao_duvida.png";
 
 import rostoFeliz from "../assets/benefits/emoji_feliz.png";
 import coracao from "../assets/benefits/coracao.png";
@@ -76,9 +81,8 @@ const year = new Date().getFullYear();
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Aristotelica+Pro&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Aristotelica+Pro&display=swap" media="print" onload="this.media='all'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Aristotelica+Pro&display=swap" /></noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=optional" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=optional" /></noscript>
     <link rel="preload" as="image" href="/imagens/background_hero.png" />
   </head>
   <body>
@@ -101,11 +105,15 @@ const year = new Date().getFullYear();
 </div>
       <!-- HERO -->
       <header class="relative overflow-hidden flex flex-col" style="min-height: 520px;">
-        <img
-          src="/imagens/background_hero.png"
+        <Image
+          src={backgroundHero}
           alt=""
           aria-hidden="true"
+          width={1920}
+          height={1080}
           class="absolute inset-0 w-full h-full object-cover object-center"
+          fetchpriority="high"
+          loading="eager"
         />
         <!-- Gradiente cobre o fundo para legibilidade -->
         <div
@@ -115,9 +123,11 @@ const year = new Date().getFullYear();
 
         <!-- Logo centralizada no topo, dentro do hero -->
         <div class="relative z-10 w-full flex justify-center pt-4 pb-2">
-          <img
-            src="/imagens/logo.png"
+          <Image
+            src={logoImg}
             alt="Tião Camaleão"
+            width={768}
+            height={432}
             class="w-64 md:w-80 lg:w-96"
             style="height: auto;"
           />
@@ -317,6 +327,8 @@ const year = new Date().getFullYear();
                       <Image
                         src={icon}
                         alt=""
+                        width={224}
+                        height={224}
                         class="h-24 w-24 md:h-28 md:w-28 object-contain drop-shadow-xl"
                         loading="lazy"
                       />
@@ -357,10 +369,13 @@ const year = new Date().getFullYear();
           class="relative bg-[#1D82F5] rounded-3xl p-8 md:p-12 w-full max-w-4xl min-h-[400px] flex flex-col items-center justify-center"
         >
           <div class="absolute -top-16 -left-4 md:-top-20 md:-left-16 w-36 md:w-64 z-10">
-            <img
-              src="/imagens/mascote.png"
+            <Image
+              src={mascoteImg}
               alt="Mascote Camaleão"
+              width={400}
+              height={347}
               class="w-full h-auto"
+              loading="lazy"
             />
           </div>
 
@@ -441,10 +456,13 @@ const year = new Date().getFullYear();
 
               <div class="relative mt-12 md:mt-0 md:w-1/2 flex justify-start">
                 
-                <img
-                  src="/imagens/cantor_nomes.png" 
+                <Image
+                  src={cantorNomesImg}
                   alt="Cantor Personalizado"
+                  width={550}
+                  height={635}
                   class="relative z-10 w-full max-w-[550px] object-contain md:-ml-10"
+                  loading="lazy"
                 />
               </div>
 
@@ -625,7 +643,7 @@ const year = new Date().getFullYear();
             <h2 class="mt-1 whitespace-nowrap text-4xl text-white sm:text-5xl md:text-6xl lg:text-7xl">Perguntas frequentes</h2>
           </div>
           <div class="-mb-4">
-            <img src="/imagens/tiao_duvida.png" alt="FAQ" class="w-56 md:w-72 lg:w-80" />
+            <Image src={tiaoDuvidaImg} alt="FAQ" width={320} height={320} class="w-56 md:w-72 lg:w-80" loading="lazy" />
           </div>
         </div>
         <div class="mt-12">
@@ -665,10 +683,13 @@ const year = new Date().getFullYear();
         <div class="bg-card py-14">
           <div class="container">
             <div class="mx-auto flex h-40 w-96 items-center justify-center rounded-2xl overflow-hidden">
-              <img
-                src="/imagens/logo.png"
+              <Image
+                src={logoImg}
                 alt="Logo Tião Camaleão"
+                width={384}
+                height={216}
                 class="h-full w-full object-contain"
+                loading="lazy"
               />
             </div>
             <h3
