@@ -74,10 +74,12 @@ const year = new Date().getFullYear();
       name="description"
       content="Cantigas infantis personalizadas com o nome da sua criança. Mais de 2.000 nomes gravados em estúdio. Presente único que vira memória de família."
     />
-      <link
-        href="https://fonts.googleapis.com/css2?family=Aristotelica+Pro&display=swap"
-        rel="stylesheet"
-      />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Aristotelica+Pro&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Aristotelica+Pro&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Aristotelica+Pro&display=swap" /></noscript>
+    <link rel="preload" as="image" href="/imagens/background_hero.png" />
   </head>
   <body>
     <ModalController client:load />
@@ -449,10 +451,10 @@ const year = new Date().getFullYear();
             </div>
           </section>
       <!-- PRODUCTS — dynamic per campaign -->
-      <CampaignProducts campaignId={campaignId} client:load />
+      <CampaignProducts campaignId={campaignId} client:visible />
 
       <!-- COMBO — dynamic per campaign -->
-      <CampaignCombo campaignId={campaignId} client:load />
+      <CampaignCombo campaignId={campaignId} client:visible />
 <!-- MUSICIAN 1 -->
 <section class="relative bg-white pt-16 pb-0 overflow-hidden">
 
@@ -623,7 +625,7 @@ const year = new Date().getFullYear();
             <h2 class="mt-1 whitespace-nowrap text-4xl text-white sm:text-5xl md:text-6xl lg:text-7xl">Perguntas frequentes</h2>
           </div>
           <div class="-mb-4">
-            <img src="../../public/imagens/tiao_duvida.png" alt="FAQ" class="w-56 md:w-72 lg:w-80" />
+            <img src="/imagens/tiao_duvida.png" alt="FAQ" class="w-56 md:w-72 lg:w-80" />
           </div>
         </div>
         <div class="mt-12">
@@ -663,9 +665,9 @@ const year = new Date().getFullYear();
         <div class="bg-card py-14">
           <div class="container">
             <div class="mx-auto flex h-40 w-96 items-center justify-center rounded-2xl overflow-hidden">
-              <img 
-                src="../../public/imagens/logo.png" 
-                alt="Logo Tião Camaleão" 
+              <img
+                src="/imagens/logo.png"
+                alt="Logo Tião Camaleão"
                 class="h-full w-full object-contain"
               />
             </div>
