@@ -2,7 +2,7 @@
 import { Image, getImage } from "astro:assets";
 import "../styles/global.css";
 import FaqAccordion from "../components/FaqAccordion.tsx";
-import ModalController from "../components/ModalController.tsx";
+import ModalVanilla from "../components/ModalVanilla.astro";
 import CampaignProducts from "../components/CampaignProducts.tsx";
 import CampaignCombo from "../components/CampaignCombo.tsx";
 import {
@@ -190,7 +190,7 @@ const year = new Date().getFullYear();
     />
   </head>
   <body>
-    <ModalController client:idle />
+    <ModalVanilla />
 
     <div class="min-h-screen overflow-x-hidden bg-background">
 
@@ -567,7 +567,7 @@ const year = new Date().getFullYear();
             </div>
           </section>
       <!-- PRODUCTS — dynamic per campaign -->
-      <CampaignProducts campaignId={campaignId} album1Srcset={album1Srcset} album2Srcset={album2Srcset} albumSizes={albumSizes} album1Src={album1_lg.src} album2Src={album2_lg.src} client:visible />
+      <CampaignProducts campaignId={campaignId} album1Srcset={album1Srcset} album2Srcset={album2Srcset} albumSizes={albumSizes} album1Src={album1_lg.src} album2Src={album2_lg.src} />
 
       <!-- COMBO — dynamic per campaign -->
       <CampaignCombo campaignId={campaignId} album1Srcset={album1Srcset} album2Srcset={album2Srcset} albumSizes={albumSizes} album1Src={album1_lg.src} album2Src={album2_lg.src} client:visible />
