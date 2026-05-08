@@ -102,7 +102,7 @@ const year = new Date().getFullYear();
       name="description"
       content="Cantigas infantis personalizadas com o nome da sua criança. Mais de 2.000 nomes gravados em estúdio. Presente único que vira memória de família."
     />
-    <link rel="preload" as="image" href={hero_md.src} imagesrcset={heroSrcset} imagesizes={heroSizes} type="image/webp" />
+    <link rel="preload" as="image" href={hero_md.src} imagesrcset={heroSrcset} imagesizes={heroSizes} type="image/webp" fetchpriority="high" />
   </head>
   <body>
     <ModalController client:idle />
