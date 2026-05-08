@@ -1,12 +1,14 @@
 // CampaignProducts.tsx
 import { ShoppingCart, Play } from "./Icons.tsx";
+import album1Img from '../../public/imagens/album1.png';
+import album2Img from '../../public/imagens/album2.png';
 
 const albums = [
   {
     id: 1,
     title: "Álbum 1",
     price: "R$ 47,00",
-    image: "public/imagens/album1.png",
+    image: album1Img.src,
     tracks: [
       "Apresentação",
       "Ciranda Cirandinha – personalizada",
@@ -27,7 +29,7 @@ const albums = [
     id: 2,
     title: "Álbum 2",
     price: "R$ 47,00",
-    image: "public/imagens/album2.png",
+    image: album2Img.src,
     tracks: [
       "Apresentação",
       "Sabiá na Gaiola – personalizada",
