@@ -1,6 +1,4 @@
-@import "@fontsource/fredoka/latin-700.css";
-@import "@fontsource/nunito/latin-400.css";
-@import "@fontsource/nunito/latin-700.css";
+@import "@fontsource-variable/nunito/wght.css";
 
 @tailwind base;
 @tailwind components;
@@ -65,12 +63,12 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Nunito', Arial, system-ui, sans-serif;
+    font-family: 'Nunito Variable', 'Nunito', Arial, system-ui, sans-serif;
   }
 
   h1, h2, h3, h4 {
-    font-family: 'Fredoka', 'Nunito', Arial, system-ui, sans-serif;
-    @apply font-semibold tracking-tight;
+    font-family: 'Nunito Variable', 'Nunito', Arial, system-ui, sans-serif;
+    @apply font-bold tracking-tight;
   }
 }
 
