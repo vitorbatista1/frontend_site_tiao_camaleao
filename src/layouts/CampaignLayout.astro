@@ -17,7 +17,7 @@ import kidHeadphones from "../../public/imagens/menino.png";
 import musician from "../../public/imagens/musico_.png";
 import familyCollage from "../../public/imagens/familia.png";
 import studio from "../../public/imagens/studio.png";
-import backgroundHero from "../../public/imagens/background_hero.png";
+import criancasHero from "../../public/imagens/criancas_hero.png";
 import logoImg from "../../public/imagens/logo.png";
 import mascoteImg from "../../public/imagens/mascote.png";
 import cantorNomesImg from "../../public/imagens/cantor_nomes.png";
@@ -36,10 +36,17 @@ interface Props {
 
 const { campaignId } = Astro.props;
 
-const [album1Opt, album2Opt] = await Promise.all([
-  getImage({ src: album1Raw, format: "webp", width: 450, height: 450 }),
-  getImage({ src: album2Raw, format: "webp", width: 450, height: 450 }),
+const [album1_sm, album1_lg, album2_sm, album2_lg, heroOpt] = await Promise.all([
+  getImage({ src: album1Raw, format: "webp", width: 256, height: 256 }),
+  getImage({ src: album1Raw, format: "webp", width: 448, height: 448 }),
+  getImage({ src: album2Raw, format: "webp", width: 256, height: 256 }),
+  getImage({ src: album2Raw, format: "webp", width: 448, height: 448 }),
+  getImage({ src: criancasHero, format: "webp", width: 1920 }),
 ]);
+
+const album1Srcset = `${album1_sm.src} 256w, ${album1_lg.src} 448w`;
+const album2Srcset = `${album2_sm.src} 256w, ${album2_lg.src} 448w`;
+const albumSizes = "(max-width: 768px) 192px, 224px";
 
 const benefits = [
   {
@@ -91,7 +98,7 @@ const year = new Date().getFullYear();
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=optional" media="print" onload="this.media='all'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=optional" /></noscript>
-    <link rel="preload" as="image" href="/imagens/background_hero.png" />
+    <link rel="preload" as="image" href={heroOpt.src} type="image/webp" />
   </head>
   <body>
     <ModalController client:idle />
@@ -100,101 +107,89 @@ const year = new Date().getFullYear();
 
       <!-- TOP STRIP -->
 <div
-  class="py-5 text-center text-lg font-bold uppercase tracking-widest"
+  class="py-3 md:py-5 text-center font-bold uppercase tracking-widest"
   style="background-color: #69B34C; color: #fff;"
 >
-<span style="color: #F2E300; font-size: 15px;">💛</span>
-
-<span style="font-size: 20px;">
+<span style="color: #F2E300; font-size: 13px;">💛</span>
+<span style="font-size: clamp(13px, 4vw, 20px);">
   Desde 2013 encantando famílias
 </span>
-
-<span style="color: #F2E300; font-size: 15px;">💛</span>
+<span style="color: #F2E300; font-size: 13px;">💛</span>
 </div>
-      <!-- HERO -->
-      <header class="relative overflow-hidden flex flex-col" style="min-height: 520px;">
-        <Image
-          src={backgroundHero}
-          alt=""
-          aria-hidden="true"
-          width={1920}
-          height={1080}
-          class="absolute inset-0 w-full h-full object-cover object-center"
-          fetchpriority="high"
-          loading="eager"
-        />
-        <!-- Gradiente cobre o fundo para legibilidade -->
-        <div
-          class="absolute inset-0"
-          style="background: linear-gradient(to right, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.88) 45%, rgba(255,255,255,0.3) 75%, transparent 100%);"
-        ></div>
+<!-- HERO -->
+<header class="relative bg-white overflow-hidden flex flex-col" style="min-height: clamp(480px, 56vw, 650px);">
+  <img
+    src={heroOpt.src}
+    alt=""
+    aria-hidden="true"
+    class="absolute bottom-0 right-0 h-[90%] md:h-full w-auto pointer-events-none select-none"
+    fetchpriority="high"
+    loading="eager"
+  />
 
-        <!-- Logo centralizada no topo, dentro do hero -->
-        <div class="relative z-10 w-full flex justify-center pt-4 pb-2">
-          <Image
-            src={logoImg}
-            alt="Tião Camaleão"
-            widths={[256, 384, 512, 768]}
-            sizes="(max-width: 768px) 256px, (max-width: 1024px) 320px, 384px"
-            width={768}
-            height={432}
-            class="w-64 md:w-80 lg:w-96"
-            style="height: auto;"
-          />
-        </div>
+  <!-- Logo centralizada no topo, dentro do hero -->
+  <div class="relative z-10 w-full flex justify-center pt-4 pb-2">
+    <Image
+      src={logoImg}
+      alt="Tião Camaleão"
+      widths={[256, 384, 512, 768]}
+      sizes="(max-width: 768px) 256px, (max-width: 1024px) 320px, 384px"
+      width={768}
+      height={432}
+      class="w-40 md:w-64 lg:w-80"
+      style="height: auto;"
+    />
+  </div>
 
-        <!-- Texto do hero -->
-<div
-  class="relative z-10 container flex items-center flex-1 py-6 md:py-10"
->
-  <div class="w-full max-w-2xl -mt-6 md:-mt-12">
-    <p
-      class="text-sm md:text-base font-extrabold uppercase tracking-widest mb-3"
-      style="color: #888; letter-spacing: 0.14em;"
-    >
-      Um jeito especial de marcar a infância
-    </p>
-
-    <h1
-      class="font-bold leading-tight"
-      style="font-size: clamp(42px, 7vw, 88px); color: #333; line-height: 1.05;"
-    >
-      Cantigas com o<br />nome da criança
-    </h1>
-
-    <p
-      class="mt-5 font-bold"
-      style="font-size: clamp(20px, 2.5vw, 30px); color: #4caf50;"
-    >
-      A maioria dos presentes passa… esse fica!
-    </p>
-
-    <div class="mt-10">
-      <a
-        href="#produtos"
-        class="btn-pop inline-flex items-center gap-3 uppercase tracking-wide"
-        style="
-          background: #e53e3e;
-          color: #fff;
-          box-shadow: 0 6px 0 0 #9b1c1c;
-          font-size: 18px;
-          padding: 18px 34px;
-        "
-        data-buy
-        data-buy-name="Cantigas Personalizadas"
-        data-buy-price="R$ 47,00"
+  <!-- Texto do hero -->
+  <div class="relative z-10 container flex items-center flex-1 py-4 md:py-10">
+    <div class="w-full max-w-[62%] sm:max-w-lg md:max-w-2xl">
+      <p
+        class="text-sm md:text-base font-extrabold uppercase tracking-widest mb-3"
+        style="color: #888; letter-spacing: 0.14em;"
       >
-        Quero comprar <span style="font-size: 22px;">🛒</span>
-      </a>
+        Um jeito especial de marcar a infância
+      </p>
+
+      <h1
+        class="font-bold leading-tight"
+        style="font-size: clamp(26px, 7vw, 88px); color: #333; line-height: 1.05;"
+      >
+        Cantigas com o<br />nome da criança
+      </h1>
+
+      <p
+        class="mt-4 font-bold"
+        style="font-size: clamp(16px, 2.5vw, 30px); color: #4caf50;"
+      >
+        A maioria dos presentes passa… esse fica!
+      </p>
+
+      <div class="mt-5 md:mt-10">
+        <a
+          href="#produtos"
+          class="btn-pop inline-flex items-center gap-3 uppercase tracking-wide"
+          style="
+            background: #e53e3e;
+            color: #fff;
+            box-shadow: 0 6px 0 0 #9b1c1c;
+            font-size: clamp(15px, 2vw, 18px);
+            padding: clamp(12px, 1.5vw, 18px) clamp(20px, 2.5vw, 34px);
+          "
+          data-buy
+          data-buy-name="Cantigas Personalizadas"
+          data-buy-price="R$ 47,00"
+        >
+          Quero comprar <span>🛒</span>
+        </a>
+      </div>
     </div>
   </div>
-</div>
-      </header>
-
+</header>
       <!-- GREEN BAND -->
 <section
-  class="relative py-24 md:py-32 overflow-hidden"
-  style="background-color: #6ab248; min-height: 750px;"
+  class="relative py-16 md:py-32 overflow-hidden"
+  style="background-color: #6ab248;"
 >
   <div class="container grid items-center gap-4 md:grid-cols-2">
 
@@ -242,10 +237,10 @@ const year = new Date().getFullYear();
 
         <!-- Faixa azul escura: título + celular (celular vaza 100px sobre o azul claro) -->
         <div class="w-full pt-12 pb-0 md:pt-16" style="background: #00AEEF;">
-          <div class="container max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-end justify-between gap-8">
+          <div class="container max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-stretch md:items-end justify-between gap-8">
 
             <!-- Título -->
-            <div class="flex-1 text-center md:text-right text-white pb-10">
+            <div class="w-full flex-1 text-center md:text-right text-white pb-6 md:pb-10">
               <p class="mb-2 text-sm font-extrabold uppercase tracking-widest" style="color: #FFFFFF;">
                 Veja a reação quando a
               </p>
@@ -255,7 +250,7 @@ const year = new Date().getFullYear();
             </div>
 
             <!-- Celular: vaza 100px para dentro do azul claro -->
-            <div class="flex-1 flex justify-center md:justify-start" style="position: relative; z-index: 10; margin-bottom: -100px;">
+            <div class="w-full flex-1 flex justify-center md:justify-start relative z-10 md:-mb-[100px]">
               <div class="relative p-3 rounded-[2.5rem] shadow-2xl w-64 md:w-72" style="background: #1D4ED8;">
                 <div class="relative overflow-hidden rounded-[2rem] bg-black" style="aspect-ratio: 9/16;">
                   <div class="absolute inset-0 bg-gradient-to-br from-grape to-coral"></div>
@@ -279,35 +274,34 @@ const year = new Date().getFullYear();
           </div>
         </div>
 
-        <!-- Faixa azul claro: CTA (celular passa por cima) -->
-        <div class="w-full" style="background: #E0F7FF; padding-top: 1rem; padding-bottom: 1.5rem;">
-          <div class="container max-w-6xl mx-auto px-6 flex flex-col md:flex-row gap-8">
-            <!-- Coluna esquerda: alinhada ao título acima -->
-            <div class="flex-1 text-center md:text-right" style="padding-top: 110px;">
-              <h3 class="font-bold text-lg md:text-xl" style="color: #1D4ED8;">
-                Quer ver a reação da SUA CRIANÇA?
-              </h3>
-              <p class="mt-1 text-sm md:text-base" style="color: #1D4ED8;">
-                Clique no botão abaixo e receba uma cantiga.
-              </p>
-              <a
-                href="#contato"
-                class="mt-4 inline-flex items-center gap-3 text-white px-6 py-3 rounded-full font-bold shadow-lg transition-transform hover:scale-105 md:ml-auto"
-                style="background: #72BC44;"
-              >
-                PEDIR AMOSTRA GRÁTIS
-                <span class="grid h-7 w-7 place-items-center rounded-full bg-white">
-                  <svg class="h-4 w-4" style="color: #72BC44;" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-4.821 4.754a8.132 8.132 0 01-3.984-1.03l-.286-.17-2.96.776.791-2.887-.186-.296a8.14 8.14 0 01-1.247-4.346c0-4.519 3.674-8.19 8.19-8.19a8.19 8.19 0 018.19 8.19c0 4.52-3.674 8.19-8.19 8.19m0-18.054C7.452 1.082 2.591 5.943 2.591 11.956c0 1.92.487 3.793 1.412 5.46L2.4 23l5.688-1.491a9.357 9.357 0 004.515 1.156c6.012 0 10.874-4.861 10.874-10.873 0-2.864-1.115-5.556-3.141-7.581C18.303 2.197 15.612 1.082 12.651 1.082z" />
-                  </svg>
-                </span>
-              </a>
-            </div>
-            <!-- Coluna direita: espaço para o celular (mesmo flex-1) -->
-            <div class="flex-1 hidden md:block"></div>
-          </div>
-        </div>
-
+<!-- Faixa azul claro: CTA (celular passa por cima) -->
+<div class="w-full" style="background: #E0F7FF; padding-top: 0.5rem; padding-bottom: 0.75rem;">
+  <div class="container max-w-6xl mx-auto px-6 flex flex-col md:flex-row gap-4 md:gap-6">
+    <!-- Coluna esquerda: alinhada ao título acima -->
+    <div class="w-full flex-1 text-center md:text-right pt-2 md:pt-[60px]">
+      <h3 class="font-bold text-base md:text-lg lg:text-xl" style="color: #1D4ED8;">
+        Quer ver a reação da SUA CRIANÇA?
+      </h3>
+      <p class="mt-1 text-xs sm:text-sm md:text-base" style="color: #1D4ED8;">
+        Clique no botão abaixo e receba uma cantiga.
+      </p>
+      <a
+        href="#contato"
+        class="mt-3 inline-flex items-center gap-2 sm:gap-3 text-white px-5 sm:px-6 py-2 sm:py-3 rounded-full font-bold shadow-lg transition-transform hover:scale-105 md:ml-auto text-sm sm:text-base"
+        style="background: #72BC44;"
+      >
+        PEDIR AMOSTRA GRÁTIS
+        <span class="grid h-6 w-6 sm:h-7 sm:w-7 place-items-center rounded-full bg-white">
+          <svg class="h-3 w-3 sm:h-4 sm:w-4" style="color: #72BC44;" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-4.821 4.754a8.132 8.132 0 01-3.984-1.03l-.286-.17-2.96.776.791-2.887-.186-.296a8.14 8.14 0 01-1.247-4.346c0-4.519 3.674-8.19 8.19-8.19a8.19 8.19 0 018.19 8.19c0 4.52-3.674 8.19-8.19 8.19m0-18.054C7.452 1.082 2.591 5.943 2.591 11.956c0 1.92.487 3.793 1.412 5.46L2.4 23l5.688-1.491a9.357 9.357 0 004.515 1.156c6.012 0 10.874-4.861 10.874-10.873 0-2.864-1.115-5.556-3.141-7.581C18.303 2.197 15.612 1.082 12.651 1.082z" />
+          </svg>
+        </span>
+      </a>
+    </div>
+    <!-- Coluna direita: espaço para o celular (mesmo flex-1) -->
+    <div class="flex-1 hidden md:block"></div>
+  </div>
+</div>
         <!-- Faixa azul escura abaixo do azul claro -->
         <div class="w-full py-10" style="background: #00AEEF;"></div>
 
@@ -337,8 +331,9 @@ const year = new Date().getFullYear();
                       <Image
                         src={icon}
                         alt=""
-                        width={224}
-                        height={224}
+                        width={168}
+                        height={168}
+                        quality={72}
                         class="h-24 w-24 md:h-28 md:w-28 object-contain drop-shadow-xl"
                         loading="lazy"
                       />
@@ -363,82 +358,83 @@ const year = new Date().getFullYear();
           </div>
         </div>
       </section>
+<!-- TESTIMONIALS -->
+<section class="bg-[#00AAFF] py-16 px-4 flex flex-col items-center">
+  <div class="text-center mb-8">
+    <h3 class="text-white text-sm uppercase tracking-widest mb-2 opacity-90">
+      Depoimentos
+    </h3>
+    <h2 class="text-white text-3xl md:text-4xl font-bold">
+      De quem já viveu esse momento
+    </h2>
+  </div>
 
-      <!-- TESTIMONIALS -->
-      <section class="bg-[#00AAFF] py-16 px-4 flex flex-col items-center">
-        <div class="text-center mb-8">
-          <h3 class="text-white text-sm uppercase tracking-widest mb-2 opacity-90">
-            Depoimentos
-          </h3>
-          <h2 class="text-white text-3xl md:text-4xl font-bold">
-            De quem já viveu esse momento
-          </h2>
-        </div>
+  <div
+    class="relative bg-[#1D82F5] rounded-3xl p-8 md:p-12 w-full max-w-4xl min-h-[400px] flex flex-col items-center justify-center"
+  >
+    <div class="absolute -top-36 -left-8 md:-top-44 md:-left-28 w-56 md:w-96 z-10">
+      <Image
+        src={mascoteImg}
+        alt="Mascote Camaleão"
+        width={400}
+        height={347}
+        class="w-full h-auto"
+        loading="lazy"
+      />
+    </div>
 
-        <div
-          class="relative bg-[#1D82F5] rounded-3xl p-8 md:p-12 w-full max-w-4xl min-h-[400px] flex flex-col items-center justify-center"
-        >
-          <div class="absolute -top-16 -left-4 md:-top-20 md:-left-16 w-36 md:w-64 z-10">
-            <Image
-              src={mascoteImg}
-              alt="Mascote Camaleão"
-              width={400}
-              height={347}
-              class="w-full h-auto"
-              loading="lazy"
-            />
-          </div>
+    <div class="absolute top-6 right-8 flex gap-1">
+      {
+        [0, 1, 2, 3, 4].map((i) => (
+          <Star className="fill-yellow-400 text-yellow-400 w-6 h-6 md:w-8 md:h-8" />
+        ))
+      }
+    </div>
 
-          <div class="absolute top-6 right-8 flex gap-1">
-            {
-              [0, 1, 2, 3, 4].map((i) => (
-                <Star className="fill-yellow-400 text-yellow-400 w-6 h-6 md:w-8 md:h-8" />
-              ))
-            }
-          </div>
+    <div
+      class="w-full bg-white/10 rounded-2xl h-64 border-2 border-dashed border-white/20 flex items-center justify-center"
+    >
+      <p class="text-white/60 italic">Espaço para os depoimentos</p>
+    </div>
 
-          <div
-            class="w-full bg-white/10 rounded-2xl h-64 border-2 border-dashed border-white/20 flex items-center justify-center"
-          >
-            <p class="text-white/60 italic">Espaço para os depoimentos</p>
-          </div>
+    <button
+      class="absolute left-3 top-1/2 -translate-y-1/2 text-white hover:scale-110 transition"
+      aria-label="Anterior"
+    >
+      <ChevronLeft size={40} strokeWidth={3} />
+    </button>
+    <button
+      class="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:scale-110 transition"
+      aria-label="Próximo"
+    >
+      <ChevronRight size={40} strokeWidth={3} />
+    </button>
+  </div>
 
-          <button
-            class="absolute left-3 top-1/2 -translate-y-1/2 text-white hover:scale-110 transition"
-            aria-label="Anterior"
-          >
-            <ChevronLeft size={40} strokeWidth={3} />
-          </button>
-          <button
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:scale-110 transition"
-            aria-label="Próximo"
-          >
-            <ChevronRight size={40} strokeWidth={3} />
-          </button>
-        </div>
-
-        <button
-          class="mt-10 bg-[#FF0000] hover:bg-red-600 text-white font-bold py-4 px-8 rounded-full flex items-center gap-3 shadow-lg transition-transform active:scale-95"
-          data-buy
-          data-buy-name="Cantigas Personalizadas"
-          data-buy-price="R$ 47,00"
-        >
-          EU TAMBÉM QUERO
-          <ShoppingCart size={20} />
-        </button>
-      </section>
+  <button
+    class="mt-10 bg-[#FF0000] hover:bg-red-600 text-white font-bold py-4 px-8 rounded-full flex items-center gap-3 shadow-lg transition-transform active:scale-95"
+    data-buy
+    data-buy-name="Cantigas Personalizadas"
+    data-buy-price="R$ 47,00"
+  >
+    EU TAMBÉM QUERO
+    <ShoppingCart size={20} />
+  </button>
+</section>
           <section class="bg-white py-16 pt-28 font-sans overflow-hidden">
             <div class="container mx-auto flex flex-col md:flex-row items-center justify-center gap-0 px-6">
               
               <div class="z-20 flex flex-col items-center text-center md:items-end md:text-right md:w-1/2 md:pr-4">
                 
-                  <h2 class="text-[38px] font-light leading-[1.1] text-[#4D4D4D] md:text-[50px]">
-                    Mais de 2.000 nomes<br />
-                    já gravados em estúdio
+                  <h2 class="text-[28px] sm:text-[34px] md:text-[50px] font-light leading-[1.1] text-[#4D4D4D]">
+                    Já cantamos mais de<br />
+                    2.000 nomes
                   </h2>
 
                 <p class="mt-6 text-[18px] leading-relaxed text-[#666666] max-w-[450px]">
-                  Temos um grande acervo, incluindo nomes raros, compostos, apelidos e até nomes estrangeiros.
+                    Temos um grande acervo gravado em estúdio,
+                    incluindo nomes raros, compostos, apelidos e
+                    até nomes estrangeiros
                 </p>
 
                   <div class="mt-8 inline-block rounded-full bg-[#00AEEF] px-6 py-2 text-white shadow-md">
@@ -479,19 +475,18 @@ const year = new Date().getFullYear();
             </div>
           </section>
       <!-- PRODUCTS — dynamic per campaign -->
-      <CampaignProducts campaignId={campaignId} album1Src={album1Opt.src} album2Src={album2Opt.src} client:visible />
+      <CampaignProducts campaignId={campaignId} album1Srcset={album1Srcset} album2Srcset={album2Srcset} albumSizes={albumSizes} album1Src={album1_lg.src} album2Src={album2_lg.src} client:visible />
 
       <!-- COMBO — dynamic per campaign -->
-      <CampaignCombo campaignId={campaignId} album1Src={album1Opt.src} album2Src={album2Opt.src} client:visible />
+      <CampaignCombo campaignId={campaignId} album1Srcset={album1Srcset} album2Srcset={album2Srcset} albumSizes={albumSizes} album1Src={album1_lg.src} album2Src={album2_lg.src} client:visible />
 <!-- MUSICIAN 1 -->
 <section class="relative bg-white pt-16 pb-0 overflow-hidden">
 
   <div class="container flex flex-col md:flex-row items-end gap-0">
 
     <!-- IMAGEM -->
-    <div 
-      class="relative flex-shrink-0 w-full md:w-[620px] flex justify-center items-end"
-      style="margin-bottom: -80px; transform: translateY(-40px);"
+    <div
+      class="relative flex-shrink-0 w-full md:w-[620px] flex justify-center items-end md:-mb-20 md:-translate-y-10"
     >
       <Image
         src={musician}
@@ -523,7 +518,7 @@ const year = new Date().getFullYear();
         class="leading-tight text-left"
         style="
           color: #898989;
-          font-size: clamp(48px, 5vw, 76px);
+          font-size: clamp(30px, 5vw, 76px);
           line-height: 1.02;
         "
       >
@@ -535,7 +530,7 @@ const year = new Date().getFullYear();
         class="mt-7 text-left"
         style="
           color: #6B7280;
-          font-size: 26px;
+          font-size: clamp(17px, 2.5vw, 26px);
           line-height: 1.55;
           max-width: 720px;
         "
@@ -566,7 +561,7 @@ const year = new Date().getFullYear();
       <p
         style="
           color: rgba(255,255,255,0.95);
-          font-size: 28px;
+          font-size: clamp(17px, 3vw, 28px);
           line-height: 1.8;
         "
       >
@@ -582,7 +577,7 @@ const year = new Date().getFullYear();
         class="mt-8"
         style="
           color: rgba(255,255,255,0.95);
-          font-size: 28px;
+          font-size: clamp(17px, 3vw, 28px);
           line-height: 1.8;
         "
       >
@@ -650,7 +645,7 @@ const year = new Date().getFullYear();
         <div class="flex flex-col items-center gap-4 md:flex-row md:justify-between md:items-end">
           <div class="text-center md:text-left">
             <p class="text-base font-extrabold uppercase tracking-widest text-white">Tire suas dúvidas</p>
-            <h2 class="mt-1 whitespace-nowrap text-4xl text-white sm:text-5xl md:text-6xl lg:text-7xl">Perguntas frequentes</h2>
+            <h2 class="mt-1 text-3xl text-white sm:text-4xl md:text-5xl lg:text-6xl">Perguntas frequentes</h2>
           </div>
           <div class="-mb-4">
             <Image src={tiaoDuvidaImg} alt="FAQ" width={320} height={320} class="w-56 md:w-72 lg:w-80" loading="lazy" />
@@ -692,7 +687,7 @@ const year = new Date().getFullYear();
       <footer>
         <div class="bg-card py-14">
           <div class="container">
-            <div class="mx-auto flex h-40 w-96 items-center justify-center rounded-2xl overflow-hidden">
+            <div class="mx-auto flex h-28 md:h-40 w-full max-w-[240px] md:max-w-none md:w-96 items-center justify-center rounded-2xl overflow-hidden">
               <Image
                 src={logoImg}
                 alt="Logo Tião Camaleão"

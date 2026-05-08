@@ -47,10 +47,17 @@ interface Props {
   campaignId: string;
   album1Src: string;
   album2Src: string;
+  album1Srcset: string;
+  album2Srcset: string;
+  albumSizes: string;
 }
 
-export default function CampaignProducts({ campaignId, album1Src, album2Src }: Props) {
-  const albums = albumData.map((a, i) => ({ ...a, image: i === 0 ? album1Src : album2Src }));
+export default function CampaignProducts({ campaignId, album1Src, album2Src, album1Srcset, album2Srcset, albumSizes }: Props) {
+  const albums = albumData.map((a, i) => ({
+    ...a,
+    image: i === 0 ? album1Src : album2Src,
+    srcset: i === 0 ? album1Srcset : album2Srcset,
+  }));
 
   return (
     <section id="produtos" style={{ background: "#6ab248" }} className="py-14 px-4">
@@ -58,7 +65,7 @@ export default function CampaignProducts({ campaignId, album1Src, album2Src }: P
         Nossos produtos
       </h2>
 
-      <div className="flex flex-col md:flex-row gap-6 justify-center items-stretch max-w-4xl mx-auto">
+      <div className="flex flex-col md:flex-row gap-16 md:gap-6 justify-center items-stretch max-w-4xl mx-auto">
         {albums.map((album) => (
           <div
             key={album.id}
@@ -69,9 +76,11 @@ export default function CampaignProducts({ campaignId, album1Src, album2Src }: P
             <div className="w-full flex justify-center" style={{ marginTop: "-3.5rem" }}>
               <img
                 src={album.image}
+                srcSet={album.srcset}
+                sizes={albumSizes}
                 alt={album.title}
-                width={450}
-                height={450}
+                width={448}
+                height={448}
                 className="w-48 md:w-56 object-contain drop-shadow-xl"
               />
             </div>

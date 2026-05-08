@@ -44,9 +44,12 @@ interface Props {
   campaignId: string;
   album1Src: string;
   album2Src: string;
+  album1Srcset: string;
+  album2Srcset: string;
+  albumSizes: string;
 }
 
-export default function CampaignCombo({ campaignId, album1Src, album2Src }: Props) {
+export default function CampaignCombo({ campaignId, album1Src, album2Src, album1Srcset, album2Srcset, albumSizes }: Props) {
   const [combo, setCombo] = useState<Combo | null>(null);
 
   useEffect(() => {
@@ -113,16 +116,20 @@ export default function CampaignCombo({ campaignId, album1Src, album2Src }: Prop
               <div className="flex">
                 <img
                   src={album1Src}
+                  srcSet={album1Srcset}
+                  sizes="(max-width: 768px) 144px, 176px"
                   alt="Cantigas Personalizadas 1"
-                  width={450}
-                  height={450}
+                  width={448}
+                  height={448}
                   className="w-36 md:w-44"
                 />
                 <img
                   src={album2Src}
+                  srcSet={album2Srcset}
+                  sizes="(max-width: 768px) 144px, 176px"
                   alt="Cantigas Personalizadas 2"
-                  width={450}
-                  height={450}
+                  width={448}
+                  height={448}
                   className="w-36 md:w-44 -ml-10"
                 />
               </div>
