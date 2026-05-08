@@ -43,14 +43,14 @@ const [album1_sm, album1_md, album1_lg, album2_sm, album2_md, album2_lg, hero_sm
   getImage({ src: album2Raw, format: "webp", width: 256, height: 256 }),
   getImage({ src: album2Raw, format: "webp", width: 384, height: 384 }),
   getImage({ src: album2Raw, format: "webp", width: 448, height: 448 }),
-  getImage({ src: criancasHero, format: "webp", width: 600 }),
-  getImage({ src: criancasHero, format: "webp", width: 900 }),
-  getImage({ src: criancasHero, format: "webp", width: 1280 }),
-  getImage({ src: criancasHero, format: "webp", width: 1920 }),
+  getImage({ src: criancasHero, format: "webp", width: 600, quality: 75 }),
+  getImage({ src: criancasHero, format: "webp", width: 900, quality: 75 }),
+  getImage({ src: criancasHero, format: "webp", width: 1280, quality: 75 }),
+  getImage({ src: criancasHero, format: "webp", width: 1920, quality: 75 }),
 ]);
 
 const heroSrcset = `${hero_sm.src} 600w, ${hero_md.src} 900w, ${hero_lg.src} 1280w, ${hero_xl.src} 1920w`;
-const heroSizes = "(max-width: 768px) 600px, (max-width: 1280px) 900px, 1280px";
+const heroSizes = "(max-width: 768px) 600px, 900px";
 
 const album1Srcset = `${album1_sm.src} 256w, ${album1_md.src} 384w, ${album1_lg.src} 448w`;
 const album2Srcset = `${album2_sm.src} 256w, ${album2_md.src} 384w, ${album2_lg.src} 448w`;
