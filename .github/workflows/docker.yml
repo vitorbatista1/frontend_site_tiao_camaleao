@@ -33,7 +33,6 @@ jobs:
           images: ghcr.io/${{ github.repository }}
           tags: |
             type=semver,pattern={{version}}         # v1.0.0
-            type=semver,pattern={{major}}.{{minor}}  # v1.0
             type=raw,value=latest                   # latest
 
       - name: Build e Push da imagem
