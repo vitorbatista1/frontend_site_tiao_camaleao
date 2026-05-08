@@ -1,6 +1,10 @@
-<!-- Modal Vanilla JS — sem React -->
+---
+const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
+---
+
 <div
   id="tc-modal"
+  data-api={API_URL}
   class="fixed inset-0 z-50 flex items-center justify-center p-4"
   style="display:none"
   role="dialog"
@@ -11,10 +15,7 @@
     <div id="tc-header" class="sticky top-0 bg-white border-b border-gray-100 p-6 rounded-t-3xl z-10"></div>
     <div id="tc-body" class="px-6 pb-6 overflow-y-auto flex-1 min-h-0"></div>
     <div class="sticky bottom-0 border-t border-gray-100 p-6 bg-gray-50 rounded-b-3xl">
-      <button
-        id="tc-next-btn"
-        class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-3 shadow-lg"
-      >
+      <button id="tc-next-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-3 shadow-lg">
         <span id="tc-next-lbl">Continuar</span>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
       </button>
@@ -22,394 +23,356 @@
   </div>
 </div>
 
-<script>
-  const API = import.meta.env.PUBLIC_API_URL;
+<script is:inline>
+(function () {
+  var API = document.getElementById("tc-modal").dataset.api;
 
   // ── Estado ──────────────────────────────────────────────────────────────────
-  let isOpen = false, step = 1;
-  let customer = { fullName: "", email: "", telefone: "" };
-  let children: Child[] = [];
-  let albumsAPI: AlbumAPI[] = [];
-  let loadingAlbums = false;
-  let albumErrors: Record<string, string> = {};
-  let errors = { fullName: "", email: "", telefone: "" };
-  let productName = "";
-  let isCombo = false;
+  var isOpen = false, step = 1;
+  var customer = { fullName: "", email: "", telefone: "" };
+  var children = [];
+  var albumsAPI = [];
+  var loadingAlbums = false;
+  var albumErrors = {};
+  var errors = { fullName: "", email: "", telefone: "" };
+  var productName = "";
+  var isCombo = false;
 
-  interface Child {
-    id: string; name: string;
-    albumResult: { found: boolean; display_name?: string; albums?: string[]; } | null;
-    isSearching: boolean; selectedAlbums: string[];
-  }
-  interface AlbumAPI {
-    id: string; name: string; tipo: "ALBUM" | "COMBO" | "GRAVACAO";
-    priceNew: string; priceOld: string;
-  }
+  // ── Helpers de álbum ─────────────────────────────────────────────────────────
+  function getAlbumsOnly() { return albumsAPI.filter(function(a){ return a.tipo === "ALBUM"; }); }
+  function getCombo() { return albumsAPI.find(function(a){ return a.tipo === "COMBO"; }); }
+  function getGravacao() { return albumsAPI.filter(function(a){ return a.tipo === "GRAVACAO"; }); }
 
-  // ── Helpers de álbum ────────────────────────────────────────────────────────
-  const getAlbumsOnly = () => albumsAPI.filter(a => a.tipo === "ALBUM");
-  const getCombo = () => albumsAPI.find(a => a.tipo === "COMBO");
-  const getGravacao = () => albumsAPI.filter(a => a.tipo === "GRAVACAO");
-
-  function getAlbumByKey(key: string) {
+  function getAlbumByKey(key) {
     return getAlbumsOnly()[parseInt(key.replace("album_", "")) - 1];
   }
-  function getAlbumById(id: string) { return albumsAPI.find(a => a.id === id); }
-  function getAlbumLabel(id: string) { return getAlbumById(id)?.name ?? id; }
-  function priceOf(keyOrId: string): number {
-    const a = keyOrId.startsWith("album_") ? getAlbumByKey(keyOrId) : getAlbumById(keyOrId);
-    return parseFloat(a?.priceNew ?? "0");
+  function getAlbumById(id) { return albumsAPI.find(function(a){ return a.id === id; }); }
+  function getAlbumLabel(id) { var a = getAlbumById(id); return a ? a.name : id; }
+
+  function priceOf(keyOrId) {
+    var a = keyOrId.startsWith("album_") ? getAlbumByKey(keyOrId) : getAlbumById(keyOrId);
+    return parseFloat((a && a.priceNew) || "0");
   }
-  function priceOldOf(keyOrId: string): number {
-    const a = keyOrId.startsWith("album_") ? getAlbumByKey(keyOrId) : getAlbumById(keyOrId);
-    return parseFloat(a?.priceOld ?? "0");
+  function priceOldOf(keyOrId) {
+    var a = keyOrId.startsWith("album_") ? getAlbumByKey(keyOrId) : getAlbumById(keyOrId);
+    return parseFloat((a && a.priceOld) || "0");
   }
   function calcTotal() {
-    return children.reduce((t, c) =>
-      t + (c.selectedAlbums ?? []).reduce((s, k) => s + priceOf(k), 0), 0
-    ).toFixed(2);
+    return children.reduce(function(t, c) {
+      return t + (c.selectedAlbums || []).reduce(function(s, k) { return s + priceOf(k); }, 0);
+    }, 0).toFixed(2);
   }
 
-  // ── DOM ─────────────────────────────────────────────────────────────────────
-  const $modal  = () => document.getElementById("tc-modal")!;
-  const $header = () => document.getElementById("tc-header")!;
-  const $body   = () => document.getElementById("tc-body")!;
-  const $nextLbl= () => document.getElementById("tc-next-lbl")!;
+  // ── DOM ──────────────────────────────────────────────────────────────────────
+  function $header() { return document.getElementById("tc-header"); }
+  function $body()   { return document.getElementById("tc-body"); }
+  function $nextLbl(){ return document.getElementById("tc-next-lbl"); }
 
-  function esc(s: string | undefined | null) {
-    return String(s ?? "")
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   }
 
-  // ── Renderização do header ──────────────────────────────────────────────────
+  // ── Header ────────────────────────────────────────────────────────────────────
   function renderHeader() {
-    $header().innerHTML = `
-      <div class="flex justify-between items-start">
-        <div>
-          <h2 class="text-2xl font-bold text-gray-800">${step === 1 ? "Pré-checkout" : "Dados das Crianças"}</h2>
-          <p class="text-sm text-gray-500 mt-1">${step === 1 ? "Informe seus dados para continuar" : "Adicione o nome das crianças"}</p>
-        </div>
-        <button id="tc-close" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-        </button>
-      </div>
-      <div class="flex gap-2 mt-6">
-        <div class="flex-1 h-1 rounded-full bg-primary"></div>
-        <div class="flex-1 h-1 rounded-full transition-all ${step >= 2 ? "bg-primary" : "bg-gray-200"}"></div>
-      </div>`;
-    document.getElementById("tc-close")!.onclick = () => step === 1 ? closeModal() : goStep(1);
+    $header().innerHTML =
+      '<div class="flex justify-between items-start">' +
+        '<div>' +
+          '<h2 class="text-2xl font-bold text-gray-800">' + (step===1?"Pré-checkout":"Dados das Crianças") + '</h2>' +
+          '<p class="text-sm text-gray-500 mt-1">' + (step===1?"Informe seus dados para continuar":"Adicione o nome das crianças") + '</p>' +
+        '</div>' +
+        '<button id="tc-close" class="p-2 hover:bg-gray-100 rounded-full transition-colors">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>' +
+        '</button>' +
+      '</div>' +
+      '<div class="flex gap-2 mt-6">' +
+        '<div class="flex-1 h-1 rounded-full bg-primary"></div>' +
+        '<div class="flex-1 h-1 rounded-full transition-all ' + (step>=2?"bg-primary":"bg-gray-200") + '"></div>' +
+      '</div>';
+    document.getElementById("tc-close").onclick = function(){ step===1 ? closeModal() : goStep(1); };
   }
 
-  // ── Step 1 ──────────────────────────────────────────────────────────────────
+  // ── Step 1 ────────────────────────────────────────────────────────────────────
   function renderStep1() {
-    const field = (id: string, type: string, placeholder: string, value: string, err: string) => `
-      <div>
-        <input id="${id}" type="${type}" placeholder="${placeholder}" value="${esc(value)}"
-          class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${err ? "border-red-500" : "border-gray-200 focus:border-primary"}" />
-        ${err ? `<p class="text-red-500 text-xs mt-1">${esc(err)}</p>` : ""}
-      </div>`;
+    function field(id, type, ph, val, err) {
+      return '<div><input id="'+id+'" type="'+type+'" placeholder="'+ph+'" value="'+esc(val)+'"' +
+        ' class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ' +
+        (err ? "border-red-500" : "border-gray-200 focus:border-primary") + '" />' +
+        (err ? '<p class="text-red-500 text-xs mt-1">'+esc(err)+'</p>' : '') + '</div>';
+    }
+    $body().innerHTML =
+      '<div class="space-y-4 pt-4"><div class="space-y-3">' +
+        field("tc-name",  "text",  "Nome completo *",       customer.fullName,  errors.fullName) +
+        field("tc-email", "email", "Seu melhor e-mail *",   customer.email,     errors.email) +
+        field("tc-phone", "text",  "(DDD) 9XXXX-XXXX *",   customer.telefone,  errors.telefone) +
+      '</div><div class="bg-amber-50 rounded-xl p-3 border border-amber-200">' +
+        '<p class="text-xs text-amber-800">⚠️ <strong>Campos obrigatórios:</strong> Nome completo, E-mail e Telefone</p>' +
+      '</div></div>';
 
-    $body().innerHTML = `
-      <div class="space-y-4 pt-4">
-        <div class="space-y-3">
-          ${field("tc-name", "text", "Nome completo *", customer.fullName, errors.fullName)}
-          ${field("tc-email", "email", "Seu melhor e-mail *", customer.email, errors.email)}
-          ${field("tc-phone", "text", "(DDD) 9XXXX-XXXX *", customer.telefone, errors.telefone)}
-        </div>
-        <div class="bg-amber-50 rounded-xl p-3 border border-amber-200">
-          <p class="text-xs text-amber-800">⚠️ <strong>Campos obrigatórios:</strong> Nome completo, E-mail e Telefone</p>
-        </div>
-      </div>`;
-
-    const attach = (id: string, key: keyof typeof errors, setter: (v: string) => void) => {
-      document.getElementById(id)?.addEventListener("input", (e) => {
-        setter((e.target as HTMLInputElement).value);
-        if (errors[key]) { errors[key] = ""; renderStep1(); }
-      });
-    };
-    attach("tc-name", "fullName", v => customer.fullName = v);
-    attach("tc-email", "email", v => customer.email = v);
-
-    document.getElementById("tc-phone")?.addEventListener("input", (e) => {
-      const input = e.target as HTMLInputElement;
-      let n = input.value.replace(/\D/g, "").slice(0, 11);
-      const fmt = n.length <= 10
-        ? n.replace(/^(\d{0,2})(\d{0,4})(\d{0,4})$/, (_, a, b, c) =>
-            [a && `(${a}`, b && `) ${b}`, c && `-${c}`].filter(Boolean).join(""))
-        : n.replace(/^(\d{0,2})(\d{0,5})(\d{0,4})$/, (_, a, b, c) =>
-            [a && `(${a}`, b && `) ${b}`, c && `-${c}`].filter(Boolean).join(""));
+    document.getElementById("tc-name").addEventListener("input", function(e){
+      customer.fullName = e.target.value;
+      if (errors.fullName) { errors.fullName = ""; renderStep1(); }
+    });
+    document.getElementById("tc-email").addEventListener("input", function(e){
+      customer.email = e.target.value;
+      if (errors.email) { errors.email = ""; renderStep1(); }
+    });
+    document.getElementById("tc-phone").addEventListener("input", function(e){
+      var input = e.target;
+      var n = input.value.replace(/\D/g, "").slice(0, 11);
+      var fmt = n.length <= 10
+        ? n.replace(/^(\d{0,2})(\d{0,4})(\d{0,4})$/, function(_,a,b,c){ return (a?"("+a:"") + (b?") "+b:"") + (c?"-"+c:""); })
+        : n.replace(/^(\d{0,2})(\d{0,5})(\d{0,4})$/, function(_,a,b,c){ return (a?"("+a:"") + (b?") "+b:"") + (c?"-"+c:""); });
       customer.telefone = fmt;
       input.value = fmt;
       if (errors.telefone) { errors.telefone = ""; renderStep1(); }
     });
   }
 
-  // ── Step 2 — children list ──────────────────────────────────────────────────
-  function renderStep2() {
-    const combo = getCombo();
-    const hasSelections = children.some(c => c.selectedAlbums.length > 0);
+  // ── SVG check ─────────────────────────────────────────────────────────────────
+  var CHECK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
 
-    const childCards = children.map((child, idx) => {
-      let albumsHtml = "";
-      if (child.isSearching) {
-        albumsHtml = `<div class="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl border border-gray-200">
-          <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <span class="text-xs text-gray-500">Buscando álbuns...</span></div>`;
-      } else if (child.albumResult?.found) {
-        albumsHtml = buildFoundAlbums(child, combo);
-      } else if (child.albumResult && !child.albumResult.found && child.name.trim().length >= 2) {
-        albumsHtml = buildNotFound(child);
-      }
+  function albumBtn(childId, key, selected, disabled, label, pNew, pOld, selCls, unselCls, checkCls, green) {
+    var disAttr = disabled ? " disabled" : "";
+    var wrapCls = disabled
+      ? "border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed"
+      : selected ? selCls : unselCls;
+    var dotCls = selected ? checkCls : "border-gray-300";
+    var textCls = green ? "text-green-700 font-bold" : "";
+    var priceCls = green ? "text-green-700" : "text-gray-700";
+    var strikeColor = green ? "text-green-500" : "text-gray-400";
+    return (
+      '<button type="button"'+disAttr+' class="tc-album w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all '+wrapCls+'" data-cid="'+childId+'" data-key="'+key+'">' +
+        '<div class="flex items-center gap-2">' +
+          '<div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 '+dotCls+'">'+(selected?CHECK:'')+'</div>' +
+          '<span class="text-sm font-medium text-left '+textCls+'">'+esc(label)+'</span>' +
+        '</div>' +
+        '<div class="text-right flex-shrink-0 ml-2">' +
+          (pOld>pNew?'<span class="text-xs '+strikeColor+' line-through block">R$ '+pOld.toFixed(2).replace(".",",")+'</span>':'') +
+          '<span class="text-sm font-bold '+priceCls+'">R$ '+pNew.toFixed(2).replace(".",",")+'</span>' +
+        '</div>' +
+      '</button>'
+    );
+  }
 
-      return `
-        <div class="space-y-2" data-cid="${child.id}">
-          <div class="flex gap-2 items-center">
-            <input type="text" placeholder="Nome da criança ${idx + 1} *" value="${esc(child.name)}"
-              class="tc-child-name flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none transition-colors"
-              data-id="${child.id}" />
-            <button class="tc-rm-child p-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors" data-id="${child.id}" aria-label="Remover">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-            </button>
-          </div>
-          <div class="tc-result" data-cid="${child.id}">${albumsHtml}</div>
-          ${albumErrors[child.id] ? `<p class="text-red-500 text-xs px-1">${esc(albumErrors[child.id])}</p>` : ""}
-        </div>`;
+  function buildFoundAlbums(child) {
+    var combo = getCombo();
+    var sel = child.selectedAlbums || [];
+    var comboId = combo ? combo.id : "combo";
+    var comboSel = sel.indexOf(comboId) >= 0;
+
+    var btns = (child.albumResult.albums || []).map(function(key){
+      var a = getAlbumByKey(key);
+      var isSelected = sel.indexOf(a ? a.id : key) >= 0;
+      return albumBtn(child.id, key, isSelected, comboSel,
+        a ? a.name : getAlbumLabel(key), priceOf(key), priceOldOf(key),
+        "border-primary bg-primary/5", "border-gray-200 hover:border-primary/50 hover:bg-gray-50",
+        "border-primary bg-primary", false);
     }).join("");
 
-    const summaryHtml = hasSelections ? buildSummary() : "";
+    var comboBtn = "";
+    if ((child.albumResult.albums||[]).length >= 2 && combo) {
+      var cs = sel.indexOf(combo.id) >= 0;
+      comboBtn = albumBtn(child.id, "combo", cs, false,
+        "🎁 "+combo.name, parseFloat(combo.priceNew), parseFloat(combo.priceOld),
+        "border-green-500 bg-green-50", "border-dashed border-green-400 hover:bg-green-50",
+        "border-green-500 bg-green-500", true);
+    }
 
-    $body().innerHTML = `
-      <div class="space-y-4 pt-4">
-        <div class="bg-blue-50 rounded-xl p-4 border border-blue-200">
-          <p class="text-sm text-blue-800 font-medium mb-1">📝 Adicione o nome das crianças</p>
-          <p class="text-xs text-blue-600">Vamos verificar quais álbuns estão disponíveis para cada nome</p>
-        </div>
-        ${loadingAlbums ? `<div class="flex items-center gap-2 py-2">
-          <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <span class="text-xs text-gray-500">Carregando preços...</span></div>` : ""}
-        <div id="tc-children" class="space-y-5 max-h-[420px] overflow-y-auto pr-1">${childCards}</div>
-        <button id="tc-add-child" class="w-full py-3 border-2 border-dashed border-primary text-primary rounded-xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2 font-medium">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-          Adicionar outra criança
-        </button>
-        <div id="tc-summary">${summaryHtml}</div>
-        <div class="flex items-center justify-center gap-2 text-xs text-gray-400">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-          <span>Personalização ilimitada para todas as crianças</span>
-        </div>
-      </div>`;
+    return '<div class="space-y-2">' +
+      '<p class="text-xs font-semibold text-gray-600 px-1">Álbuns disponíveis para <span class="text-primary">'+esc(child.albumResult.display_name||child.name)+'</span>:</p>' +
+      '<div class="space-y-2">'+btns+comboBtn+'</div>' +
+    '</div>';
+  }
+
+  function buildNotFound(child) {
+    var grav = getGravacao();
+    var sel = child.selectedAlbums || [];
+    var btns = grav.map(function(a){
+      var isSel = sel.indexOf(a.id) >= 0;
+      return albumBtn(child.id, a.id, isSel, false,
+        "🎙️ "+a.name, parseFloat(a.priceNew), parseFloat(a.priceOld),
+        "border-primary bg-primary/5", "border-gray-200 hover:border-primary/50 hover:bg-gray-50",
+        "border-primary bg-primary", false);
+    }).join("");
+    return '<div class="space-y-2">' +
+      '<div class="px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">' +
+        '<p class="text-xs text-amber-700">⚠️ Nenhum álbum encontrado para <strong>"'+esc(child.name)+'"</strong>. '+
+          (grav.length===0?"Será feito sob encomenda.":"")+'</p>' +
+      '</div>' +
+      (grav.length>0?'<div class="space-y-2"><p class="text-xs font-semibold text-gray-600 px-1">Serviço de gravação disponível:</p>'+btns+'</div>':'') +
+    '</div>';
+  }
+
+  function buildSummary() {
+    var rows = children.map(function(c){
+      var sel = c.selectedAlbums || [];
+      if (!c.name || !sel.length) return "";
+      var sub = sel.reduce(function(s,k){ return s+priceOf(k); }, 0);
+      return '<div class="flex justify-between text-xs text-gray-600">' +
+        '<span>'+esc(c.albumResult&&c.albumResult.display_name||c.name)+' — '+sel.map(function(k){return esc(getAlbumLabel(k));}).join(" + ")+'</span>' +
+        '<span class="font-semibold">R$ '+sub.toFixed(2).replace(".",",")+'</span></div>';
+    }).join("");
+    if (!rows) return "";
+    return '<div class="bg-gray-50 rounded-xl p-4 border border-gray-200 space-y-2">' +
+      '<p class="text-sm font-semibold text-gray-700">Resumo:</p>'+rows+
+      '<div class="border-t border-gray-300 pt-2 flex justify-between font-bold text-gray-800">' +
+        '<span>Total</span><span>R$ '+calcTotal().replace(".",",")+'</span></div></div>';
+  }
+
+  function resultAreaHtml(child) {
+    if (child.isSearching) {
+      return '<div class="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl border border-gray-200">' +
+        '<div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>' +
+        '<span class="text-xs text-gray-500">Buscando álbuns...</span></div>';
+    }
+    if (child.albumResult && child.albumResult.found) return buildFoundAlbums(child);
+    if (child.albumResult && !child.albumResult.found && child.name.trim().length >= 2) return buildNotFound(child);
+    return "";
+  }
+
+  // ── Step 2 ────────────────────────────────────────────────────────────────────
+  function renderStep2() {
+    var hasSel = children.some(function(c){ return (c.selectedAlbums||[]).length > 0; });
+    var cards = children.map(function(c, idx){
+      return '<div class="space-y-2" data-cid="'+c.id+'">' +
+        '<div class="flex gap-2 items-center">' +
+          '<input type="text" placeholder="Nome da criança '+(idx+1)+' *" value="'+esc(c.name)+'"' +
+            ' class="tc-child-name flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none transition-colors"' +
+            ' data-id="'+c.id+'" />' +
+          '<button class="tc-rm-child p-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors" data-id="'+c.id+'" aria-label="Remover">' +
+            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>' +
+          '</button>' +
+        '</div>' +
+        '<div class="tc-result" data-cid="'+c.id+'">'+resultAreaHtml(c)+'</div>' +
+        (albumErrors[c.id]?'<p class="text-red-500 text-xs px-1">'+esc(albumErrors[c.id])+'</p>':'') +
+      '</div>';
+    }).join("");
+
+    $body().innerHTML =
+      '<div class="space-y-4 pt-4">' +
+        '<div class="bg-blue-50 rounded-xl p-4 border border-blue-200">' +
+          '<p class="text-sm text-blue-800 font-medium mb-1">📝 Adicione o nome das crianças</p>' +
+          '<p class="text-xs text-blue-600">Vamos verificar quais álbuns estão disponíveis para cada nome</p>' +
+        '</div>' +
+        (loadingAlbums?'<div class="flex items-center gap-2 py-2"><div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div><span class="text-xs text-gray-500">Carregando preços...</span></div>':"") +
+        '<div id="tc-children" class="space-y-5 max-h-[420px] overflow-y-auto pr-1">'+cards+'</div>' +
+        '<button id="tc-add-child" class="w-full py-3 border-2 border-dashed border-primary text-primary rounded-xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2 font-medium">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>' +
+          'Adicionar outra criança</button>' +
+        '<div id="tc-summary">'+(hasSel?buildSummary():"")+'</div>' +
+        '<div class="flex items-center justify-center gap-2 text-xs text-gray-400">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' +
+          '<span>Personalização ilimitada para todas as crianças</span></div>' +
+      '</div>';
 
     attachStep2();
     updateNextBtn();
   }
 
-  // ── Helpers de HTML do step 2 ───────────────────────────────────────────────
-  const CHECK_SVG = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`;
-
-  function albumBtn(childId: string, key: string, selected: boolean, disabled: boolean,
-    label: string, priceNew: number, priceOld: number,
-    selectedClass: string, unselectedClass: string, checkClass: string, greenText = false) {
-    const dis = disabled ? "disabled" : "";
-    const cls = disabled ? "border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed"
-      : selected ? selectedClass : unselectedClass;
-    return `
-      <button type="button" ${dis}
-        class="tc-album w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${cls}"
-        data-cid="${childId}" data-key="${key}">
-        <div class="flex items-center gap-2">
-          <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${selected ? checkClass : "border-gray-300"}">
-            ${selected ? CHECK_SVG : ""}
-          </div>
-          <span class="text-sm font-medium text-left ${greenText ? "text-green-700 font-bold" : ""}">${esc(label)}</span>
-        </div>
-        <div class="text-right flex-shrink-0 ml-2">
-          ${priceOld > priceNew ? `<span class="text-xs ${greenText ? "text-green-500" : "text-gray-400"} line-through block">R$ ${priceOld.toFixed(2).replace(".", ",")}</span>` : ""}
-          <span class="text-sm font-bold ${greenText ? "text-green-700" : "text-gray-700"}">R$ ${priceNew.toFixed(2).replace(".", ",")}</span>
-        </div>
-      </button>`;
-  }
-
-  function buildFoundAlbums(child: Child, combo: AlbumAPI | undefined) {
-    const sel = child.selectedAlbums;
-    const comboId = combo?.id ?? "combo";
-    const comboSel = sel.includes(comboId);
-
-    const albumBtns = (child.albumResult!.albums ?? []).map(key => {
-      const a = getAlbumByKey(key);
-      const isSelected = sel.includes(a?.id ?? key);
-      return albumBtn(child.id, key, isSelected, comboSel,
-        a?.name ?? getAlbumLabel(key), priceOf(key), priceOldOf(key),
-        "border-primary bg-primary/5",
-        "border-gray-200 hover:border-primary/50 hover:bg-gray-50",
-        "border-primary bg-primary");
-    }).join("");
-
-    let comboBtn = "";
-    if ((child.albumResult!.albums?.length ?? 0) >= 2 && combo) {
-      const comboSelected = sel.includes(combo.id);
-      comboBtn = albumBtn(child.id, "combo", comboSelected, false,
-        `🎁 ${combo.name}`, parseFloat(combo.priceNew), parseFloat(combo.priceOld),
-        "border-green-500 bg-green-50",
-        "border-dashed border-green-400 hover:bg-green-50",
-        "border-green-500 bg-green-500", true);
-    }
-
-    return `
-      <div class="space-y-2">
-        <p class="text-xs font-semibold text-gray-600 px-1">Álbuns disponíveis para <span class="text-primary">${esc(child.albumResult?.display_name ?? child.name)}</span>:</p>
-        <div class="space-y-2">${albumBtns}${comboBtn}</div>
-      </div>`;
-  }
-
-  function buildNotFound(child: Child) {
-    const gravacao = getGravacao();
-    const sel = child.selectedAlbums;
-    const recBtns = gravacao.map(a => {
-      const isSelected = sel.includes(a.id);
-      return albumBtn(child.id, a.id, isSelected, false,
-        `🎙️ ${a.name}`, parseFloat(a.priceNew), parseFloat(a.priceOld),
-        "border-primary bg-primary/5",
-        "border-gray-200 hover:border-primary/50 hover:bg-gray-50",
-        "border-primary bg-primary");
-    }).join("");
-
-    return `
-      <div class="space-y-2">
-        <div class="px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
-          <p class="text-xs text-amber-700">⚠️ Nenhum álbum encontrado para <strong>"${esc(child.name)}"</strong>. ${gravacao.length === 0 ? "Será feito sob encomenda." : ""}</p>
-        </div>
-        ${gravacao.length > 0 ? `<div class="space-y-2"><p class="text-xs font-semibold text-gray-600 px-1">Serviço de gravação disponível:</p>${recBtns}</div>` : ""}
-      </div>`;
-  }
-
-  function buildSummary() {
-    const rows = children.map(c => {
-      const sel = c.selectedAlbums;
-      if (!c.name || sel.length === 0) return "";
-      const sub = sel.reduce((s, k) => s + priceOf(k), 0);
-      return `<div class="flex justify-between text-xs text-gray-600">
-        <span>${esc(c.albumResult?.display_name ?? c.name)} — ${sel.map(k => esc(getAlbumLabel(k))).join(" + ")}</span>
-        <span class="font-semibold">R$ ${sub.toFixed(2).replace(".", ",")}</span>
-      </div>`;
-    }).join("");
-    if (!rows) return "";
-    return `<div class="bg-gray-50 rounded-xl p-4 border border-gray-200 space-y-2">
-      <p class="text-sm font-semibold text-gray-700">Resumo:</p>
-      ${rows}
-      <div class="border-t border-gray-300 pt-2 flex justify-between font-bold text-gray-800">
-        <span>Total</span><span>R$ ${calcTotal().replace(".", ",")}</span>
-      </div>
-    </div>`;
-  }
-
-  // ── Step 2 listeners ────────────────────────────────────────────────────────
   function attachStep2() {
-    document.getElementById("tc-add-child")!.onclick = () => {
-      children.push({ id: Date.now().toString(), name: "", albumResult: null, isSearching: false, selectedAlbums: [] });
+    document.getElementById("tc-add-child").onclick = function(){
+      children.push({ id: String(Date.now()), name: "", albumResult: null, isSearching: false, selectedAlbums: [] });
       renderStep2();
     };
+    var container = document.getElementById("tc-children");
 
-    const container = document.getElementById("tc-children")!;
-
-    container.addEventListener("input", (e) => {
-      const input = e.target as HTMLInputElement;
+    container.addEventListener("input", function(e){
+      var input = e.target;
       if (!input.classList.contains("tc-child-name")) return;
-      const id = input.dataset.id!;
-      const name = input.value;
-      children = children.map(c => c.id === id
-        ? { ...c, name, albumResult: null, isSearching: name.trim().length >= 2, selectedAlbums: [] }
-        : c);
-      // Update only the result area (preserve input focus)
-      const resultDiv = container.querySelector(`.tc-result[data-cid="${id}"]`);
+      var id = input.dataset.id;
+      var name = input.value;
+      children = children.map(function(c){
+        return c.id === id ? Object.assign({}, c, { name: name, albumResult: null, isSearching: name.trim().length >= 2, selectedAlbums: [] }) : c;
+      });
+      var resultDiv = container.querySelector('.tc-result[data-cid="'+id+'"]');
       if (resultDiv) {
-        resultDiv.innerHTML = children.find(c => c.id === id)!.isSearching
-          ? `<div class="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl border border-gray-200">
-              <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-              <span class="text-xs text-gray-500">Buscando álbuns...</span></div>`
+        var child = children.find(function(c){ return c.id === id; });
+        resultDiv.innerHTML = child.isSearching
+          ? '<div class="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl border border-gray-200"><div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div><span class="text-xs text-gray-500">Buscando álbuns...</span></div>'
           : "";
       }
       debouncedSearch(id, name);
     });
 
-    container.addEventListener("click", (e) => {
-      const target = e.target as HTMLElement;
-      const rmBtn = target.closest(".tc-rm-child") as HTMLElement | null;
+    container.addEventListener("click", function(e){
+      var rmBtn = e.target.closest(".tc-rm-child");
       if (rmBtn) {
-        const id = rmBtn.dataset.id!;
-        if (children.length > 1) { children = children.filter(c => c.id !== id); renderStep2(); }
+        var id = rmBtn.dataset.id;
+        if (children.length > 1) { children = children.filter(function(c){ return c.id !== id; }); renderStep2(); }
         return;
       }
-      const albumBtn = target.closest(".tc-album") as HTMLButtonElement | null;
-      if (albumBtn && !albumBtn.disabled) {
-        toggleAlbum(albumBtn.dataset.cid!, albumBtn.dataset.key!);
-      }
+      var ab = e.target.closest(".tc-album");
+      if (ab && !ab.disabled) toggleAlbum(ab.dataset.cid, ab.dataset.key);
     });
   }
 
-  // ── Album toggle ─────────────────────────────────────────────────────────────
-  function toggleAlbum(childId: string, key: string) {
-    const combo = getCombo();
-    const comboId = combo?.id ?? "combo";
-    children = children.map(c => {
+  function updateResultArea(id) {
+    var child = children.find(function(c){ return c.id === id; });
+    if (!child) return;
+    var div = document.querySelector('.tc-result[data-cid="'+id+'"]');
+    if (div) div.innerHTML = resultAreaHtml(child);
+    var sumDiv = document.getElementById("tc-summary");
+    if (sumDiv) sumDiv.innerHTML = buildSummary();
+    updateNextBtn();
+  }
+
+  // ── Toggle álbum ─────────────────────────────────────────────────────────────
+  function toggleAlbum(childId, key) {
+    var combo = getCombo();
+    var comboId = combo ? combo.id : "combo";
+    children = children.map(function(c){
       if (c.id !== childId) return c;
-      const sel = c.selectedAlbums;
-      if (key === "combo") return { ...c, selectedAlbums: sel.includes(comboId) ? [] : [comboId] };
-      const realId = key.startsWith("album_") ? (getAlbumByKey(key)?.id ?? key) : key;
-      const noCombo = sel.filter(a => a !== comboId);
-      return { ...c, selectedAlbums: noCombo.includes(realId) ? noCombo.filter(a => a !== realId) : [...noCombo, realId] };
+      var sel = c.selectedAlbums || [];
+      if (key === "combo") return Object.assign({}, c, { selectedAlbums: sel.indexOf(comboId)>=0 ? [] : [comboId] });
+      var realId = key.startsWith("album_") ? (getAlbumByKey(key) ? getAlbumByKey(key).id : key) : key;
+      var noCombo = sel.filter(function(a){ return a !== comboId; });
+      return Object.assign({}, c, {
+        selectedAlbums: noCombo.indexOf(realId)>=0 ? noCombo.filter(function(a){ return a!==realId; }) : noCombo.concat([realId])
+      });
     });
-    albumErrors = { ...albumErrors, [childId]: "" };
+    albumErrors[childId] = "";
     renderStep2();
   }
 
-  // ── Debounce + search ────────────────────────────────────────────────────────
-  function debounce<T extends (...args: Parameters<T>) => void>(fn: T, ms: number): T {
-    let t: ReturnType<typeof setTimeout>;
-    return ((...args: Parameters<T>) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); }) as T;
+  // ── Debounce + busca ──────────────────────────────────────────────────────────
+  function debounce(fn, ms) {
+    var t;
+    return function() {
+      var args = arguments;
+      clearTimeout(t);
+      t = setTimeout(function(){ fn.apply(null, args); }, ms);
+    };
   }
 
-  const debouncedSearch = debounce(async (childId: string, name: string) => {
+  var debouncedSearch = debounce(function(childId, name) {
     if (!name.trim() || name.trim().length < 2) {
-      children = children.map(c => c.id === childId ? { ...c, albumResult: null, isSearching: false, selectedAlbums: [] } : c);
+      children = children.map(function(c){
+        return c.id===childId ? Object.assign({},c,{albumResult:null,isSearching:false,selectedAlbums:[]}) : c;
+      });
       updateResultArea(childId);
       return;
     }
-    try {
-      const res = await fetch(`${API}/api/children/search?name=${encodeURIComponent(name.trim())}`);
-      const data = await res.json();
-      children = children.map(c => c.id === childId ? { ...c, albumResult: data, isSearching: false, selectedAlbums: [] } : c);
-    } catch {
-      children = children.map(c => c.id === childId ? { ...c, albumResult: null, isSearching: false, selectedAlbums: [] } : c);
-    }
-    updateResultArea(childId);
-    document.getElementById("tc-summary")!.innerHTML = buildSummary();
-    updateNextBtn();
+    fetch(API + "/api/children/search?name=" + encodeURIComponent(name.trim()))
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        children = children.map(function(c){
+          return c.id===childId ? Object.assign({},c,{albumResult:data,isSearching:false,selectedAlbums:[]}) : c;
+        });
+      })
+      .catch(function(){
+        children = children.map(function(c){
+          return c.id===childId ? Object.assign({},c,{albumResult:null,isSearching:false,selectedAlbums:[]}) : c;
+        });
+      })
+      .finally(function(){ updateResultArea(childId); });
   }, 600);
 
-  function updateResultArea(childId: string) {
-    const child = children.find(c => c.id === childId);
-    if (!child) return;
-    const div = document.querySelector(`.tc-result[data-cid="${childId}"]`);
-    if (!div) return;
-    const combo = getCombo();
-    if (child.isSearching) {
-      div.innerHTML = `<div class="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl border border-gray-200">
-        <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-        <span class="text-xs text-gray-500">Buscando álbuns...</span></div>`;
-    } else if (child.albumResult?.found) {
-      div.innerHTML = buildFoundAlbums(child, combo);
-    } else if (child.albumResult && !child.albumResult.found && child.name.trim().length >= 2) {
-      div.innerHTML = buildNotFound(child);
-    } else {
-      div.innerHTML = "";
-    }
-  }
-
-  // ── Validação ────────────────────────────────────────────────────────────────
+  // ── Validação ─────────────────────────────────────────────────────────────────
   function validateStep1() {
-    const e = { fullName: "", email: "", telefone: "" };
-    let ok = true;
+    var e = { fullName: "", email: "", telefone: "" };
+    var ok = true;
     if (!customer.fullName.trim()) { e.fullName = "Nome completo é obrigatório"; ok = false; }
     else if (customer.fullName.trim().length < 3) { e.fullName = "Nome deve ter pelo menos 3 caracteres"; ok = false; }
     if (!customer.email.trim()) { e.email = "E-mail é obrigatório"; ok = false; }
@@ -422,53 +385,55 @@
   }
 
   function validateStep2() {
-    if (children.some(c => !c.name.trim())) { alert("Por favor, preencha o nome de todas as crianças"); return false; }
-    const errs: Record<string, string> = {};
-    children.forEach(c => {
-      if (c.albumResult?.found && c.selectedAlbums.length === 0) errs[c.id] = "Selecione pelo menos um álbum";
+    if (children.some(function(c){ return !c.name.trim(); })) {
+      alert("Por favor, preencha o nome de todas as crianças"); return false;
+    }
+    var errs = {};
+    children.forEach(function(c){
+      if (c.albumResult && c.albumResult.found && !(c.selectedAlbums||[]).length) errs[c.id] = "Selecione pelo menos um álbum";
     });
     if (Object.keys(errs).length) { albumErrors = errs; renderStep2(); return false; }
     return true;
   }
 
-  // ── Fluxo ────────────────────────────────────────────────────────────────────
+  // ── Fluxo ─────────────────────────────────────────────────────────────────────
   function updateNextBtn() {
-    const lbl = $nextLbl();
+    var lbl = $nextLbl();
+    if (!lbl) return;
     if (step === 2) {
-      const total = calcTotal();
-      const hasSel = children.some(c => c.selectedAlbums.length > 0);
-      lbl.textContent = hasSel ? `Ir para o Pagamento — R$ ${total.replace(".", ",")}` : "Ir para o Pagamento";
+      var hasSel = children.some(function(c){ return (c.selectedAlbums||[]).length>0; });
+      lbl.textContent = hasSel ? "Ir para o Pagamento — R$ "+calcTotal().replace(".",",") : "Ir para o Pagamento";
     } else {
       lbl.textContent = "Continuar";
     }
   }
 
-  function goStep(n: number) {
+  function goStep(n) {
     step = n;
     renderHeader();
     n === 1 ? renderStep1() : renderStep2();
     updateNextBtn();
   }
 
-  async function fetchAlbums() {
+  function fetchAlbums() {
     loadingAlbums = true;
-    try {
-      const r = await fetch(`${API}/api/albums`);
-      const j = await r.json();
-      if (j.success) albumsAPI = j.data;
-    } catch (e) { console.error("Erro ao buscar álbuns:", e); }
-    loadingAlbums = false;
+    fetch(API + "/api/albums")
+      .then(function(r){ return r.json(); })
+      .then(function(j){ if (j.success) albumsAPI = j.data; })
+      .catch(function(e){ console.error("Erro ao buscar álbuns:", e); })
+      .finally(function(){ loadingAlbums = false; });
   }
 
-  function openModal(detail: { name?: string; price?: string; combo?: boolean } = {}) {
-    productName = detail.name ?? "Cantigas Personalizadas";
+  function openModal(detail) {
+    detail = detail || {};
+    productName = detail.name || "Cantigas Personalizadas";
     isCombo = !!detail.combo;
     step = 1;
     customer = { fullName: "", email: "", telefone: "" };
-    children = [{ id: Date.now().toString(), name: "", albumResult: null, isSearching: false, selectedAlbums: [] }];
+    children = [{ id: String(Date.now()), name: "", albumResult: null, isSearching: false, selectedAlbums: [] }];
     albumsAPI = []; albumErrors = {}; errors = { fullName: "", email: "", telefone: "" };
     isOpen = true;
-    $modal().style.display = "";
+    document.getElementById("tc-modal").style.display = "";
     document.body.style.overflow = "hidden";
     renderHeader();
     renderStep1();
@@ -478,22 +443,23 @@
 
   function closeModal() {
     isOpen = false;
-    $modal().style.display = "none";
+    document.getElementById("tc-modal").style.display = "none";
     document.body.style.overflow = "";
   }
 
-  // ── Eventos globais ──────────────────────────────────────────────────────────
-  window.addEventListener("open-modal", (e) => openModal((e as CustomEvent).detail));
+  // ── Eventos ───────────────────────────────────────────────────────────────────
+  window.addEventListener("open-modal", function(e){ openModal(e.detail); });
 
-  document.getElementById("tc-backdrop")!.onclick = () => step === 1 ? closeModal() : goStep(1);
+  document.getElementById("tc-backdrop").onclick = function(){ step===1 ? closeModal() : goStep(1); };
 
-  document.getElementById("tc-next-btn")!.onclick = () => {
+  document.getElementById("tc-next-btn").onclick = function(){
     if (step === 1) {
       if (validateStep1()) goStep(2);
     } else {
       if (validateStep2()) {
         localStorage.setItem("orderData", JSON.stringify({
-          customerData: customer, children, albumsAPI, productName, total: calcTotal(), isCombo
+          customerData: customer, children: children, albumsAPI: albumsAPI,
+          productName: productName, total: calcTotal(), isCombo: isCombo
         }));
         closeModal();
         window.location.href = "/pagamento";
@@ -501,7 +467,8 @@
     }
   };
 
-  document.addEventListener("keydown", (e) => {
+  document.addEventListener("keydown", function(e){
     if (e.key === "Escape" && isOpen) step > 1 ? goStep(1) : closeModal();
   });
+})();
 </script>
