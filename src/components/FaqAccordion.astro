@@ -1,0 +1,69 @@
+---
+const faqs = [
+  {
+    q: "É fácil baixar as músicas após a compra?",
+    a: "Sim! Após a confirmação, você recebe um link por e-mail com todas as faixas em alta qualidade, prontas para baixar no celular ou computador.",
+  },
+  {
+    q: "Como saber se o nome do meu filho está disponível para personalização?",
+    a: "Temos mais de 2.000 nomes gravados. Se o nome não estiver no acervo, fazemos a gravação personalizada sob encomenda em até 7 dias.",
+  },
+  {
+    q: "Posso ouvir as músicas no celular, no carro e em outros dispositivos?",
+    a: "Sim! Os arquivos são em MP3 e funcionam em qualquer aparelho: celular, caixinha de som, carro, computador e tablets.",
+  },
+  {
+    q: "Posso enviar as músicas por WhatsApp e e-mail?",
+    a: "Pode sim — as faixas são suas e você pode compartilhar com a família e padrinhos sem nenhuma restrição.",
+  },
+  {
+    q: "Como posso ter certeza de que vou gostar das cantigas?",
+    a: "Fica tranquilo, você só compra se realmente gostar. Antes de qualquer compra, nós enviamos uma cantiga de amostra totalmente gratuita com o nome da sua criança. Essa amostra é justamente para você conhecer de perto o nosso trabalho: ouvir como o nome é cantado na música, conhecer o estilo do arranjo e avaliar a qualidade do áudio. Assim, você só decide comprar se realmente gostar do resultado. Nosso objetivo é que você se sinta seguro e confiante — por isso, a amostra existe para garantir que você saiba exatamente o que vai receber antes de fazer o pedido.",
+    open: true,
+  },
+];
+---
+
+<div class="mt-10 space-y-3">
+  {faqs.map((faq) => (
+    <details class="faq-item overflow-hidden rounded-2xl border-2 border-border" open={faq.open}>
+      <summary class="flex w-full items-center justify-between gap-4 p-5 font-bold text-foreground cursor-pointer select-none">
+        <span class="uppercase tracking-wide text-left">{faq.q}</span>
+        <span class="faq-chevron flex-shrink-0" aria-hidden="true"></span>
+      </summary>
+      <div class="border-t-2 border-border faq-body p-5 text-foreground/70 leading-relaxed">
+        {faq.a}
+      </div>
+    </details>
+  ))}
+</div>
+
+<style>
+  .faq-item {
+    background: #f8e505;
+  }
+  .faq-item[open] {
+    background: #fffbcc;
+  }
+  .faq-item summary {
+    list-style: none;
+  }
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq-body {
+    background: hsl(48 40% 92% / 0.4);
+  }
+  .faq-chevron {
+    display: inline-block;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-right: 2.5px solid hsl(142 65% 42%);
+    border-bottom: 2.5px solid hsl(142 65% 42%);
+    transform: rotate(45deg) translate(-2px, -4px);
+    transition: transform 0.2s ease;
+  }
+  details[open] .faq-chevron {
+    transform: rotate(-135deg) translate(-2px, -4px);
+  }
+</style>

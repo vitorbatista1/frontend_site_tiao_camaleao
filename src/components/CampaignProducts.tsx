@@ -81,7 +81,7 @@ export default function CampaignProducts({ campaignId, album1Src, album2Src, alb
                 alt={album.title}
                 width={448}
                 height={448}
-                className="w-48 md:w-56 object-contain drop-shadow-xl"
+                className="w-48 md:w-56 object-contain"
               />
             </div>
 

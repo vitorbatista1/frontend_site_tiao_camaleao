@@ -1,10 +1,10 @@
 ---
 import { Image, getImage } from "astro:assets";
 import "../styles/global.css";
-import FaqAccordion from "../components/FaqAccordion.tsx";
+import FaqAccordion from "../components/FaqAccordion.astro";
 import ModalVanilla from "../components/ModalVanilla.astro";
 import CampaignProducts from "../components/CampaignProducts.tsx";
-import CampaignCombo from "../components/CampaignCombo.tsx";
+import CampaignCombo from "../components/CampaignCombo.astro";
 import {
   Music, Heart, Play, Lock, Mail, Phone, Instagram, MessageCircle,
   Star, ChevronLeft, ChevronRight, ShoppingCart
@@ -53,50 +53,50 @@ const [
   getImage({
     src: album1Raw,
     format: "webp",
-    width: 256,
-    height: 256,
-    quality: 70
-  }),
-
-  getImage({
-    src: album1Raw,
-    format: "webp",
-    width: 384,
-    height: 384,
+    width: 128,
+    height: 128,
     quality: 72
   }),
 
   getImage({
     src: album1Raw,
     format: "webp",
-    width: 448,
-    height: 448,
+    width: 192,
+    height: 192,
     quality: 75
+  }),
+
+  getImage({
+    src: album1Raw,
+    format: "webp",
+    width: 256,
+    height: 256,
+    quality: 78
   }),
 
   // ALBUM 2
   getImage({
     src: album2Raw,
     format: "webp",
-    width: 256,
-    height: 256,
-    quality: 70
-  }),
-
-  getImage({
-    src: album2Raw,
-    format: "webp",
-    width: 384,
-    height: 384,
+    width: 128,
+    height: 128,
     quality: 72
   }),
 
   getImage({
     src: album2Raw,
     format: "webp",
-    width: 448,
-    height: 448,
+    width: 192,
+    height: 192,
     quality: 75
+  }),
+
+  getImage({
+    src: album2Raw,
+    format: "webp",
+    width: 256,
+    height: 256,
+    quality: 78
   }),
 
   // HERO
@@ -129,8 +129,8 @@ const heroSrcset = `
 `;
 const heroSizes = "(max-width: 768px) 70vw, 45vw";
 
-const album1Srcset = `${album1_sm.src} 256w, ${album1_md.src} 384w, ${album1_lg.src} 448w`;
-const album2Srcset = `${album2_sm.src} 256w, ${album2_md.src} 384w, ${album2_lg.src} 448w`;
+const album1Srcset = `${album1_sm.src} 128w, ${album1_md.src} 192w, ${album1_lg.src} 256w`;
+const album2Srcset = `${album2_sm.src} 128w, ${album2_md.src} 192w, ${album2_lg.src} 256w`;
 const albumSizes = "(max-width: 768px) 192px, 224px";
 
 const benefits = [
@@ -578,7 +578,7 @@ const year = new Date().getFullYear();
       <CampaignProducts campaignId={campaignId} album1Srcset={album1Srcset} album2Srcset={album2Srcset} albumSizes={albumSizes} album1Src={album1_lg.src} album2Src={album2_lg.src} />
 
       <!-- COMBO — dynamic per campaign -->
-      <CampaignCombo campaignId={campaignId} album1Srcset={album1Srcset} album2Srcset={album2Srcset} albumSizes={albumSizes} album1Src={album1_lg.src} album2Src={album2_lg.src} client:idle />
+      <CampaignCombo campaignId={campaignId} album1Srcset={album1Srcset} album2Srcset={album2Srcset} albumSizes={albumSizes} album1Src={album1_lg.src} album2Src={album2_lg.src} />
 <!-- MUSICIAN 1 -->
 <section class="relative bg-white pt-16 pb-0 overflow-hidden" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
 
@@ -751,7 +751,7 @@ const year = new Date().getFullYear();
           </div>
         </div>
         <div class="mt-12">
-          <FaqAccordion client:idle />
+          <FaqAccordion />
         </div>
       </div>
     </section>

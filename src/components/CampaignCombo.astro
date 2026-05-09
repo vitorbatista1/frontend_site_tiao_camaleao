@@ -1,0 +1,192 @@
+---
+const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
+
+interface RawCombo {
+  id: string;
+  name: string;
+  priceOld: string | number;
+  priceNew: string | number;
+}
+
+interface Combo {
+  id: string;
+  name: string;
+  priceOld: number;
+  priceNew: number;
+}
+
+interface Props {
+  campaignId: string;
+  album1Src: string;
+  album2Src: string;
+  album1Srcset: string;
+  album2Srcset: string;
+  albumSizes: string;
+}
+
+const { campaignId, album1Src, album2Src, album1Srcset, album2Srcset, albumSizes } =
+  Astro.props;
+
+let combo: Combo | null = null;
+
+try {
+  const res = await fetch(
+    `${API_URL}/api/albums/combos?campanha=${campaignId}&tipo=COMBO`
+  );
+  const json = await res.json();
+  const raw: RawCombo = Array.isArray(json.data) ? json.data[0] : json.data;
+  if (raw) {
+    combo = {
+      id: raw.id,
+      name: raw.name,
+      priceOld: Number(raw.priceOld),
+      priceNew: Number(raw.priceNew),
+    };
+  }
+} catch {}
+
+function fmt(v: number) {
+  return v.toFixed(2).replace(".", ",");
+}
+
+const ITEMS = [
+  "Um super desconto no segundo álbum",
+  "Total de 15 cantigas personalizadas",
+  "Parabéns pra Você autoral com o nome da criança",
+  "Ebook ilustrado com letras e cifras das cantigas",
+];
+---
+
+<section class="py-20 bg-[#FFD700]" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
+  <div class="container">
+    <h2 class="text-center text-4xl text-[#4a3a00] md:text-5xl mb-12 tracking-tighter">
+      Promoção combo especial
+    </h2>
+
+    <div class="relative mx-auto max-w-4xl rounded-[3rem] bg-white p-8 pt-16 md:p-16 combo-card">
+      <div class="absolute -top-5 left-8 md:left-12">
+        <span class="rounded-xl border-2 border-dashed border-slate-900 bg-[#FFD700] px-6 py-2 text-sm font-black uppercase tracking-tight text-slate-900">
+          Mais vendido
+        </span>
+      </div>
+
+      <div class="text-center">
+        <h3 class="text-xl font-black text-slate-700 md:text-3xl">
+          <div class="flex flex-wrap justify-center items-center gap-2">
+            Álbum 1
+            <span class="text-[#FFD700] text-3xl">+</span>
+            Álbum 2
+          </div>
+          <div class="flex flex-wrap justify-center items-center gap-2 mt-1">
+            <span class="text-[#FFD700] text-3xl">+</span>
+            Parabéns personalizado
+            <span class="text-[#FFD700] text-3xl">+</span>
+            Ebook
+          </div>
+        </h3>
+
+        <div class="my-10 flex justify-center items-end gap-4">
+          <div class="flex">
+            <img
+              src={album1Src}
+              srcset={album1Srcset}
+              sizes="(max-width: 768px) 144px, 176px"
+              alt="Cantigas Personalizadas 1"
+              width={256}
+              height={256}
+              class="w-36 md:w-44"
+              loading="lazy"
+              decoding="async"
+            />
+            <img
+              src={album2Src}
+              srcset={album2Srcset}
+              sizes="(max-width: 768px) 144px, 176px"
+              alt="Cantigas Personalizadas 2"
+              width={256}
+              height={256}
+              class="w-36 md:w-44 -ml-10"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+
+          {combo && (
+            <div class="flex flex-col items-start gap-0.5 font-bold mb-1 -ml-6">
+              {combo.priceOld > 0 && (
+                <span class="text-sm text-slate-400 line-through">
+                  de R$ {fmt(combo.priceOld)}
+                </span>
+              )}
+              <span class="text-3xl font-black text-red-600 italic leading-tight">
+                <small class="text-base not-italic">por R$</small>{" "}
+                {fmt(combo.priceNew)}
+              </span>
+            </div>
+          )}
+        </div>
+
+        <ul class="inline-block space-y-3 text-left text-lg font-bold text-slate-600 mb-10">
+          {ITEMS.map((item) => (
+            <li class="flex items-start gap-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="mt-1 h-6 w-6 flex-shrink-0 text-green-500"
+                aria-hidden="true"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+
+        <div class="flex flex-col items-center gap-4">
+          {combo ? (
+            <button
+              type="button"
+              class="flex items-center justify-center gap-3 rounded-full bg-red-600 px-12 py-5 text-2xl font-black uppercase text-white combo-btn"
+              data-buy
+              data-buy-name={combo.name}
+              data-buy-price={`R$ ${fmt(combo.priceNew)}`}
+              data-buy-combo
+            >
+              Comprar agora 🛒
+            </button>
+          ) : (
+            <a
+              href="#produtos"
+              class="flex items-center justify-center gap-3 rounded-full bg-red-600 px-12 py-5 text-2xl font-black uppercase text-white combo-btn"
+            >
+              Comprar agora 🛒
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .combo-card {
+    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.18);
+  }
+  .combo-btn {
+    box-shadow: 0 6px 0 0 rgba(153, 0, 0, 0.4);
+    transition: transform 0.15s;
+  }
+  .combo-btn:hover {
+    transform: scale(1.05);
+  }
+  .combo-btn:active {
+    transform: scale(0.97);
+  }
+</style>
