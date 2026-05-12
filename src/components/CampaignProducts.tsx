@@ -110,16 +110,22 @@ export default function CampaignProducts({ campaignId, album1Src, album2Src, alb
             </ol>
 
             {/* Divider + nota */}
-            <div className="mt-4 w-full px-8">
-              <hr className="border-gray-200" />
-              <p className="mt-3 text-center text-sm text-gray-500 whitespace-pre-line leading-snug">
-                {album.note}
+            <div className="mt-4 w-full px-8" >
+              <hr className="border-red-400 border-t-2" />
+              <p className="mt-3 text-center text-base font-bold whitespace-pre-line leading-snug">
+                <span className="text-red-500">
+                  São 7 cantigas personalizadas
+                </span>
+                <br />
+                <span className="text-gray-500">
+                  com o nome da criança!
+                </span>
               </p>
             </div>
 
             {/* Botão de áudio */}
             <div
-              className="mt-4 mx-8 w-[calc(100%-4rem)] rounded-2xl flex items-center gap-3 px-4 py-3"
+              className="mt-4 mx-6 w-[calc(100%-3rem)] rounded-2xl flex items-center gap-3 px-4 py-3"
               style={{ background: "#F2C200" }}
             >
               <button
@@ -140,12 +146,12 @@ export default function CampaignProducts({ campaignId, album1Src, album2Src, alb
 
             {/* Botão comprar */}
             <button
-              className="mt-4 mx-8 w-[calc(100%-4rem)] rounded-full bg-[#FF0000] text-white font-bold uppercase tracking-wide py-3 flex items-center justify-center gap-2 text-sm shadow hover:bg-red-600 transition"
+              className="mt-4 mx-6 btn-red-rounded whitespace-nowrap"
               data-buy
               data-buy-name={album.title}
               data-buy-price={album.price}
             >
-              Comprar agora
+              COMPRAR AGORA
               <ShoppingCart size={18} />
             </button>
           </div>

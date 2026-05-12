@@ -12,6 +12,7 @@ import {
 
 import album1Raw from "../assets/album1.png";
 import album2Raw from "../assets/album2.png";
+import comboRaw from "../assets/combo.png";
 
 import kidHeadphones from "../../public/imagens/menino.png";
 import musician from "../../public/imagens/musico_.png";
@@ -39,6 +40,10 @@ const [
   album1_sm,
   album1_md,
   album1_lg,
+
+  combo_sm,
+  combo_md,
+  combo_lg,
 
   album2_sm,
   album2_md,
@@ -73,6 +78,33 @@ const [
     height: 256,
     quality: 78
   }),
+
+
+    // Combo
+  getImage({
+    src: comboRaw,
+    format: "webp",
+    width: 128,
+    height: 128,
+    quality: 72
+  }),
+
+  getImage({
+    src: comboRaw,
+    format: "webp",
+    width: 192,
+    height: 192,
+    quality: 75
+  }),
+
+  getImage({
+    src: comboRaw,
+    format: "webp",
+    width: 256,
+    height: 256,
+    quality: 78
+  }),
+  
 
   // ALBUM 2
   getImage({
@@ -127,10 +159,12 @@ const heroSrcset = `
   ${hero_md.src} 768w,
   ${hero_lg.src} 960w
 `;
-const heroSizes = "(max-width: 768px) 70vw, 45vw";
+const heroSizes = "(max-width: 768px) 95vw, 45vw";
 
 const album1Srcset = `${album1_sm.src} 128w, ${album1_md.src} 192w, ${album1_lg.src} 256w`;
 const album2Srcset = `${album2_sm.src} 128w, ${album2_md.src} 192w, ${album2_lg.src} 256w`;
+const comboSrcset = `${combo_sm.src} 128w, ${combo_md.src} 192w, ${combo_lg.src} 256w`;
+
 const albumSizes = "(max-width: 768px) 192px, 224px";
 
 const benefits = [
@@ -141,8 +175,8 @@ const benefits = [
   },
   {
     icon: globo,
-    title: "Para quem está longe, mas quer manter o Brasil por perto",
-    text: "Para famílias fora do Brasil: as cantigas mantêm o vínculo, a língua, o carinho e as memórias vivas, mesmo à distância.",
+    title: "Para quem está longe",
+    text: "Uma cantiga com o nome do seu neto que você pode mandar agora pelo WhatsApp. A distância desaparece em minutos. ",
   },
   {
     icon: coracao,
@@ -152,7 +186,7 @@ const benefits = [
   {
     icon: nuvemCoracao,
     title: "Um presente diferente de tudo que você já comprou",
-    text: "Brinquedo passa. Roupa deixa de servir. Esse presente vira memória, afeto e história de família.",
+    text: "Brinquedo passa. Roupa deixa de servir. Esse presente não — ele vira memória, afeto e história de família.",
   },
   {
     icon: jogoPeca,
@@ -161,8 +195,8 @@ const benefits = [
   },
   {
     icon: nuvems,
-    title: "Estimula a fala",
-    text: "A música ajuda a criança a reconhecer sons, palavras e a se comunicar melhor naturalmente.",
+    title: "Estimula a fala naturalmente",
+    text: "A música ajuda a criança a reconhecer sons, palavras e a se comunicar melhor. ",
   },
 ];
 
@@ -213,20 +247,7 @@ const year = new Date().getFullYear();
 <span style="color: #F2E300; font-size: 13px;">💛</span>
 </div>
 <!-- HERO -->
-<header class="relative bg-white overflow-hidden flex flex-col" style="min-height: clamp(480px, 56vw, 650px);">
-  <img
-    src={hero_md.src}
-    srcset={heroSrcset}
-    sizes={heroSizes}
-    alt=""
-    aria-hidden="true"
-    class="absolute bottom-0 right-0 h-[90%] md:h-full w-auto pointer-events-none select-none"
-    style="contain: layout paint;"
-    fetchpriority="high"
-    loading="eager"
-    decoding="async"
-  />
-
+<header class="hero-header relative bg-white overflow-hidden flex flex-col">
   <!-- Logo centralizada no topo, dentro do hero -->
   <div class="relative z-10 w-full flex justify-center pt-4 pb-2">
     <Image
@@ -243,7 +264,7 @@ const year = new Date().getFullYear();
 
   <!-- Texto do hero -->
   <div class="relative z-10 container flex items-center flex-1 py-4 md:py-10">
-    <div class="w-full max-w-[62%] sm:max-w-lg md:max-w-2xl">
+    <div class="w-full md:max-w-[55%]">
       <p
         class="text-sm md:text-base font-extrabold uppercase tracking-widest mb-3"
         style="color: #888; letter-spacing: 0.14em;"
@@ -259,32 +280,43 @@ const year = new Date().getFullYear();
       </h1>
 
       <p
-        class="mt-4 font-bold"
-        style="font-size: clamp(16px, 2.5vw, 30px); color: #4caf50;"
+        class="mt-2 font-bold"
+        style="font-size: clamp(16px, 4.5vw, 40px); color: #4caf50;"
       >
         A maioria dos presentes passa… esse fica!
       </p>
 
-      <div class="mt-5 md:mt-10">
+      <div class="mt-6 md:mt-10">
         <a
           href="#produtos"
-          class="btn-pop inline-flex items-center gap-3 uppercase tracking-wide"
-          style="
-            background: #e53e3e;
-            color: #fff;
-            box-shadow: 0 6px 0 0 #9b1c1c;
-            font-size: clamp(15px, 2vw, 18px);
-            padding: clamp(12px, 1.5vw, 18px) clamp(20px, 2.5vw, 34px);
-          "
+          class="btn-red-rounded"
           data-buy
           data-buy-name="Cantigas Personalizadas"
           data-buy-price="R$ 47,00"
         >
-          Quero comprar <span>🛒</span>
+          QUERO COMPRAR
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
         </a>
       </div>
     </div>
   </div>
+
+  <img
+    src={hero_md.src}
+    srcset={heroSrcset}
+    sizes={heroSizes}
+    alt=""
+    aria-hidden="true"
+    class="block w-full md:absolute md:bottom-0 md:right-0 md:h-full md:w-auto pointer-events-none select-none"
+    style="contain: layout paint;"
+    fetchpriority="high"
+    loading="eager"
+    decoding="async"
+  />
 </header>
       <!-- GREEN BAND -->
 <section
@@ -309,6 +341,7 @@ const year = new Date().getFullYear();
     <div class="text-primary-foreground text-center md:text-left">
       <h2
         class="font-bold leading-tight"
+        aria-label="Um presente para ouvir hoje"
         style="font-size: clamp(32px, 4vw, 64px); line-height: 1.15;"
       >
         Um presente<br />para ouvir hoje
@@ -321,6 +354,7 @@ const year = new Date().getFullYear();
       <a
         href="#produtos"
         class="btn-pop mt-7"
+        aria-label="Quero ouvir"
         style="background: #e53e3e; color: #fff; box-shadow: 0 6px 0 0 #9b1c1c;"
         data-buy
         data-buy-name="Cantigas Personalizadas"
@@ -344,7 +378,7 @@ const year = new Date().getFullYear();
               <p class="mb-2 text-sm font-extrabold uppercase tracking-widest" style="color: #FFFFFF;">
                 Veja a reação quando a
               </p>
-              <h2 class="text-4xl md:text-6xl font-bold leading-tight">
+              <h2 class="text-4xl md:text-6xl font-bold leading-tight" aria-label="Criança ouve o próprio nome na música">
                 Criança ouve o<br />próprio nome<br />na música
               </h2>
             </div>
@@ -379,7 +413,7 @@ const year = new Date().getFullYear();
   <div class="container max-w-6xl mx-auto px-6 flex flex-col md:flex-row gap-4 md:gap-6">
     <!-- Coluna esquerda: alinhada ao título acima -->
     <div class="w-full flex-1 text-center md:text-right pt-2 md:pt-[60px]">
-      <h3 class="font-bold text-base md:text-lg lg:text-xl" style="color: #1D4ED8;">
+      <h3 class="font-bold text-base md:text-lg lg:text-xl" style="color: #1D4ED8;" aria-label="Quer ver a reação da sua criança?">
         Quer ver a reação da SUA CRIANÇA?
       </h3>
       <p class="mt-1 text-xs sm:text-sm md:text-base" style="color: #1D4ED8;">
@@ -387,6 +421,7 @@ const year = new Date().getFullYear();
       </p>
       <a
         href="#contato"
+        aria-label="Pedir amostra grátis"
         class="mt-3 inline-flex items-center gap-2 sm:gap-3 text-white px-5 sm:px-6 py-2 sm:py-3 rounded-full font-bold shadow-lg transition-transform hover:scale-105 md:ml-auto text-sm sm:text-base"
         style="background: #72BC44;"
       >
@@ -408,55 +443,45 @@ const year = new Date().getFullYear();
       </section>
 
       <!-- BENEFITS -->
-      <section
+      <!-- <section
         class="relative py-20"
         style="background-image: url('/imagens/fundo.png'); background-size: auto; background-repeat: repeat; background-color: #f3f4f6; content-visibility: auto; contain-intrinsic-size: 0 900px;"
+      > -->
+
+      <section
+        class="relative py-20"
+        style= "background-size: auto; background-repeat: repeat; background-color: #f3f4f6;"
+      > 
+<div class="grid gap-6 grid-cols-1 md:grid-cols-2 max-w-2xl mx-auto">
+  {
+    benefits.map(({ icon, title, text }) => (
+      <article
+        class="card-pop border-2 rounded-[32px] transition-all hover:scale-[1.02] relative bg-white w-full max-w-[260px] aspect-square mx-auto px-4 pt-12 pb-4 flex flex-col items-center text-center"
+        style={{ borderColor: "#6ab248" }}
       >
-        <div class="container">
-          <p class="text-center text-lg font-extrabold uppercase tracking-widest text-gray-400">
-            POR QUE AS FAMÍLIAS AMAM
-          </p>
-          <h2 class="mt-2 text-center text-4xl text-gray-600 md:text-5xl">
-            Muito mais que cantigas
-          </h2>
-          <div class="mt-20 mx-auto max-w-5xl">
-            <div class="grid gap-x-6 gap-y-20 grid-cols-1 md:grid-cols-2">
-              {
-                benefits.map(({ icon, title, text }) => (
-                  <article
-                    class="card-pop border-2 border-border rounded-2xl transition-all hover:scale-[1.02] relative pt-14"
-                    style={{ backgroundColor: "#6ab248" }}
-                  >
-                    <div class="absolute -top-12 left-0 right-0 flex justify-center">
-                      <Image
-                        src={icon}
-                        alt=""
-                        width={168}
-                        height={168}
-                        quality={45}
-                        class="h-24 w-24 md:h-28 md:w-28 object-contain"
-                        loading="lazy"
-                      />
-                    </div>
-                    <h3 class="text-2xl font-bold text-white mb-3 text-center px-4">{title}</h3>
-                    <p class="text-base text-white/90 leading-relaxed text-justify px-6 pb-6">{text}</p>
-                  </article>
-                ))
-              }
-            </div>
-          </div>
-          <div class="mt-16 text-center">
-            <a
-              href="#produtos"
-              class="btn-pop btn-coral"
-              data-buy
-              data-buy-name="Cantigas Personalizadas"
-              data-buy-price="R$ 47,00"
-            >
-              QUERO COMPRAR
-            </a>
-          </div>
+        <div class="absolute -top-10 left-0 right-0 flex justify-center">
+          <Image
+            src={icon}
+            alt=""
+            width={96}
+            height={96}
+            quality={45}
+            class="h-[96px] w-[96px] object-contain"
+            loading="lazy"
+          />
         </div>
+
+        <h3 class="text-lg font-bold text-gray-700 leading-tight mt-5">
+          {title}
+        </h3>
+
+        <p class="mt-4 text-sm text-gray-600 leading-relaxed">
+          {text}
+        </p>
+      </article>
+    ))
+  }
+</div>
       </section>
 <!-- TESTIMONIALS -->
 <section class="bg-[#00AAFF] py-16 px-4 flex flex-col items-center" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
@@ -472,7 +497,7 @@ const year = new Date().getFullYear();
   <div
     class="relative bg-[#1D82F5] rounded-3xl p-8 md:p-12 w-full max-w-4xl min-h-[400px] flex flex-col items-center justify-center"
   >
-    <div class="absolute -top-36 -left-8 md:-top-44 md:-left-28 w-56 md:w-96 z-10">
+    <div class="absolute -top-36 left-0 md:-top-44 md:-left-28 w-44 md:w-96 z-10">
       <Image
         src={mascoteImg}
         alt="Mascote Camaleão"
@@ -512,7 +537,7 @@ const year = new Date().getFullYear();
   </div>
 
   <button
-    class="mt-10 bg-[#FF0000] hover:bg-red-600 text-white font-bold py-4 px-8 rounded-full flex items-center gap-3 shadow-lg transition-transform active:scale-95"
+    class="mt-10 btn-red-rounded"
     data-buy
     data-buy-name="Cantigas Personalizadas"
     data-buy-price="R$ 47,00"
@@ -521,7 +546,7 @@ const year = new Date().getFullYear();
     <ShoppingCart size={20} />
   </button>
 </section>
-          <section class="bg-white py-16 pt-28 font-sans overflow-hidden" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
+          <section class="bg-white pt-12 pb-12 md:pt-28 md:pb-16 font-sans overflow-hidden" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
             <div class="container mx-auto flex flex-col md:flex-row items-center justify-center gap-0 px-6">
               
               <div class="z-20 flex flex-col items-center text-center md:items-end md:text-right md:w-1/2 md:pr-4">
@@ -549,9 +574,9 @@ const year = new Date().getFullYear();
 
                 <a
                    href="#produtos"
-                    class="mt-8 flex items-center gap-3 rounded-full bg-[#FF0000] px-7 py-3 text-lg font-semibold uppercase tracking-wider text-white shadow-lg transition-transform hover:scale-105"
+                    class="mt-8 btn-red-rounded"
                   >
-                    Quero comprar
+                    QUERO COMPRAR
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                       <circle cx="9" cy="21" r="1"></circle>
                       <circle cx="20" cy="21" r="1"></circle>
@@ -578,7 +603,11 @@ const year = new Date().getFullYear();
       <CampaignProducts campaignId={campaignId} album1Srcset={album1Srcset} album2Srcset={album2Srcset} albumSizes={albumSizes} album1Src={album1_lg.src} album2Src={album2_lg.src} />
 
       <!-- COMBO — dynamic per campaign -->
-      <CampaignCombo campaignId={campaignId} album1Srcset={album1Srcset} album2Srcset={album2Srcset} albumSizes={albumSizes} album1Src={album1_lg.src} album2Src={album2_lg.src} />
+      <CampaignCombo
+        campaignId={campaignId}
+        comboSrc={combo_lg.src}
+        comboSrcset={comboSrcset}
+      />
 <!-- MUSICIAN 1 -->
 <section class="relative bg-white pt-16 pb-0 overflow-hidden" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
 
@@ -593,7 +622,7 @@ const year = new Date().getFullYear();
         alt="Bruno Grossi, voz do Tião Camaleão, com sua filha"
         width={1000}
         height={1200}
-        class="relative z-10 h-[520px] md:h-[720px] w-auto object-contain object-bottom block"
+        class="relative z-10 h-[300px] sm:h-[420px] md:h-[720px] w-auto object-contain object-bottom block"
         loading="lazy"
         style="margin-bottom: 0; vertical-align: bottom;"
       />
