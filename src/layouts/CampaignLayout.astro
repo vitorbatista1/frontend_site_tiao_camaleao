@@ -450,8 +450,17 @@ const year = new Date().getFullYear();
 
       <section
         class="relative py-20"
-        style= "background-size: auto; background-repeat: repeat; background-color: #f3f4f6;"
-      > 
+        style="background-color: #ffffff;"
+      >
+      <div class="benefits-bg absolute inset-0 pointer-events-none"></div>
+<div class="text-center mb-12 px-4">
+  <p class="text-sm font-extrabold uppercase tracking-widest" style="color: #9CA3AF; letter-spacing: 0.18em;">
+    Porque as famílias amam
+  </p>
+  <h2 class="mt-2 font-bold leading-tight" style="font-size: clamp(28px, 5vw, 56px); color: #6B7280;">
+    Muito mais que cantigas
+  </h2>
+</div>
 <div class="grid gap-6 grid-cols-1 md:grid-cols-2 max-w-2xl mx-auto">
   {
     benefits.map(({ icon, title, text }) => (
@@ -484,8 +493,8 @@ const year = new Date().getFullYear();
 </div>
       </section>
 <!-- TESTIMONIALS -->
-<section class="bg-[#00AAFF] py-16 px-4 flex flex-col items-center" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
-  <div class="text-center mb-8">
+<section class="bg-[#00AAFF] pt-28 pb-16 md:pt-10 md:pb-16 px-4 flex flex-col items-center" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
+  <div class="text-center mb-8 md:mb-20">
     <h3 class="text-white text-sm uppercase tracking-widest mb-2 opacity-90">
       Depoimentos
     </h3>
@@ -497,7 +506,7 @@ const year = new Date().getFullYear();
   <div
     class="relative bg-[#1D82F5] rounded-3xl p-8 md:p-12 w-full max-w-4xl min-h-[400px] flex flex-col items-center justify-center"
   >
-    <div class="absolute -top-36 left-0 md:-top-44 md:-left-28 w-44 md:w-96 z-10">
+    <div class="absolute -top-16 -left-1 w-36 sm:w-44 md:w-60 lg:w-72 xl:w-96 md:-top-28 md:-left-4 lg:-top-36 lg:-left-16 xl:-top-44 xl:-left-24 z-10">
       <Image
         src={mascoteImg}
         alt="Mascote Camaleão"
@@ -585,14 +594,14 @@ const year = new Date().getFullYear();
                   </a>
                   </div>
 
-              <div class="relative mt-12 md:mt-0 md:w-1/2 flex justify-start">
-                
+              <div class="relative mt-12 md:mt-0 md:w-1/2 flex justify-start md:justify-end">
+
                 <Image
                   src={cantorNomesImg}
                   alt="Cantor Personalizado"
                   width={550}
                   height={635}
-                  class="relative z-10 w-full max-w-[550px] object-contain md:-ml-10"
+                  class="relative z-10 w-full max-w-[550px] object-contain md:ml-8 md:-mt-16"
                   loading="lazy"
                 />
               </div>

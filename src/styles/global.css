@@ -127,15 +127,24 @@
   50% { transform: rotate(3deg); }
 }
 
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+}
+.badge-pulse {
+  animation: badge-pulse 2s ease-in-out infinite;
+  will-change: transform;
+}
+
 
 .btn-red-rounded {
   background: #ff0000;
   color: white;
   font-weight: 700;
-  font-size: clamp(14px, 3.5vw, 19px);
+  font-size: clamp(13px, 3vw, 16px);
   letter-spacing: 0.04em;
 
-  padding: clamp(10px, 2vw, 12px) clamp(20px, 5vw, 44px);
+  padding: clamp(9px, 1.5vw, 10px) clamp(18px, 4vw, 34px);
   border-radius: 9999px;
 
   display: inline-flex;
@@ -171,5 +180,15 @@
 @media (min-width: 768px) {
   .hero-header {
     min-height: clamp(480px, 56vw, 650px);
+  }
+}
+
+@media (min-width: 768px) {
+  .benefits-bg {
+    background-image: url('/imagens/benefits/fundo_benefits.png');
+    background-size: contain;
+    background-position: 45% center;
+    background-repeat: no-repeat;
+    opacity: 0.6;
   }
 }
