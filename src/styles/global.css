@@ -70,7 +70,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: 'Nunito Variable', system-ui, -apple-system, sans-serif;
   }
 
   h1, h2, h3, h4 {
@@ -81,7 +81,9 @@
 
 @layer components {
   .btn-pop {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 font-bold uppercase tracking-wide text-sm transition-all duration-200 active:translate-y-1;
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 uppercase tracking-wide transition-all duration-200 active:translate-y-1;
+    font-weight: 500;
+    font-size: 16px;
   }
   .btn-coral {
     background: hsl(var(--coral));
@@ -140,8 +142,8 @@
 .btn-red-rounded {
   background: #ff0000;
   color: white;
-  font-weight: 700;
-  font-size: clamp(13px, 3vw, 16px);
+  font-weight: 500;
+  font-size: 16px;
   letter-spacing: 0.04em;
 
   padding: clamp(9px, 1.5vw, 10px) clamp(18px, 4vw, 34px);

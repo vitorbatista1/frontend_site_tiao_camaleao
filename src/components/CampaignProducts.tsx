@@ -61,7 +61,7 @@ export default function CampaignProducts({ campaignId, album1Src, album2Src, alb
 
   return (
     <section id="produtos" style={{ background: "#6ab248" }} className="py-14 px-4">
-      <h2 className="text-center text-3xl md:text-4xl font-bold text-white mb-16">
+      <h2 className="text-center text-white mb-16" style={{ fontSize: "48px", fontWeight: 800 }}>
         Nossos produtos
       </h2>
 
@@ -87,37 +87,38 @@ export default function CampaignProducts({ campaignId, album1Src, album2Src, alb
 
             {/* Título e preço */}
             <div className="text-center mt-2 px-6">
-              <h3 className="text-2xl font-bold text-gray-800">{album.title}</h3>
-              <p className="text-sm text-gray-500 mt-0.5">
-                R$ <span className="text-[#FF0000] text-3xl font-black">{album.price.replace("R$ ", "")}</span>
-              </p>
+              <h3 className="text-gray-800" style={{ fontSize: "30px", fontWeight: 800 }}>{album.title}</h3>
+              <p className="text-[#FF0000] mt-0.5" style={{ fontSize: "30px", fontWeight: 800 }}>{album.price}</p>
             </div>
 
             {/* Lista de faixas — flex-1 para empurrar botões pro fim */}
-            <ol className="mt-4 px-8 w-full space-y-1 text-sm text-gray-700 list-decimal list-inside flex-1">
-              {album.tracks.map((track, i) => (
-                <li key={i}>
-                  {track.includes("– personalizada") ? (
-                    <>
-                      {track.replace("– personalizada", "")}
-                      <span className="font-bold">– personalizada</span>
-                    </>
-                  ) : (
-                    track
-                  )}
-                </li>
-              ))}
-            </ol>
+            <div className="mt-4 px-8 w-full flex-1">
+              <p className="text-gray-500 mb-1" style={{ fontSize: "14px", fontWeight: 500 }}>Repertório:</p>
+              <ol className="w-full space-y-1 text-gray-700 list-decimal list-inside" style={{ fontSize: "14px", fontWeight: 500 }}>
+                {album.tracks.map((track, i) => (
+                  <li key={i}>
+                    {track.includes("– personalizada") ? (
+                      <>
+                        {track.replace("– personalizada", "")}
+                        <span style={{ fontWeight: 800 }}>– personalizada</span>
+                      </>
+                    ) : (
+                      track
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </div>
 
             {/* Divider + nota */}
             <div className="mt-4 w-full px-8" >
               <hr className="border-red-400 border-t-2" />
-              <p className="mt-3 text-center text-base font-bold whitespace-pre-line leading-snug">
-                <span className="text-red-500">
+              <p className="mt-3 text-center whitespace-pre-line leading-snug">
+                <span className="text-red-500" style={{ fontSize: "22px", fontWeight: 800 }}>
                   São 7 cantigas personalizadas
                 </span>
                 <br />
-                <span className="text-gray-500">
+                <span className="text-gray-500" style={{ fontSize: "16px", fontWeight: 600 }}>
                   com o nome da criança!
                 </span>
               </p>

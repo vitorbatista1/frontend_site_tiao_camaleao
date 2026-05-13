@@ -27,11 +27,11 @@ const faqs = [
 <div class="mt-10 space-y-3">
   {faqs.map((faq) => (
     <details class="faq-item overflow-hidden rounded-2xl border-2 border-border" open={faq.open}>
-      <summary class="flex w-full items-center justify-between gap-4 p-5 font-bold text-foreground cursor-pointer select-none">
+      <summary class="flex w-full items-center justify-between gap-4 p-5 text-foreground cursor-pointer select-none" style="font-size: 14px; font-weight: 700;">
         <span class="uppercase tracking-wide text-left">{faq.q}</span>
         <span class="faq-chevron flex-shrink-0" aria-hidden="true"></span>
       </summary>
-      <div class="border-t-2 border-border faq-body p-5 text-foreground/70 leading-relaxed">
+      <div class="border-t-2 border-border faq-body p-5 text-foreground/70 leading-relaxed" style="font-size: 14px; font-weight: 500;">
         {faq.a}
       </div>
     </details>
