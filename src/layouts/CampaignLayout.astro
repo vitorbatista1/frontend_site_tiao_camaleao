@@ -640,8 +640,8 @@ const year = new Date().getFullYear();
     <!-- TEXTO -->
     <div class="flex-1 px-4 md:px-0 md:-ml-10 pb-10 md:pb-24">
 
-      <p 
-        class="mb-5 uppercase tracking-widest text-left"
+      <p
+        class="mb-5 uppercase tracking-widest text-right"
         style="
           color: #9CA3AF;
           font-size: 16px;
@@ -653,7 +653,7 @@ const year = new Date().getFullYear();
       </p>
 
       <h2
-        class="leading-tight text-left"
+        class="leading-tight text-right"
         style="
           color: #898989;
           font-size: clamp(30px, 5vw, 76px);
@@ -665,20 +665,18 @@ const year = new Date().getFullYear();
       </h2>
 
       <p
-        class="mt-7 text-left"
+        class="mt-7 text-right"
         style="
           color: #6B7280;
           font-size: clamp(17px, 2.5vw, 26px);
           line-height: 1.55;
           max-width: 720px;
+          margin-left: auto;
         "
       >
-        A voz do Tião Camaleão é interpretada pelo
-        <strong style="color: #111827;">
-          Bruno Grossi
-        </strong>,
-        músico formado em Música Popular pela UFMG,
-        com mais de 20 anos de experiência.
+        A voz do Tião Camaleão é interpretada pelo<br />
+        <strong style="color: #111827;">Bruno Grossi</strong>, músico formado em Música Popular<br />
+        pela UFMG, com mais de 20 anos de experiência.
       </p>
 
     </div>
@@ -690,20 +688,21 @@ const year = new Date().getFullYear();
   class="py-20 overflow-hidden"
   style="background-color: #8c52ff; content-visibility: auto; contain-intrinsic-size: 0 600px;"
 >
-  <div class="container flex flex-col-reverse items-center gap-8 md:flex-row md:gap-4">
+  <div class="container flex flex-col-reverse items-center gap-8 md:flex-row md:gap-0">
 
     <!-- TEXTO -->
-    <div class="w-full md:w-[48%] text-center md:text-left">
+    <div class="w-full md:w-[48%] text-right">
 
       <p
         style="
-          color: rgba(255,255,255,0.95);
+          color: #ffffff;
           font-size: clamp(17px, 3vw, 28px);
+          font-weight: 700;
           line-height: 1.8;
         "
       >
         Além de músico, ele também é o pai da
-        <strong style="font-weight: 700;">
+        <strong style="font-weight: 800;">
           Malu
         </strong>,
         e conhece de perto o que encanta uma
@@ -713,8 +712,9 @@ const year = new Date().getFullYear();
       <p
         class="mt-8"
         style="
-          color: rgba(255,255,255,0.95);
+          color: #ffffff;
           font-size: clamp(17px, 3vw, 28px);
+          font-weight: 700;
           line-height: 1.8;
         "
       >
@@ -733,7 +733,7 @@ const year = new Date().getFullYear();
         alt="Mosaico de famílias e crianças encantadas com as cantigas"
         width={1200}
         height={1200}
-        class="w-full max-w-[620px] rounded-[28px] object-cover"
+        class="w-full max-w-[460px] rounded-[28px] object-cover"
         loading="lazy"
       />
 
@@ -765,11 +765,11 @@ const year = new Date().getFullYear();
             />
           </div>
           <div class="space-y-5 text-foreground">
-            <p class="text-lg leading-relaxed text-muted-foreground">
-              Por isso, cada cantiga não é só uma gravação. É uma interpretação feita com{" "}
-              <strong class="text-foreground">intenção, emoção e qualidade de estúdio</strong>.
+            <p class="leading-relaxed text-muted-foreground" style="font-size: clamp(18px, 2vw, 26px); font-weight: 600;">
+              Por isso, cada cantiga não é só uma gravação. É uma interpretação feita com
+              intenção, emoção e qualidade de estúdio.
             </p>
-            <p class="text-lg leading-relaxed text-muted-foreground">
+            <p class="leading-relaxed text-muted-foreground" style="font-size: clamp(18px, 2vw, 26px); font-weight: 600;">
               Porque no fim… a criança percebe. E é isso que faz esse momento ser tão especial.
             </p>
           </div>
@@ -785,7 +785,7 @@ const year = new Date().getFullYear();
             <h2 class="mt-1 text-3xl text-white sm:text-4xl md:text-5xl lg:text-6xl">Perguntas frequentes</h2>
           </div>
           <div class="-mb-4">
-            <Image src={tiaoDuvidaImg} alt="FAQ" width={320} height={320} class="w-56 md:w-72 lg:w-80" loading="lazy" />
+            <Image src={tiaoDuvidaImg} alt="FAQ" width={320} height={320} class="w-56 md:w-72 lg:w-80 float-slow" loading="lazy" />
           </div>
         </div>
         <div class="mt-12">
@@ -907,6 +907,22 @@ const year = new Date().getFullYear();
         </div>
       </footer>
     </div>
+
+    <script is:inline>
+      (function () {
+        var obs = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) {
+              e.target.classList.add('is-visible');
+              obs.unobserve(e.target);
+            }
+          });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-up, .fade-left, .fade-right').forEach(function (el) {
+          obs.observe(el);
+        });
+      })();
+    </script>
 
     <script is:inline>
       document.addEventListener("click", function (e) {
