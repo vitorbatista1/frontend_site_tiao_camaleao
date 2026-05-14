@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+.container {
+  width: 92%;
+  max-width: 1280px;
+}
+
 @font-face {
   font-family: 'Nunito Variable';
   src: url('/fonts/nunito-latin.woff2') format('woff2');
@@ -181,7 +186,10 @@
 
 @media (min-width: 768px) {
   .hero-header {
-    min-height: clamp(480px, 56vw, 650px);
+    min-height: 480px; /* fallback para navegadores sem suporte a dvh */
+  }
+  .hero-img {
+    height: clamp(480px, 56vw, 650px);
   }
 }
 

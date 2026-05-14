@@ -18,6 +18,7 @@ import kidHeadphones from "../../public/imagens/menino.png";
 import musician from "../../public/imagens/musico_.png";
 import familyCollage from "../../public/imagens/familia.png";
 import studio from "../../public/imagens/studio.png";
+import listMusicas from "../../public/imagens/list_studio.png";
 import criancasHero from "../../public/imagens/criancas_hero.png";
 import logoImg from "../../public/imagens/logo.png";
 import mascoteImg from "../../public/imagens/mascote.png";
@@ -235,7 +236,10 @@ const year = new Date().getFullYear();
 
     <div class="min-h-screen overflow-x-hidden bg-background">
 
-      <!-- TOP STRIP -->
+      <!-- TOP STRIP + HERO ocupam 100% da tela -->
+<div style="min-height: 100dvh; display: flex; flex-direction: column;">
+
+<!-- TOP STRIP -->
 <div
   class="py-3 md:py-5 text-center font-normal uppercase tracking-widest"
   style="background-color: #69B34C; color: #fff;"
@@ -247,7 +251,7 @@ const year = new Date().getFullYear();
 <span style="color: #F2E300; font-size: 13px;">💛</span>
 </div>
 <!-- HERO -->
-<header class="hero-header relative bg-white overflow-hidden flex flex-col">
+<header class="hero-header relative bg-white overflow-hidden flex flex-col" style="flex: 1;">
   <!-- Logo centralizada no topo, dentro do hero -->
   <div class="relative z-10 w-full flex justify-center pt-4 pb-2">
     <Image
@@ -283,7 +287,7 @@ const year = new Date().getFullYear();
         class="mt-2"
         style="font-size: 34px; font-weight: 800; color: #4caf50;"
       >
-        A maioria dos presentes passa… esse fica!
+        A maioria dos presentes passa… <br \>esse fica!
       </p>
 
       <div class="mt-6 md:mt-10">
@@ -311,13 +315,15 @@ const year = new Date().getFullYear();
     sizes={heroSizes}
     alt=""
     aria-hidden="true"
-    class="block w-full md:absolute md:bottom-0 md:right-0 md:h-full md:w-auto pointer-events-none select-none"
-    style="contain: layout paint;"
+    class="block w-full md:absolute md:bottom-0 md:w-auto hero-img pointer-events-none select-none"
+    style="contain: layout paint; right: max(0px, calc((100vw - 1400px) / 2));"
     fetchpriority="high"
     loading="eager"
     decoding="async"
   />
 </header>
+
+</div><!-- fim do wrapper 100dvh -->
       <!-- GREEN BAND -->
 <section
   class="relative py-16 md:py-32 overflow-hidden"
@@ -453,7 +459,8 @@ const year = new Date().getFullYear();
         style="background-color: #ffffff;"
       >
       <div class="benefits-bg absolute inset-0 pointer-events-none"></div>
-<div class="text-center mb-12 px-4">
+<div class="container">
+<div class="text-center mb-16">
   <p class="uppercase tracking-widest" style="color: #9CA3AF; letter-spacing: 0.18em; font-size: 18px; font-weight: 400;">
     Porque as famílias amam
   </p>
@@ -461,11 +468,11 @@ const year = new Date().getFullYear();
     Muito mais que cantigas
   </h2>
 </div>
-<div class="grid gap-6 grid-cols-1 md:grid-cols-2 max-w-2xl mx-auto">
+<div class="grid gap-x-6 gap-y-16 grid-cols-1 md:grid-cols-2 max-w-2xl mx-auto justify-items-center">
   {
     benefits.map(({ icon, title, text }) => (
       <article
-        class="card-pop border-2 rounded-[32px] transition-all hover:scale-[1.02] relative bg-white w-full max-w-[260px] aspect-square mx-auto px-4 pt-12 pb-4 flex flex-col items-center text-center"
+        class="card-pop border-2 rounded-[32px] transition-all hover:scale-[1.02] relative bg-white w-full max-w-[260px] min-h-[220px] mx-auto px-4 pt-12 pb-6 flex flex-col items-center text-center"
         style={{ borderColor: "#6ab248" }}
       >
         <div class="absolute -top-10 left-0 right-0 flex justify-center">
@@ -490,6 +497,7 @@ const year = new Date().getFullYear();
       </article>
     ))
   }
+</div>
 </div>
       </section>
 <!-- TESTIMONIALS -->
@@ -556,7 +564,7 @@ const year = new Date().getFullYear();
   </button>
 </section>
           <section class="bg-white pt-12 pb-12 md:pt-28 md:pb-16 font-sans overflow-hidden" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
-            <div class="container mx-auto flex flex-col md:flex-row items-center justify-center gap-0 px-6">
+            <div class="container flex flex-col md:flex-row items-center justify-center gap-0">
               
               <div class="z-20 flex flex-col items-center text-center md:items-end md:text-right md:w-1/2 md:pr-4">
                 
@@ -594,14 +602,14 @@ const year = new Date().getFullYear();
                   </a>
                   </div>
 
-              <div class="relative mt-12 md:mt-0 md:w-1/2 flex justify-start md:justify-end">
+              <div class="relative mt-12 md:mt-0 md:w-1/2 flex justify-start md:justify-start">
 
                 <Image
                   src={cantorNomesImg}
                   alt="Cantor Personalizado"
                   width={550}
                   height={635}
-                  class="relative z-10 w-full max-w-[550px] object-contain md:ml-8 md:-mt-16"
+                  class="relative z-10 w-full max-w-[550px] object-contain md:-ml-8 md:-mt-16"
                   loading="lazy"
                 />
               </div>
@@ -620,7 +628,7 @@ const year = new Date().getFullYear();
 <!-- MUSICIAN 1 -->
 <section class="relative bg-white pt-16 pb-0 overflow-hidden" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
 
-  <div class="container flex flex-col md:flex-row items-end gap-0">
+  <div class="container flex flex-col md:flex-row items-center gap-0">
 
     <!-- IMAGEM -->
     <div
@@ -638,7 +646,7 @@ const year = new Date().getFullYear();
     </div>
 
     <!-- TEXTO -->
-    <div class="flex-1 px-4 md:px-0 md:-ml-10 pb-10 md:pb-24">
+    <div class="flex-1 md:max-w-[560px] px-4 md:px-0 md:-ml-10 pb-10 md:pb-24">
 
       <p
         class="mb-5 uppercase tracking-widest text-right"
@@ -673,8 +681,6 @@ const year = new Date().getFullYear();
           font-size: 18px;
           font-weight: 600;
           line-height: 1.55;
-          max-width: 720px;
-          margin-left: auto;
         "
       >
         A voz do Tião Camaleão é interpretada pelo<br />
@@ -691,7 +697,7 @@ const year = new Date().getFullYear();
   class="py-20 overflow-hidden"
   style="background-color: #8c52ff; content-visibility: auto; contain-intrinsic-size: 0 600px;"
 >
-  <div class="container flex flex-col-reverse items-center gap-8 md:flex-row md:gap-0">
+  <div class="container flex flex-col-reverse items-center gap-8 md:flex-row md:gap-10">
 
     <!-- TEXTO -->
     <div class="w-full md:w-[48%] text-right">
@@ -704,12 +710,9 @@ const year = new Date().getFullYear();
           line-height: 1.8;
         "
       >
-        Além de músico, ele também é o pai da
-        <strong style="font-weight: 600;">
-          Malu
-        </strong>,
-        e conhece de perto o que encanta uma
-        criança de verdade.
+        Além de músico, ele também é o pai<br />
+        da Malu, e conhece de perto o que<br />
+        encanta uma criança de verdade.
       </p>
 
       <p
@@ -721,15 +724,15 @@ const year = new Date().getFullYear();
           line-height: 1.8;
         "
       >
-        Ao longo dos anos, já ensinou música para
-        muitas crianças e desenvolveu um olhar
-        sensível para esse universo.
+        Ao longo dos anos, já ensinou música<br />
+        para muitas crianças e desenvolveu<br />
+        um olhar sensível para esse universo.
       </p>
 
     </div>
 
     <!-- IMAGEM -->
-    <div class="relative flex w-full justify-center md:w-[52%]">
+    <div class="relative flex w-full justify-center md:justify-start md:w-[52%]">
 
       <Image
         src={familyCollage}
@@ -747,33 +750,36 @@ const year = new Date().getFullYear();
 
       <!-- MUSICIAN 3 -->
       <section class="relative bg-background py-20" style="content-visibility: auto; contain-intrinsic-size: 0 600px;">
-        <svg
-          aria-hidden="true"
-          class="absolute left-0 right-0 top-0 h-16 w-full text-grape/40"
-          viewBox="0 0 1200 60"
-          preserveAspectRatio="none"
-        >
-          <path d="M0 40 Q 200 0 400 30 T 800 30 T 1200 20" fill="none" stroke="currentColor" stroke-width="1.5"></path>
-          <path d="M0 50 Q 200 10 400 40 T 800 40 T 1200 30" fill="none" stroke="currentColor" stroke-width="1.5"></path>
-        </svg>
-        <div class="container grid items-center gap-12 pt-10 md:grid-cols-2">
-          <div class="relative mx-auto w-full max-w-md">
+        <div class="container relative flex flex-col md:flex-row items-center md:justify-end gap-8 md:gap-10 pt-10">
+          <Image
+            src={listMusicas}
+            aria-hidden="true"
+            alt=""
+            width={1080}
+            height={1350}
+            class="hidden md:block absolute md:left-[52%] lg:left-[49%] -top-36 w-96 h-auto object-contain pointer-events-none select-none"
+            loading="lazy"
+          />
+          <div class="relative w-full md:w-[38%] flex-shrink-0 flex justify-center md:justify-end">
             <Image
               src={studio}
               alt="Estúdio de gravação onde as cantigas são produzidas"
               width={1100}
               height={800}
-              class="rounded-3xl shadow-[var(--shadow-card)]"
+              class="rounded-3xl shadow-[var(--shadow-card)] w-full max-w-md"
               loading="lazy"
             />
           </div>
-          <div class="space-y-5 text-foreground">
+          <div class="w-full md:w-[42%] space-y-5 text-foreground mt-6 -ml-4 md:mt-0 md:ml-0">
             <p class="leading-relaxed text-muted-foreground" style="font-size: 18px; font-weight: 800;">
-              Por isso, cada cantiga não é só uma gravação. É uma interpretação feita com
-              intenção, emoção e qualidade de estúdio.
+              Por isso, cada cantiga não é só uma gravação.<br />
+              É uma interpretação feita com intenção,<br />
+              emoção e qualidade de estúdio.
             </p>
             <p class="leading-relaxed text-muted-foreground" style="font-size: 18px; font-weight: 800;">
-              Porque no fim… a criança percebe. E é isso que faz esse momento ser tão especial.
+              Porque no fim… a criança percebe.<br />
+              E é isso que faz esse momento<br />
+              ser tão especial.
             </p>
           </div>
         </div>
