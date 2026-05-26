@@ -184,12 +184,22 @@
   flex-shrink: 0;
 }
 
+@media (max-width: 767px) {
+  .hero-img {
+    width: 100%;
+    transform: scale(1.8);
+    transform-origin: center bottom;
+    margin-top: 20rem;
+    margin-bottom: -6rem;
+  }
+}
+
 @media (min-width: 768px) {
   .hero-header {
     min-height: 480px; /* fallback para navegadores sem suporte a dvh */
   }
   .hero-img {
-    height: clamp(480px, 56vw, 650px);
+    height: clamp(620px, 74vw, 880px);
   }
 }
 

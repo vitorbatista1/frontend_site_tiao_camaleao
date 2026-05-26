@@ -2,6 +2,7 @@
 import { Image, getImage } from "astro:assets";
 import "../styles/global.css";
 import FaqAccordion from "../components/FaqAccordion.astro";
+import PlayerSection from "../components/PlayerSection.astro";
 import ModalVanilla from "../components/ModalVanilla.astro";
 import CampaignProducts from "../components/CampaignProducts.tsx";
 import CampaignCombo from "../components/CampaignCombo.astro";
@@ -52,7 +53,8 @@ const [
 
   hero_sm,
   hero_md,
-  hero_lg
+  hero_lg,
+  hero_xl
 ] = await Promise.all([
 
   // ALBUM 1
@@ -153,14 +155,22 @@ const [
     width: 960,
     quality: 60
   }),
+
+  getImage({
+    src: criancasHero,
+    format: "avif",
+    width: 1440,
+    quality: 65
+  }),
 ]);
 
 const heroSrcset = `
   ${hero_sm.src} 480w,
   ${hero_md.src} 768w,
-  ${hero_lg.src} 960w
+  ${hero_lg.src} 960w,
+  ${hero_xl.src} 1440w
 `;
-const heroSizes = "(max-width: 768px) 95vw, 45vw";
+const heroSizes = "(max-width: 768px) 95vw, 55vw";
 
 const album1Srcset = `${album1_sm.src} 128w, ${album1_md.src} 192w, ${album1_lg.src} 256w`;
 const album2Srcset = `${album2_sm.src} 128w, ${album2_md.src} 192w, ${album2_lg.src} 256w`;
@@ -245,13 +255,13 @@ const year = new Date().getFullYear();
   style="background-color: #69B34C; color: #fff;"
 >
 <span style="color: #F2E300; font-size: 13px;">💛</span>
-<span style="font-size: 20px;">
+<span style="font-size: clamp(11px, 3.5vw, 20px); white-space: nowrap;">
   Desde 2013 encantando famílias
 </span>
 <span style="color: #F2E300; font-size: 13px;">💛</span>
 </div>
 <!-- HERO -->
-<header class="hero-header relative bg-white overflow-hidden flex flex-col" style="flex: 1;">
+<header class="hero-header relative bg-white flex flex-col" style="flex: 1;">
   <!-- Logo centralizada no topo, dentro do hero -->
   <div class="relative z-10 w-full flex justify-center pt-4 pb-2">
     <Image
@@ -267,30 +277,30 @@ const year = new Date().getFullYear();
   </div>
 
   <!-- Texto do hero -->
-  <div class="relative z-10 container flex items-center flex-1 py-4 md:py-10">
-    <div class="w-full md:max-w-[55%]">
+  <div class="relative z-10 container flex items-start md:items-center flex-none md:flex-1 pt-2 pb-4 md:py-10">
+    <div class="w-full md:max-w-[55%] text-center md:text-left">
       <p
         class="font-normal uppercase tracking-widest mb-3"
-        style="color: #888; letter-spacing: 0.14em; font-size: 18px;"
+        style="color: #888; letter-spacing: 0.14em; font-size: clamp(11px, 3.1vw, 18px); white-space: nowrap;"
       >
         Um jeito especial de marcar a infância
       </p>
 
       <h1
         class="font-black leading-tight"
-        style="font-size: 60px; color: #333; line-height: 1.05;"
+        style="font-size: clamp(30px, 9vw, 60px); color: #333; line-height: 1.05;"
       >
         Cantigas com o<br />nome da criança
       </h1>
 
       <p
         class="mt-2"
-        style="font-size: 34px; font-weight: 800; color: #4caf50;"
+        style="font-size: clamp(18px, 5.5vw, 34px); font-weight: 800; color: #4caf50;"
       >
-        A maioria dos presentes passa… <br \>esse fica!
+        A maioria dos presentes<br />passa… esse fica!
       </p>
 
-      <div class="mt-6 md:mt-10">
+      <div class="mt-6 md:mt-10 flex justify-center md:justify-start">
         <a
           href="#produtos"
           class="btn-red-rounded"
@@ -315,8 +325,8 @@ const year = new Date().getFullYear();
     sizes={heroSizes}
     alt=""
     aria-hidden="true"
-    class="block w-full md:absolute md:bottom-0 md:w-auto hero-img pointer-events-none select-none"
-    style="contain: layout paint; right: max(0px, calc((100vw - 1400px) / 2));"
+    class="block w-full md:absolute md:w-auto hero-img pointer-events-none select-none"
+    style="contain: layout paint; bottom: -160px; right: max(-370px, calc((100vw - 1400px) / 2 - 370px));"
     fetchpriority="high"
     loading="eager"
     decoding="async"
@@ -348,12 +358,12 @@ const year = new Date().getFullYear();
       <h2
         class="leading-tight"
         aria-label="Um presente para ouvir hoje"
-        style="font-size: 48px; font-weight: 800; line-height: 1.15;"
+        style="font-size: clamp(26px, 6vw, 48px); font-weight: 800; line-height: 1.15;"
       >
         Um presente<br />para ouvir hoje
       </h2>
 
-      <p class="mt-3 max-w-md text-primary-foreground/90" style="font-size: 26px; font-weight: 600;">
+      <p class="mt-3 max-w-md text-primary-foreground/90" style="font-size: clamp(16px, 4vw, 26px); font-weight: 600;">
         e lembrar para sempre!
       </p>
 
@@ -381,17 +391,17 @@ const year = new Date().getFullYear();
 
             <!-- Título -->
             <div class="w-full flex-1 text-center md:text-right text-white pb-6 md:pb-10">
-              <p class="mb-2 uppercase tracking-widest" style="color: #FFFFFF; font-size: 18px; font-weight: 400;">
+              <p class="mb-2 uppercase tracking-widest" style="color: #FFFFFF; font-size: clamp(13px, 2.5vw, 18px); font-weight: 400;">
                 Veja a reação quando a
               </p>
-              <h2 class="leading-tight" style="font-size: 48px; font-weight: 800;" aria-label="Criança ouve o próprio nome na música">
+              <h2 class="leading-tight" style="font-size: clamp(26px, 6vw, 48px); font-weight: 800;" aria-label="Criança ouve o próprio nome na música">
                 Criança ouve o<br />próprio nome<br />na música
               </h2>
             </div>
 
             <!-- Celular: vaza 100px para dentro do azul claro -->
             <div class="w-full flex-1 flex justify-center md:justify-start relative z-10 md:-mb-[100px]">
-              <div class="relative p-3 rounded-[2.5rem] shadow-2xl w-64 md:w-72" style="background: #1D4ED8;">
+              <div class="relative p-3 rounded-[2.5rem] shadow-2xl w-52 md:w-72" style="background: #1D4ED8;">
                 <div class="relative overflow-hidden rounded-[2rem] bg-black" style="aspect-ratio: 9/16;">
                   <div class="absolute inset-0 bg-gradient-to-br from-grape to-coral"></div>
                   <div class="absolute inset-0 flex items-center justify-center">
@@ -419,7 +429,7 @@ const year = new Date().getFullYear();
   <div class="container max-w-6xl mx-auto px-6 flex flex-col md:flex-row gap-4 md:gap-6">
     <!-- Coluna esquerda: alinhada ao título acima -->
     <div class="w-full flex-1 text-center md:text-right pt-2 md:pt-[60px]">
-      <h3 style="color: #1D4ED8; font-size: 18px; font-weight: 800;" aria-label="Quer ver a reação da sua criança?">
+      <h3 style="color: #1D4ED8; font-size: clamp(13px, 2.5vw, 18px); font-weight: 800;" aria-label="Quer ver a reação da sua criança?">
         Quer ver a reação da SUA CRIANÇA?
       </h3>
       <p class="mt-1" style="color: #1D4ED8; font-size: 14px; font-weight: 600;">
@@ -461,10 +471,10 @@ const year = new Date().getFullYear();
       <div class="benefits-bg absolute inset-0 pointer-events-none"></div>
 <div class="container">
 <div class="text-center mb-16">
-  <p class="uppercase tracking-widest" style="color: #9CA3AF; letter-spacing: 0.18em; font-size: 18px; font-weight: 400;">
+  <p class="uppercase tracking-widest" style="color: #9CA3AF; letter-spacing: 0.18em; font-size: clamp(13px, 2.5vw, 18px); font-weight: 400;">
     Porque as famílias amam
   </p>
-  <h2 class="mt-2 leading-tight" style="font-size: 48px; font-weight: 800; color: #6B7280;">
+  <h2 class="mt-2 leading-tight" style="font-size: clamp(26px, 6vw, 48px); font-weight: 800; color: #6B7280;">
     Muito mais que cantigas
   </h2>
 </div>
@@ -487,7 +497,7 @@ const year = new Date().getFullYear();
           />
         </div>
 
-        <h3 class="text-gray-700 leading-tight mt-5" style="font-size: 18px; font-weight: 800;">
+        <h3 class="text-gray-700 leading-tight mt-5" style="font-size: clamp(16px, 3vw, 22px); font-weight: 800;">
           {title}
         </h3>
 
@@ -503,10 +513,10 @@ const year = new Date().getFullYear();
 <!-- TESTIMONIALS -->
 <section class="bg-[#00AAFF] pt-28 pb-16 md:pt-10 md:pb-16 px-4 flex flex-col items-center" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
   <div class="text-center mb-8 md:mb-20">
-    <h3 class="text-white uppercase tracking-widest mb-2 opacity-90" style="font-size: 18px; font-weight: 400;">
+    <h3 class="text-white uppercase tracking-widest mb-2 opacity-90" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 400;">
       Depoimentos
     </h3>
-    <h2 class="text-white" style="font-size: 48px; font-weight: 800;">
+    <h2 class="text-white" style="font-size: clamp(26px, 6vw, 48px); font-weight: 800;">
       De quem já viveu esse momento
     </h2>
   </div>
@@ -568,24 +578,24 @@ const year = new Date().getFullYear();
               
               <div class="z-20 flex flex-col items-center text-center md:items-end md:text-right md:w-1/2 md:pr-4">
                 
-                  <h2 class="leading-[1.1] text-[#4D4D4D]" style="font-size: 48px; font-weight: 800;">
+                  <h2 class="leading-[1.1] text-[#4D4D4D]" style="font-size: clamp(26px, 6vw, 48px); font-weight: 800;">
                     Já cantamos mais de<br />
                     2.000 nomes
                   </h2>
 
-                <p class="mt-6 leading-relaxed text-[#666666] max-w-[450px]" style="font-size: 18px; font-weight: 600;">
+                <p class="mt-6 leading-relaxed text-[#666666] max-w-[450px]" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 600;">
                     Temos um grande acervo gravado em estúdio,
                     incluindo nomes raros, compostos, apelidos e
                     até nomes estrangeiros
                 </p>
 
                   <div class="mt-8 inline-block rounded-full bg-[#00AEEF] px-6 py-2 text-white shadow-md">
-                    <p style="font-size: 24px; font-weight: 800;">
+                    <p style="font-size: clamp(16px, 3.5vw, 24px); font-weight: 800;">
                       E se não tiver o nome que eu quero?
                     </p>
                   </div>
 
-                <p class="mt-4 text-[#666666] max-w-[420px]" style="font-size: 18px; font-weight: 600;">
+                <p class="mt-4 text-[#666666] max-w-[420px]" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 600;">
                   Sem problema! Nós fazemos a gravação personalizada do nome sob encomenda, com entrega em até 7 dias e um pequeno acréscimo de estúdio.
                 </p>
 
@@ -617,7 +627,7 @@ const year = new Date().getFullYear();
             </div>
           </section>
       <!-- PRODUCTS — dynamic per campaign -->
-      <CampaignProducts campaignId={campaignId} album1Srcset={album1Srcset} album2Srcset={album2Srcset} albumSizes={albumSizes} album1Src={album1_lg.src} album2Src={album2_lg.src} />
+      <CampaignProducts client:load campaignId={campaignId} album1Srcset={album1Srcset} album2Srcset={album2Srcset} albumSizes={albumSizes} album1Src={album1_lg.src} album2Src={album2_lg.src} />
 
       <!-- COMBO — dynamic per campaign -->
       <CampaignCombo
@@ -628,12 +638,13 @@ const year = new Date().getFullYear();
 <!-- MUSICIAN 1 -->
 <section class="relative bg-white pt-16 pb-0 overflow-hidden" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
 
-  <div class="container flex flex-col md:flex-row items-center gap-0">
+  <div class="container flex flex-col md:flex-row items-center gap-0 relative">
 
     <!-- IMAGEM -->
-    <div
-      class="relative flex-shrink-0 w-full md:w-[620px] flex justify-center items-end md:-mb-20 md:-translate-y-10"
-    >
+    <div class="relative flex-shrink-0 w-full md:w-[620px] flex justify-center items-end md:-mb-20 md:-translate-y-10">
+
+
+
       <Image
         src={musician}
         alt="Bruno Grossi, voz do Tião Camaleão, com sua filha"
@@ -650,25 +661,15 @@ const year = new Date().getFullYear();
 
       <p
         class="mb-5 uppercase tracking-widest text-right"
-        style="
-          color: #9CA3AF;
-          font-size: 18px;
-          font-weight: 400;
-          letter-spacing: 0.18em;
-        "
+        style="color: #9CA3AF; font-size: clamp(9px, 1.6vw, 13px); font-weight: 400; letter-spacing: 0.18em;"
       >
-        A diferença está na voz, na intenção<br />
-        e no cuidado em cada detalhe
+        A diferença está na voz, na intenção e<br />
+        no cuidado em cada detalhe
       </p>
 
       <h2
         class="leading-tight text-right"
-        style="
-          color: #898989;
-          font-size: 48px;
-          font-weight: 800;
-          line-height: 1.02;
-        "
+        style="color: #898989; font-size: clamp(26px, 6vw, 48px); font-weight: 800; line-height: 1.02;"
       >
         Quem dá voz ao Tião é<br />
         um músico de verdade
@@ -676,17 +677,13 @@ const year = new Date().getFullYear();
 
       <p
         class="mt-7 text-right"
-        style="
-          color: #6B7280;
-          font-size: 18px;
-          font-weight: 600;
-          line-height: 1.55;
-        "
+        style="color: #6B7280; font-size: clamp(15px, 2.8vw, 20px); font-weight: 600; line-height: 1.55;"
       >
-        A voz do Tião Camaleão é interpretada pelo<br />
-        <strong style="color: #111827; font-weight: 800;">Bruno Grossi</strong>, músico formado em Música Popular<br />
+        A voz do Tião Camaleão é interpretada pelo
+        <strong style="color: #111827; font-weight: 800;">Bruno Grossi</strong>, músico formado em Música Popular
         pela UFMG, com mais de 20 anos de experiência.
       </p>
+
 
     </div>
 
@@ -700,46 +697,49 @@ const year = new Date().getFullYear();
   <div class="container flex flex-col-reverse items-center gap-8 md:flex-row md:gap-10">
 
     <!-- TEXTO -->
-    <div class="w-full md:w-[48%] text-right">
+    <div class="w-full md:w-[48%]">
 
       <p
+        class="text-center mx-auto"
         style="
           color: #ffffff;
-          font-size: 18px;
+          font-size: clamp(17px, 3vw, 24px);
           font-weight: 600;
           line-height: 1.8;
         "
       >
-        Além de músico, ele também é o pai<br />
-        da Malu, e conhece de perto o que<br />
-        encanta uma criança de verdade.
+        Além de músico, ele também é<br />
+        o pai da Malu, e conhece de<br />
+        perto o que encanta uma<br />
+        criança de verdade.
       </p>
 
       <p
-        class="mt-8"
+        class="mt-8 text-center mx-auto"
         style="
           color: #ffffff;
-          font-size: 18px;
+          font-size: clamp(17px, 3vw, 24px);
           font-weight: 600;
           line-height: 1.8;
         "
       >
-        Ao longo dos anos, já ensinou música<br />
-        para muitas crianças e desenvolveu<br />
-        um olhar sensível para esse universo.
+        Ao longo dos anos, já ensinou<br />
+        música para muitas crianças e<br />
+        desenvolveu um olhar sensível<br />
+        para esse universo.
       </p>
 
     </div>
 
     <!-- IMAGEM -->
-    <div class="relative flex w-full justify-center md:justify-start md:w-[52%]">
+    <div class="relative flex w-full justify-center md:w-[52%]">
 
       <Image
         src={familyCollage}
         alt="Mosaico de famílias e crianças encantadas com as cantigas"
         width={1200}
         height={1200}
-        class="w-full max-w-[460px] rounded-[28px] object-cover"
+        class="w-full max-w-[460px] rounded-[28px] object-cover mx-auto"
         loading="lazy"
       />
 
@@ -749,8 +749,9 @@ const year = new Date().getFullYear();
 </section>
 
       <!-- MUSICIAN 3 -->
-      <section class="relative bg-background py-20" style="content-visibility: auto; contain-intrinsic-size: 0 600px;">
-        <div class="container relative flex flex-col md:flex-row items-center md:justify-end gap-8 md:gap-10 pt-10">
+      <section class="relative pb-8 md:py-20 overflow-hidden" style="background-color: #ffffff; content-visibility: auto; contain-intrinsic-size: 0 600px;">
+        <div class="container relative flex flex-col md:flex-row items-center md:justify-end gap-2 md:gap-10 md:pt-10">
+          <!-- listMusicas desktop (absolute) -->
           <Image
             src={listMusicas}
             aria-hidden="true"
@@ -760,38 +761,63 @@ const year = new Date().getFullYear();
             class="hidden md:block absolute md:left-[52%] lg:left-[49%] -top-36 w-96 h-auto object-contain pointer-events-none select-none"
             loading="lazy"
           />
-          <div class="relative w-full md:w-[38%] flex-shrink-0 flex justify-center md:justify-end">
+          <!-- listMusicas mobile -->
+<div class="md:hidden order-1 w-screen relative -left-4 h-56 overflow-hidden">
+  <Image
+    src={listMusicas}
+    aria-hidden="true"
+    alt=""
+    width={1080}
+    height={1350}
+    class="absolute inset-0 w-full h-full object-cover scale-150 object-[58%_center] pointer-events-none select-none"
+    loading="lazy"
+  />
+</div>
+          <!-- texto (order 2 mobile) -->
+<div class="order-2 md:order-2 w-full md:w-[42%] space-y-3 md:space-y-5 text-foreground mx-auto md:mt-0 md:ml-0">
+  <p
+    class="leading-relaxed text-muted-foreground text-center"
+    style="font-size: clamp(18px, 3.5vw, 24px); font-weight: 800;"
+  >
+    Por isso, cada cantiga não é só<br />
+    uma gravação. É uma interpretação<br />
+    feita com intenção, emoção e<br />
+    qualidade de estúdio.
+  </p>
+
+  <p
+    class="leading-relaxed text-muted-foreground text-center"
+    style="font-size: clamp(18px, 3.5vw, 24px); font-weight: 800;"
+  >
+    Porque no fim… a criança<br />
+    percebe. E é isso que faz esse<br />
+    momento ser tão especial.
+  </p>
+</div>
+          <!-- studio (order 3 mobile = abaixo do texto) -->
+          <div class="order-3 md:order-1 relative w-full md:w-[38%] flex-shrink-0 flex justify-center md:justify-end">
             <Image
               src={studio}
               alt="Estúdio de gravação onde as cantigas são produzidas"
               width={1100}
               height={800}
-              class="rounded-3xl shadow-[var(--shadow-card)] w-full max-w-md"
+              class="rounded-3xl shadow-[var(--shadow-card)] w-full max-w-[280px] md:max-w-md"
               loading="lazy"
             />
-          </div>
-          <div class="w-full md:w-[42%] space-y-5 text-foreground mt-6 -ml-4 md:mt-0 md:ml-0">
-            <p class="leading-relaxed text-muted-foreground" style="font-size: 18px; font-weight: 800;">
-              Por isso, cada cantiga não é só uma gravação.<br />
-              É uma interpretação feita com intenção,<br />
-              emoção e qualidade de estúdio.
-            </p>
-            <p class="leading-relaxed text-muted-foreground" style="font-size: 18px; font-weight: 800;">
-              Porque no fim… a criança percebe.<br />
-              E é isso que faz esse momento<br />
-              ser tão especial.
-            </p>
           </div>
         </div>
       </section>
 
+    <!-- PLAYER SECTION -->
+    <PlayerSection />
+
     <!-- FAQ -->
     <section class="py-20" style="background-color: #6ab248; content-visibility: auto; contain-intrinsic-size: 0 700px;">
-      <div class="container max-w-5xl">
-        <div class="flex flex-col items-center gap-4 md:flex-row md:justify-between md:items-end">
-          <div class="text-center md:text-left">
-            <p class="uppercase tracking-widest text-white" style="font-size: 18px; font-weight: 400;">Tire suas dúvidas</p>
-            <h2 class="mt-1 text-white" style="font-size: 48px; font-weight: 800;">Perguntas frequentes</h2>
+      <div class="container" style="max-width: 820px;">
+        <div class="flex flex-row items-center gap-4 md:flex-row md:justify-between md:items-end">
+          <div class="text-left">
+            <p class="uppercase tracking-widest text-white" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 400;">Tire suas dúvidas</p>
+            <h2 class="mt-1 text-white" style="font-size: clamp(32px, 7vw, 56px); font-weight: 800;">Perguntas frequentes</h2>
           </div>
           <div class="-mb-4">
             <Image src={tiaoDuvidaImg} alt="FAQ" width={320} height={320} class="w-56 md:w-72 lg:w-80 float-slow" loading="lazy" />
@@ -805,8 +831,8 @@ const year = new Date().getFullYear();
 
 <!--BOTAO DE DUVIDA DO FAQ -->
 <section class="bg-[#cae2a6] py-20 text-center" style="content-visibility: auto; contain-intrinsic-size: 0 300px;">
-  <p style="font-size: 18px; font-weight: 700;">AINDA FICOU COM ALGUMA DÚVIDA?</p>
-  <p class="mt-2 text-foreground/80" style="font-size: 18px; font-weight: 500;">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
+  <p style="font-size: clamp(20px, 4vw, 32px); font-weight: 700;">AINDA FICOU COM ALGUMA DÚVIDA?</p>
+  <p class="mt-2 text-foreground/80" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 500;">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
   
 <a
   href="https://wa.me/5537933003534?text=Olá!%20Tenho%20dúvidas%20sobre%20as%20cantigas%20personalizadas%20e%20gostaria%20de%20mais%20informações."

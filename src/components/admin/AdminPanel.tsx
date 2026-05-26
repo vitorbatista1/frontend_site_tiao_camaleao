@@ -19,7 +19,7 @@ export default function AdminPanel() {
   // Função para renovar o token
   async function refreshAccessToken(): Promise<string | null> {
     const refreshToken = sessionStorage.getItem('refreshToken');
-    
+
     if (!refreshToken) {
       return null;
     }
@@ -34,12 +34,13 @@ export default function AdminPanel() {
       const json = await response.json();
 
       if (response.ok && json.success) {
-        const { accessToken } = json.data;
+        const { accessToken, refreshToken: newRefreshToken } = json.data;
         sessionStorage.setItem('accessToken', accessToken);
+        sessionStorage.setItem('refreshToken', newRefreshToken);
         document.cookie = `auth_token=${accessToken}; path=/; SameSite=Strict`;
         return accessToken;
       }
-      
+
       return null;
     } catch (error) {
       console.error('Erro ao renovar token:', error);
@@ -50,8 +51,7 @@ export default function AdminPanel() {
   // Função para fazer requisições autenticadas com refresh automático
   async function authenticatedFetch(url: string, options: RequestInit = {}) {
     let accessToken = sessionStorage.getItem('accessToken');
-    
-    // Função para fazer a requisição com o token atual
+
     const makeRequest = async (token: string) => {
       return fetch(url, {
         ...options,
@@ -62,18 +62,14 @@ export default function AdminPanel() {
       });
     };
 
-    // Primeira tentativa
     let response = await makeRequest(accessToken!);
 
-    // Se não autorizado, tenta renovar o token
     if (response.status === 401) {
       const newToken = await refreshAccessToken();
-      
+
       if (newToken) {
-        // Tenta novamente com o novo token
         response = await makeRequest(newToken);
       } else {
-        // Não conseguiu renovar, redireciona para login
         sessionStorage.removeItem('accessToken');
         sessionStorage.removeItem('refreshToken');
         sessionStorage.removeItem('user');

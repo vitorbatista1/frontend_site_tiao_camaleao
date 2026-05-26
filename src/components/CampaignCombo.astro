@@ -1,20 +1,6 @@
 ---
 const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
 
-interface RawCombo {
-  id: string;
-  name: string;
-  priceOld: string | number;
-  priceNew: string | number;
-}
-
-interface Combo {
-  id: string;
-  name: string;
-  priceOld: number;
-  priceNew: number;
-}
-
 interface Props {
   campaignId: string;
   comboSrc: string;
@@ -23,38 +9,11 @@ interface Props {
 
 const { campaignId, comboSrc, comboSrcset } = Astro.props;
 
-let combo: Combo | null = null;
-
-try {
-  const res = await fetch(
-    `${API_URL}/api/albums/combos?campanha=${campaignId}&tipo=COMBO`
-  );
-
-  const json = await res.json();
-
-  const raw: RawCombo = Array.isArray(json.data)
-    ? json.data[0]
-    : json.data;
-
-  if (raw) {
-    combo = {
-      id: raw.id,
-      name: raw.name,
-      priceOld: Number(raw.priceOld),
-      priceNew: Number(raw.priceNew),
-    };
-  }
-} catch {}
-
-function fmt(v: number) {
-  return v.toFixed(2).replace(".", ",");
-}
-
 const ITEMS = [
-  "O dobro de cantigas personalizadas por mais R$ 20",
-  "Parabéns pra Você autoral com o nome da criança.",
+  "<strong>O dobro de cantigas personalizadas</strong> por mais R$ 20",
+  "<strong>Parabéns pra Você</strong> autoral com o nome da criança.",
   "Ebook* com ilustrações e cifras de todas as cantigas.",
-  "Total de 15 cantigas personalizadas**.",
+  "Total de <strong>15 cantigas personalizadas**</strong>.",
 ];
 
 const CONFIRMACOES = [
@@ -71,101 +30,102 @@ const CONFIRMACOES = [
 >
   <div class="container">
 
-    <h2 class="text-center text-slate-500 mb-12 tracking-tight" style="font-size: 48px; font-weight: 800;">
+    <h2 class="text-center text-slate-500 mb-12 tracking-tight" style="font-size: clamp(26px, 6vw, 48px); font-weight: 800;">
       Promoção
     </h2>
 
     <div class="relative mx-auto max-w-[720px] rounded-[3rem] bg-white p-6 pt-14 md:p-10 md:pt-14 combo-card">
 
       <div class="absolute -top-6 left-1/2 -translate-x-1/2 md:left-28 md:translate-x-0">
-        <span class="badge-pulse rounded-2xl border-2 border-dashed border-slate-500 bg-[#FFD700] px-6 py-2.5 md:px-10 md:py-4 uppercase tracking-tight text-slate-700 shadow-lg whitespace-nowrap inline-block" style="font-size: 20px; font-weight: 800;">
+        <span class="badge-pulse rounded-2xl border-2 border-dashed border-slate-500 bg-[#FFD700] px-6 py-2.5 md:px-10 md:py-4 uppercase tracking-tight text-slate-700 shadow-lg whitespace-nowrap inline-block" style="font-size: clamp(14px, 3vw, 20px); font-weight: 800;">
           Mais vendido
         </span>
       </div>
 
       <div class="text-center">
 
-        <h3 class="text-slate-700" style="font-size: 36px; font-weight: 800;">
+        <h3 class="text-slate-700" style="font-size: clamp(22px, 5vw, 36px); font-weight: 800;">
           Combo Especial
         </h3>
 
         <div class="w-full">
 
-          <div class="my-10 flex flex-col md:flex-row justify-center items-center md:items-start gap-6">
+          <!-- Imagem + itens/preço: sempre lado a lado -->
+          <div class="my-6 flex flex-row justify-center items-start gap-4 md:gap-8">
 
-            {/* Imagem */}
+            <!-- Imagem -->
             <div class="flex-shrink-0">
               <img
                 src={comboSrc}
                 srcset={comboSrcset}
-                sizes="(max-width: 768px) 260px, 380px"
+                sizes="(max-width: 768px) 140px, 280px"
                 alt="Combo Especial"
                 width={500}
                 height={500}
-                class="w-48 md:w-60 object-contain mx-auto md:mx-0"
+                class="w-32 md:w-60 object-contain"
                 loading="lazy"
                 decoding="async"
               />
             </div>
 
-            {/* Itens + preço ao lado direito */}
-            <div class="flex-shrink-0 text-left w-full md:w-auto">
+            <!-- Itens + preço -->
+            <div class="flex-1 text-left">
 
-              {/* itens + linha laranja contidos na mesma largura */}
-              <div class="inline-flex flex-col mt-10 mb-5">
-                <div class="space-y-3">
+              <div class="flex flex-col">
+                <div class="space-y-2 md:space-y-3">
                   {CONFIRMACOES.map((item) => (
-                    <div class="flex items-start gap-3">
-                      <span class="text-green-500 font-black text-2xl leading-snug flex-shrink-0">✓</span>
-                      <span class="text-slate-700 leading-snug" style="font-size: 22px; font-weight: 700;">{item.replace("✓ ", "")}</span>
+                    <div class="flex items-center gap-2">
+                      <span class="text-green-500 font-black leading-snug flex-shrink-0" style="font-size: clamp(16px, 3.5vw, 22px);">✓</span>
+                      <span class="text-slate-700 leading-snug" style="font-size: clamp(13px, 3vw, 20px); font-weight: 700;">{item}</span>
                     </div>
                   ))}
                 </div>
 
-                {/* Linha laranja — mesma largura do bloco acima */}
-                <hr class="border-t-[3px] border-orange-400 mt-5 w-full" />
+                <!-- Linha laranja -->
+                <hr class="border-t-[3px] border-orange-400 mt-4 w-full" />
               </div>
 
-              {/* Preços */}
-              <div class="flex flex-col gap-0.5">
+              <!-- Preços -->
+              <div class="flex flex-col gap-0 mt-3">
                 <span
+                  id="combo-price-old"
                   class="text-slate-400 line-through"
-                  style="font-size: 16px; font-weight: 400; text-decoration-color: #fca5a5;"
+                  style="font-size: clamp(12px, 2.5vw, 16px); font-weight: 400; text-decoration-color: #fca5a5;"
                 >
-                  de R$ {combo && combo.priceOld > 0 ? Math.round(combo.priceOld) : "90"}
+                  de R$ 90
                 </span>
-                <span class="text-red-600 leading-tight" style="font-size: 30px; font-weight: 800;">
-                  por R$ {combo ? Math.round(combo.priceNew) : "74"}
+                <span id="combo-price-new" class="text-red-600 leading-tight" style="font-size: clamp(18px, 4.5vw, 30px); font-weight: 800;">
+                  por R$ 74
                 </span>
               </div>
 
             </div>
           </div>
 
-          <ul class="inline-block space-y-3 text-left text-slate-600 mb-10" style="font-size: 18px; font-weight: 600;">
-          {ITEMS.map((item) => (
-            <li class="flex items-start gap-3">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="mt-1 h-6 w-6 flex-shrink-0 text-green-500"
-                aria-hidden="true"
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
+          <ul class="inline-block space-y-3 text-left text-slate-600 mb-10" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 600;">
+            {ITEMS.map((item) => (
+              <li class="flex items-start gap-3">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="mt-1 h-6 w-6 flex-shrink-0 text-green-500"
+                  aria-hidden="true"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span set:html={item} />
+              </li>
+            ))}
+          </ul>
 
-        </div>{/* /max-w-2xl mx-auto */}
+        </div>
 
         <p class="text-green-800 text-left max-w-md md:max-w-2xl mx-auto mt-2 leading-relaxed bg-green-100 rounded-xl px-4 py-3 border border-green-200" style="font-size: 12px; font-weight: 500;">
           * Ebook – livro digital que pode ser baixado, compartilhado e impresso.<br />
@@ -173,53 +133,31 @@ const CONFIRMACOES = [
         </p>
 
         <div class="flex flex-col items-center gap-4 mt-6">
-          {combo ? (
-            <button
-              type="button"
-              class="btn-red-rounded"
-              data-buy
-              data-buy-name={combo.name}
-              data-buy-price={`R$ ${fmt(combo.priceNew)}`}
-              data-buy-combo
+          <button
+            id="combo-buy-btn"
+            type="button"
+            class="btn-red-rounded"
+            data-buy
+            data-buy-name="Combo Especial"
+            data-buy-price="R$ 74,00"
+            data-buy-combo
+          >
+            COMPRAR AGORA
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
-              COMPRAR AGORA
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <circle cx="9" cy="21" r="1"></circle>
-                <circle cx="20" cy="21" r="1"></circle>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-              </svg>
-            </button>
-          ) : (
-            <a
-              href="#produtos"
-              class="btn-red-rounded"
-            >
-              COMPRAR AGORA
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <circle cx="9" cy="21" r="1"></circle>
-                <circle cx="20" cy="21" r="1"></circle>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-              </svg>
-            </a>
-          )}
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
@@ -231,3 +169,24 @@ const CONFIRMACOES = [
     box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.18);
   }
 </style>
+
+<script define:vars={{ campaignId, API_URL }}>
+  fetch(`${API_URL}/api/albums/combos?campanha=${campaignId}&tipo=COMBO`)
+    .then((r) => r.json())
+    .then((json) => {
+      const raw = Array.isArray(json.data) ? json.data[0] : json.data;
+      if (!raw) return;
+      const priceOld = Number(raw.priceOld);
+      const priceNew = Number(raw.priceNew);
+      const elOld = document.getElementById('combo-price-old');
+      const elNew = document.getElementById('combo-price-new');
+      const btn = document.getElementById('combo-buy-btn');
+      if (elOld) elOld.textContent = priceOld > 0 ? `de R$ ${Math.round(priceOld)}` : '';
+      if (elNew) elNew.textContent = `por R$ ${Math.round(priceNew)}`;
+      if (btn) {
+        btn.dataset.buyName = raw.name;
+        btn.dataset.buyPrice = `R$ ${priceNew.toFixed(2).replace('.', ',')}`;
+      }
+    })
+    .catch(() => {});
+</script>
