@@ -187,10 +187,16 @@
 @media (max-width: 767px) {
   .hero-img {
     width: 100%;
-    transform: scale(1.8);
+    transform: scale(2.4);
     transform-origin: center bottom;
-    margin-top: 20rem;
-    margin-bottom: -6rem;
+    margin-top: auto;
+    margin-bottom: -16rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-header {
+    padding-bottom: 5rem;
   }
 }
 
