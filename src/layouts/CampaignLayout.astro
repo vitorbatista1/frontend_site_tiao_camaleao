@@ -325,6 +325,8 @@ const year = new Date().getFullYear();
     sizes={heroSizes}
     alt=""
     aria-hidden="true"
+    width={1920}
+    height={1080}
     class="block w-full md:absolute md:w-auto hero-img pointer-events-none select-none"
     style="contain: layout paint; bottom: -160px; right: max(-370px, calc((100vw - 1400px) / 2 - 370px));"
     fetchpriority="high"
@@ -627,7 +629,7 @@ const year = new Date().getFullYear();
             </div>
           </section>
       <!-- PRODUCTS — dynamic per campaign -->
-      <CampaignProducts client:load campaignId={campaignId} album1Srcset={album1Srcset} album2Srcset={album2Srcset} albumSizes={albumSizes} album1Src={album1_lg.src} album2Src={album2_lg.src} />
+      <CampaignProducts client:visible campaignId={campaignId} album1Srcset={album1Srcset} album2Srcset={album2Srcset} albumSizes={albumSizes} album1Src={album1_lg.src} album2Src={album2_lg.src} />
 
       <!-- COMBO — dynamic per campaign -->
       <CampaignCombo
