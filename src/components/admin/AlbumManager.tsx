@@ -32,22 +32,27 @@ interface AlbumManagerProps {
   authenticatedFetch: (url: string, options?: RequestInit) => Promise<Response>;
 }
 
+const EMPTY_FORM: AlbumFormData = {
+  name: '',
+  linkAmostra: '',
+  linkImgAlbum: '',
+  priceOld: 0,
+  priceNew: 0,
+  campanha: '',
+  tipo: 'ALBUM',
+  repertorio: [],
+};
+
 export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [newTrack, setNewTrack] = useState('');
   const [newTrackPersonalizada, setNewTrackPersonalizada] = useState(false);
-  const [formData, setFormData] = useState<AlbumFormData>({
-    name: '',
-    linkAmostra: '',
-    linkImgAlbum: '',
-    priceOld: 0,
-    priceNew: 0,
-    campanha: '',
-    tipo: 'ALBUM',
-    repertorio: [],
-  });
+  const [formData, setFormData] = useState<AlbumFormData>(EMPTY_FORM);
 
   const API_URL = import.meta.env.PUBLIC_API_URL;
 
@@ -56,13 +61,14 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
       const response = await authenticatedFetch(`${API_URL}/api/albums`);
       if (response.ok) {
         const data = await response.json();
-        const albums = (data.data || []).map((a: Album) => ({
-          ...a,
-          priceOld: Number(a.priceOld),
-          priceNew: Number(a.priceNew),
-          repertorio: a.repertorio ?? [],
-        }));
-        setAlbums(albums);
+        setAlbums(
+          (data.data || []).map((a: Album) => ({
+            ...a,
+            priceOld: Number(a.priceOld),
+            priceNew: Number(a.priceNew),
+            repertorio: a.repertorio ?? [],
+          }))
+        );
       }
     } catch (error) {
       console.error('Erro ao buscar álbuns:', error);
@@ -110,42 +116,85 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
     });
   };
 
+  const openCreate = () => {
+    setEditingId(null);
+    setFormData(EMPTY_FORM);
+    setNewTrack('');
+    setNewTrackPersonalizada(false);
+    setIsModalOpen(true);
+  };
+
+  const openEdit = (album: Album) => {
+    setEditingId(album.id);
+    setFormData({
+      name: album.name,
+      linkAmostra: album.linkAmostra,
+      linkImgAlbum: album.linkImgAlbum,
+      priceOld: album.priceOld,
+      priceNew: album.priceNew,
+      campanha: album.campanha,
+      tipo: album.tipo,
+      repertorio: album.repertorio,
+    });
+    setNewTrack('');
+    setNewTrackPersonalizada(false);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingId(null);
+    setFormData(EMPTY_FORM);
+    setNewTrack('');
+    setNewTrackPersonalizada(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
     try {
-      const response = await authenticatedFetch(`${API_URL}/api/albums`, {
-        method: 'POST',
+      const url = editingId
+        ? `${API_URL}/api/albums/${editingId}`
+        : `${API_URL}/api/albums`;
+      const method = editingId ? 'PUT' : 'POST';
+
+      const response = await authenticatedFetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        setIsModalOpen(false);
-        resetForm();
+        closeModal();
         await fetchAlbums();
       } else {
         const error = await response.json();
-        alert(`Erro ao criar álbum: ${error.message || 'Tente novamente'}`);
+        alert(`Erro: ${error.message || 'Tente novamente'}`);
       }
-    } catch (error) {
-      console.error('Erro ao criar álbum:', error);
-      alert('Erro ao criar álbum. Tente novamente.');
+    } catch {
+      alert('Erro ao salvar álbum. Tente novamente.');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      linkAmostra: '',
-      linkImgAlbum: '',
-      priceOld: 0,
-      priceNew: 0,
-      campanha: '',
-      tipo: 'ALBUM',
-      repertorio: [],
-    });
-    setNewTrack('');
-    setNewTrackPersonalizada(false);
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    try {
+      const response = await authenticatedFetch(`${API_URL}/api/albums/${id}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        setAlbums(prev => prev.filter(a => a.id !== id));
+      } else {
+        const error = await response.json();
+        alert(`Erro ao excluir: ${error.message || 'Tente novamente'}`);
+      }
+    } catch {
+      alert('Erro ao excluir álbum. Tente novamente.');
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   if (loading) {
@@ -161,7 +210,7 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Gerenciar Álbuns</h1>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={openCreate}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,9 +257,7 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
                       {album.repertorio.map((faixa, i) => (
                         <li key={i} className="flex items-center gap-1">
                           <span>{faixa.nome}</span>
-                          {faixa.personalizada && (
-                            <span className="text-purple-500 font-semibold">★</span>
-                          )}
+                          {faixa.personalizada && <span className="text-purple-500 font-semibold">★</span>}
                         </li>
                       ))}
                     </ol>
@@ -219,9 +266,40 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
                 {album.linkAmostra && (
                   <audio controls className="w-full mt-3" controlsList="nodownload">
                     <source src={album.linkAmostra} type="audio/mpeg" />
-                    Seu navegador não suporta áudio.
                   </audio>
                 )}
+
+                <div className="flex gap-2 mt-4">
+                  <button
+                    onClick={() => openEdit(album)}
+                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm(`Excluir "${album.name}"? Esta ação não pode ser desfeita.`)) {
+                        handleDelete(album.id);
+                      }
+                    }}
+                    disabled={deletingId === album.id}
+                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    {deletingId === album.id ? (
+                      <span>Excluindo...</span>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Excluir
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -232,191 +310,115 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-800">Adicionar Novo Álbum</h2>
-              <button
-                onClick={() => { setIsModalOpen(false); resetForm(); }}
-                className="text-gray-400 hover:text-gray-600 transition-colors text-2xl"
-              >
-                ×
-              </button>
+              <h2 className="text-xl font-semibold text-gray-800">
+                {editingId ? 'Editar Álbum' : 'Adicionar Novo Álbum'}
+              </h2>
+              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 transition-colors text-2xl">×</button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nome do Álbum *</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
+                <input type="text" name="name" value={formData.name} onChange={handleInputChange} required
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Ex: Cantigas para Dormir Vol. 1"
-                />
+                  placeholder="Ex: Cantigas para Dormir Vol. 1" />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Link da Amostra (MP3)</label>
-                <input
-                  type="url"
-                  name="linkAmostra"
-                  value={formData.linkAmostra}
-                  onChange={handleInputChange}
+                <input type="url" name="linkAmostra" value={formData.linkAmostra} onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="https://meusite.com/amostra.mp3"
-                />
+                  placeholder="https://meusite.com/amostra.mp3" />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Link da Imagem do Álbum</label>
-                <input
-                  type="url"
-                  name="linkImgAlbum"
-                  value={formData.linkImgAlbum}
-                  onChange={handleInputChange}
+                <input type="url" name="linkImgAlbum" value={formData.linkImgAlbum} onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="https://meusite.com/capa.jpg"
-                />
+                  placeholder="https://meusite.com/capa.jpg" />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Preço Antigo</label>
-                <input
-                  type="number"
-                  name="priceOld"
-                  value={formData.priceOld}
-                  onChange={handleInputChange}
-                  step="0.01"
-                  min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="49.90"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Preço Novo *</label>
-                <input
-                  type="number"
-                  name="priceNew"
-                  value={formData.priceNew}
-                  onChange={handleInputChange}
-                  required
-                  step="0.01"
-                  min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="29.90"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Preço Antigo</label>
+                  <input type="number" name="priceOld" value={formData.priceOld} onChange={handleInputChange}
+                    step="0.01" min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="49.90" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Preço Novo *</label>
+                  <input type="number" name="priceNew" value={formData.priceNew} onChange={handleInputChange}
+                    required step="0.01" min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="29.90" />
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Campanha</label>
-                <input
-                  type="text"
-                  name="campanha"
-                  value={formData.campanha}
-                  onChange={handleInputChange}
+                <input type="text" name="campanha" value={formData.campanha} onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Ex: CAMPANHA1"
-                />
+                  placeholder="Ex: campanha1" />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
-                <select
-                  name="tipo"
-                  value={formData.tipo}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                >
+                <select name="tipo" value={formData.tipo} onChange={handleInputChange} required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
                   <option value="ALBUM">ALBUM</option>
                   <option value="COMBO">COMBO</option>
                 </select>
               </div>
 
-              {/* Repertório */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Repertório</label>
-
                 {formData.repertorio.length > 0 && (
                   <ol className="mb-3 space-y-1">
                     {formData.repertorio.map((faixa, i) => (
                       <li key={i} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-1.5">
                         <span className="text-xs text-gray-400 w-5 text-right shrink-0">{i + 1}.</span>
                         <span className="flex-1 text-sm text-gray-700 truncate">{faixa.nome}</span>
-                        {faixa.personalizada && (
-                          <span className="text-xs text-purple-600 font-semibold shrink-0">personalizada</span>
-                        )}
+                        {faixa.personalizada && <span className="text-xs text-purple-600 font-semibold shrink-0">personalizada</span>}
                         <div className="flex gap-1 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => moveTrack(i, 'up')}
-                            disabled={i === 0}
-                            className="text-gray-400 hover:text-gray-600 disabled:opacity-20 text-xs px-1"
-                            title="Mover para cima"
-                          >▲</button>
-                          <button
-                            type="button"
-                            onClick={() => moveTrack(i, 'down')}
-                            disabled={i === formData.repertorio.length - 1}
-                            className="text-gray-400 hover:text-gray-600 disabled:opacity-20 text-xs px-1"
-                            title="Mover para baixo"
-                          >▼</button>
-                          <button
-                            type="button"
-                            onClick={() => removeTrack(i)}
-                            className="text-red-400 hover:text-red-600 text-xs px-1"
-                            title="Remover"
-                          >✕</button>
+                          <button type="button" onClick={() => moveTrack(i, 'up')} disabled={i === 0}
+                            className="text-gray-400 hover:text-gray-600 disabled:opacity-20 text-xs px-1" title="Mover para cima">▲</button>
+                          <button type="button" onClick={() => moveTrack(i, 'down')} disabled={i === formData.repertorio.length - 1}
+                            className="text-gray-400 hover:text-gray-600 disabled:opacity-20 text-xs px-1" title="Mover para baixo">▼</button>
+                          <button type="button" onClick={() => removeTrack(i)}
+                            className="text-red-400 hover:text-red-600 text-xs px-1" title="Remover">✕</button>
                         </div>
                       </li>
                     ))}
                   </ol>
                 )}
-
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={newTrack}
-                      onChange={e => setNewTrack(e.target.value)}
+                    <input type="text" value={newTrack} onChange={e => setNewTrack(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTrack(); } }}
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      placeholder="Nome da faixa"
-                    />
-                    <button
-                      type="button"
-                      onClick={addTrack}
-                      className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
-                    >
+                      placeholder="Nome da faixa" />
+                    <button type="button" onClick={addTrack}
+                      className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">
                       + Adicionar
                     </button>
                   </div>
                   <label className="flex items-center gap-2 cursor-pointer select-none w-fit">
-                    <input
-                      type="checkbox"
-                      checked={newTrackPersonalizada}
-                      onChange={e => setNewTrackPersonalizada(e.target.checked)}
-                      className="w-4 h-4 accent-purple-600"
-                    />
+                    <input type="checkbox" checked={newTrackPersonalizada} onChange={e => setNewTrackPersonalizada(e.target.checked)}
+                      className="w-4 h-4 accent-purple-600" />
                     <span className="text-sm text-gray-600">Música personalizada</span>
                   </label>
                 </div>
               </div>
 
               <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => { setIsModalOpen(false); resetForm(); }}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                >
+                <button type="button" onClick={closeModal}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
                   Cancelar
                 </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Criar Álbum
+                <button type="submit" disabled={saving}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60">
+                  {saving ? 'Salvando...' : editingId ? 'Salvar Alterações' : 'Criar Álbum'}
                 </button>
               </div>
             </form>
