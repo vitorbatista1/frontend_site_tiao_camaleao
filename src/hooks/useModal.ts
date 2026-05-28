@@ -1,6 +1,7 @@
 // src/hooks/useModal.ts
 import { useState, useCallback } from "react";
 
+// Interface para as informações do produto a serem exibidas no modal
 interface ProductInfo {
     name: string;
     price: string;
