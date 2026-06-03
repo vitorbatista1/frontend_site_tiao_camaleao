@@ -30,9 +30,8 @@ export default function LoginForm() {
       const { accessToken, refreshToken, user } = json.data;
 
       sessionStorage.setItem('accessToken', accessToken);
-      sessionStorage.setItem('refreshToken', refreshToken);
-      sessionStorage.setItem('user', JSON.stringify(user));
-      document.cookie = `auth_token=${accessToken}; path=/; SameSite=Strict`;
+      localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('user', JSON.stringify(user));
 
       window.location.href = '/admin';
     } catch {

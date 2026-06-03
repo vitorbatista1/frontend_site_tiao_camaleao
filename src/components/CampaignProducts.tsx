@@ -26,14 +26,9 @@ function fmtPrice(value: string | number) {
 
 interface Props {
   campaignId: string;
-  album1Src: string;
-  album2Src: string;
-  album1Srcset: string;
-  album2Srcset: string;
-  albumSizes: string;
 }
 
-export default function CampaignProducts({ campaignId, album1Src, album2Src, album1Srcset, album2Srcset, albumSizes }: Props) {
+export default function CampaignProducts({ campaignId }: Props) {
   const [albums, setAlbums] = useState<AlbumAPI[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,11 +47,6 @@ export default function CampaignProducts({ campaignId, album1Src, album2Src, alb
       .finally(() => setLoading(false));
   }, [campaignId]);
 
-  const images = [
-    { src: album1Src, srcset: album1Srcset },
-    { src: album2Src, srcset: album2Srcset },
-  ];
-
   return (
     <section id="produtos" style={{ background: "#6ab248" }} className="py-14 px-4">
       <h2 className="text-center text-white mb-16" style={{ fontSize: "clamp(26px, 6vw, 48px)", fontWeight: 800 }}>
@@ -68,11 +58,10 @@ export default function CampaignProducts({ campaignId, album1Src, album2Src, alb
           [0, 1].map(i => (
             <div key={i} className="bg-white/30 rounded-3xl w-full md:w-[340px] h-[600px] animate-pulse" style={{ marginTop: "-3.5rem" }} />
           ))
-        ) : albums.map((album, i) => {
+        ) : albums.map((album) => {
           const priceNew = Number(album.priceNew);
           const priceOld = album.priceOld ? Number(album.priceOld) : 0;
           const tracks = album.repertorio;
-          const img = images[i] ?? images[0];
 
           return (
             <div
@@ -83,9 +72,7 @@ export default function CampaignProducts({ campaignId, album1Src, album2Src, alb
               {/* Capa do álbum — sai do card com margem negativa */}
               <div className="w-full flex justify-center" style={{ marginTop: "-3.5rem" }}>
                 <img
-                  src={img.src}
-                  srcSet={img.srcset}
-                  sizes={albumSizes}
+                  src={album.linkImgAlbum}
                   alt={album.name}
                   width={448}
                   height={448}

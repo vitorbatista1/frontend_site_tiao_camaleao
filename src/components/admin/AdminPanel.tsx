@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AlbumManager from './AlbumManager';
+import OrderBumpManager from './OrderBumpManager';
 
 interface User {
   id: string;
@@ -7,7 +8,7 @@ interface User {
   name: string;
 }
 
-type Section = 'albums';
+type Section = 'albums' | 'orderbumps';
 
 const API_URL = import.meta.env.PUBLIC_API_URL;
 
@@ -16,13 +17,10 @@ export default function AdminPanel() {
   const [ready, setReady] = useState(false);
   const [activeSection, setActiveSection] = useState<Section>('albums');
 
-  // Função para renovar o token
   async function refreshAccessToken(): Promise<string | null> {
-    const refreshToken = sessionStorage.getItem('refreshToken');
+    const refreshToken = localStorage.getItem('refreshToken');
 
-    if (!refreshToken) {
-      return null;
-    }
+    if (!refreshToken) return null;
 
     try {
       const response = await fetch(`${API_URL}/api/auth/refresh`, {
@@ -36,8 +34,7 @@ export default function AdminPanel() {
       if (response.ok && json.success) {
         const { accessToken, refreshToken: newRefreshToken } = json.data;
         sessionStorage.setItem('accessToken', accessToken);
-        sessionStorage.setItem('refreshToken', newRefreshToken);
-        document.cookie = `auth_token=${accessToken}; path=/; SameSite=Strict`;
+        localStorage.setItem('refreshToken', newRefreshToken);
         return accessToken;
       }
 
@@ -71,8 +68,8 @@ export default function AdminPanel() {
         response = await makeRequest(newToken);
       } else {
         sessionStorage.removeItem('accessToken');
-        sessionStorage.removeItem('refreshToken');
-        sessionStorage.removeItem('user');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
         window.location.href = '/admin/login';
         throw new Error('Sessão expirada');
       }
@@ -82,29 +79,36 @@ export default function AdminPanel() {
   }
 
   useEffect(() => {
-    const token = sessionStorage.getItem('accessToken');
-    const stored = sessionStorage.getItem('user');
+    async function init() {
+      let token = sessionStorage.getItem('accessToken');
+      const stored = localStorage.getItem('user');
 
-    if (!token || !stored) {
-      window.location.href = '/admin/login';
-      return;
+      if (!token) {
+        token = await refreshAccessToken();
+      }
+
+      if (!token || !stored) {
+        window.location.href = '/admin/login';
+        return;
+      }
+
+      try {
+        setUser(JSON.parse(stored));
+      } catch {
+        window.location.href = '/admin/login';
+        return;
+      }
+
+      setReady(true);
     }
 
-    try {
-      setUser(JSON.parse(stored));
-    } catch {
-      window.location.href = '/admin/login';
-      return;
-    }
-
-    setReady(true);
+    init();
   }, []);
 
   function logout() {
     sessionStorage.removeItem('accessToken');
-    sessionStorage.removeItem('refreshToken');
-    sessionStorage.removeItem('user');
-    document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
     window.location.href = '/admin/login';
   }
 
@@ -118,6 +122,7 @@ export default function AdminPanel() {
 
   const navItems: { id: Section; label: string; icon: string }[] = [
     { id: 'albums', label: 'Álbuns', icon: '🎵' },
+    { id: 'orderbumps', label: 'Order Bumps', icon: '🎁' },
   ];
 
   return (
@@ -164,6 +169,9 @@ export default function AdminPanel() {
       <main className="flex-1 p-8 overflow-auto">
         {activeSection === 'albums' && (
           <AlbumManager authenticatedFetch={authenticatedFetch} />
+        )}
+        {activeSection === 'orderbumps' && (
+          <OrderBumpManager authenticatedFetch={authenticatedFetch} />
         )}
       </main>
     </div>

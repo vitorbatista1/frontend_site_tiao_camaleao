@@ -3,11 +3,9 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
 
 interface Props {
   campaignId: string;
-  comboSrc: string;
-  comboSrcset: string;
 }
 
-const { campaignId, comboSrc, comboSrcset } = Astro.props;
+const { campaignId } = Astro.props;
 
 const ITEMS = [
   "<strong>O dobro de cantigas personalizadas</strong> por mais R$ 20",
@@ -56,9 +54,8 @@ const CONFIRMACOES = [
             <!-- Imagem -->
             <div class="flex-shrink-0">
               <img
-                src={comboSrc}
-                srcset={comboSrcset}
-                sizes="(max-width: 768px) 140px, 280px"
+                id="combo-img"
+                src=""
                 alt="Combo Especial"
                 width={500}
                 height={500}
@@ -183,6 +180,8 @@ const CONFIRMACOES = [
       const btn = document.getElementById('combo-buy-btn');
       if (elOld) elOld.textContent = priceOld > 0 ? `de R$ ${Math.round(priceOld)}` : '';
       if (elNew) elNew.textContent = `por R$ ${Math.round(priceNew)}`;
+      const img = document.getElementById('combo-img');
+      if (img && raw.linkImgAlbum) img.src = raw.linkImgAlbum;
       if (btn) {
         btn.dataset.buyName = raw.name;
         btn.dataset.buyPrice = `R$ ${priceNew.toFixed(2).replace('.', ',')}`;

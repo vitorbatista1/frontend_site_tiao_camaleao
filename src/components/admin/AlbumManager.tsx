@@ -13,7 +13,7 @@ interface Album {
   priceOld: number;
   priceNew: number;
   campanha: string;
-  tipo: 'ALBUM' | 'COMBO';
+  tipo: 'ALBUM' | 'COMBO' | 'GRAVACAO';
   repertorio: Faixa[];
 }
 
@@ -24,7 +24,7 @@ interface AlbumFormData {
   priceOld: number;
   priceNew: number;
   campanha: string;
-  tipo: 'ALBUM' | 'COMBO';
+  tipo: 'ALBUM' | 'COMBO' | 'GRAVACAO';
   repertorio: Faixa[];
 }
 
@@ -50,6 +50,7 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploadingImg, setUploadingImg] = useState(false);
   const [newTrack, setNewTrack] = useState('');
   const [newTrackPersonalizada, setNewTrackPersonalizada] = useState(false);
   const [formData, setFormData] = useState<AlbumFormData>(EMPTY_FORM);
@@ -80,6 +81,32 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
   useEffect(() => {
     fetchAlbums();
   }, []);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImg(true);
+    try {
+      const formPayload = new FormData();
+      formPayload.append('imagem', file);
+      const response = await authenticatedFetch(`${API_URL}/api/upload/imagens-albums`, {
+        method: 'POST',
+        body: formPayload,
+      });
+      if (response.ok) {
+        const result = await response.json();
+        setFormData(prev => ({ ...prev, linkImgAlbum: result.data.url }));
+      } else {
+        const error = await response.json();
+        alert(`Erro ao enviar imagem: ${error.message || 'Tente novamente'}`);
+      }
+    } catch {
+      alert('Erro ao enviar imagem. Tente novamente.');
+    } finally {
+      setUploadingImg(false);
+      e.target.value = '';
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -236,7 +263,11 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-semibold text-lg text-gray-800">{album.name}</h3>
                   {album.tipo && (
-                    <span className={`text-xs font-semibold px-2 py-1 rounded-full ${album.tipo === 'COMBO' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                    <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                      album.tipo === 'COMBO' ? 'bg-purple-100 text-purple-700'
+                      : album.tipo === 'GRAVACAO' ? 'bg-orange-100 text-orange-700'
+                      : 'bg-blue-100 text-blue-700'
+                    }`}>
                       {album.tipo}
                     </span>
                   )}
@@ -332,10 +363,33 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Link da Imagem do Álbum</label>
-                <input type="url" name="linkImgAlbum" value={formData.linkImgAlbum} onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="https://meusite.com/capa.jpg" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Imagem do Álbum</label>
+                {formData.linkImgAlbum && (
+                  <div className="mb-2 relative w-full h-32 rounded-lg overflow-hidden border border-gray-200">
+                    <img src={formData.linkImgAlbum} alt="Capa do álbum" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, linkImgAlbum: '' }))}
+                      className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs leading-none"
+                      title="Remover imagem"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+                <label className={`flex items-center justify-center gap-2 w-full px-3 py-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${uploadingImg ? 'border-blue-300 bg-blue-50 text-blue-400' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50 text-gray-500'}`}>
+                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span className="text-sm">{uploadingImg ? 'Enviando...' : formData.linkImgAlbum ? 'Substituir imagem' : 'Selecionar imagem'}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploadingImg}
+                    onChange={handleImageUpload}
+                  />
+                </label>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -368,6 +422,7 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
                   <option value="ALBUM">ALBUM</option>
                   <option value="COMBO">COMBO</option>
+                  <option value="GRAVACAO">GRAVAÇÃO</option>
                 </select>
               </div>
 

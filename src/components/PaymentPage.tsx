@@ -27,8 +27,9 @@ interface OrderBump {
   description: string;
   originalPrice: number;
   offerPrice: number;
-  icon: 'zap' | 'gift' | 'trending';
-  popularText: string;
+  icon: string;
+  badge: string | null;
+  popularText?: string;
 }
 
 const OrderBumpItem = React.memo(({
@@ -48,7 +49,10 @@ const OrderBumpItem = React.memo(({
       case 'zap': return <Zap className="h-8 w-8 text-yellow-500" />;
       case 'gift': return <Gift className="h-8 w-8 text-pink-500" />;
       case 'trending': return <TrendingUp className="h-8 w-8 text-green-500" />;
-      default: return <Zap className="h-8 w-8 text-yellow-500" />;
+      case 'music': return <Music className="h-8 w-8 text-purple-500" />;
+      case 'heart': return <Heart className="h-8 w-8 text-red-500" />;
+      case 'star': return <span className="text-3xl">⭐</span>;
+      default: return <Gift className="h-8 w-8 text-pink-500" />;
     }
   };
 
@@ -67,10 +71,10 @@ const OrderBumpItem = React.memo(({
         </div>
       </div>
 
-      {bump.popularText && (
+      {(bump.popularText || bump.badge) && (
         <div className="absolute -top-3 -left-3 z-10">
           <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-            ⭐ {bump.popularText}
+            ⭐ {bump.popularText || bump.badge}
           </div>
         </div>
       )}
@@ -174,6 +178,8 @@ const MemoizedCardForm = React.memo(({
   />
 ));
 
+const API_URL = import.meta.env.PUBLIC_API_URL;
+
 export default function PaymentPage() {
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -181,42 +187,28 @@ export default function PaymentPage() {
   const [showBumpModal, setShowBumpModal] = useState(false);
   const [timeLeft, setTimeLeft] = useState(300);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-
-  const bumps: OrderBump[] = [
-    {
-      id: 'physical',
-      title: '🎵 CD Físico Personalizado',
-      description: 'Receba o CD físico com capa exclusiva, encarte e dedicatória especial para seu filho',
-      originalPrice: 97.00,
-      offerPrice: 47.00,
-      icon: 'gift',
-      popularText: 'Mais Vendido'
-    },
-    {
-      id: 'ebook',
-      title: '📚 E-book Atividades Musicais',
-      description: '20 atividades lúdicas para desenvolver o amor pela música nas crianças',
-      originalPrice: 49.00,
-      offerPrice: 19.90,
-      icon: 'trending',
-      popularText: 'Recomendado'
-    },
-    {
-      id: 'vip',
-      title: '🎓 Comunidade VIP',
-      description: 'Acesso vitalício ao grupo exclusivo com dicas semanais e materiais extras',
-      originalPrice: 149.00,
-      offerPrice: 67.00,
-      icon: 'zap',
-      popularText: 'Oferta Única'
-    }
-  ];
+  const [bumps, setBumps] = useState<OrderBump[]>([]);
 
   useEffect(() => {
     const savedData = localStorage.getItem('orderData');
     if (savedData) {
       setOrderData(JSON.parse(savedData));
     }
+
+    fetch(`${API_URL}/api/orderbumps?active=true`)
+      .then(r => r.json())
+      .then(json => {
+        if (json.success) {
+          setBumps(json.data.map((b: OrderBump) => ({
+            ...b,
+            originalPrice: Number(b.originalPrice),
+            offerPrice: Number(b.offerPrice),
+            popularText: b.badge ?? '',
+          })));
+        }
+      })
+      .catch(() => {});
+
     setIsLoading(false);
 
     const timer = setInterval(() => {

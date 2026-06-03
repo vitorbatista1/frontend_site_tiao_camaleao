@@ -38,10 +38,19 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   var productName = "";
   var isCombo = false;
 
+  var COMBO_GRAVADO_PRICE_FULL = 150;
+  var COMBO_GRAVADO_ONE_MISSING = 120;
+
   // ── Helpers de álbum ─────────────────────────────────────────────────────────
   function getAlbumsOnly() { return albumsAPI.filter(function(a){ return a.tipo === "ALBUM"; }); }
   function getCombo() { return albumsAPI.find(function(a){ return a.tipo === "COMBO"; }); }
   function getGravacao() { return albumsAPI.filter(function(a){ return a.tipo === "GRAVACAO"; }); }
+  function getGravacaoIndividuais() { return getGravacao().slice(0, getAlbumsOnly().length); }
+  function getGravacaoIds() { return getGravacao().map(function(a){ return a.id; }); }
+  function isComboGravadoSelected(sel) {
+    var ids = getGravacaoIds();
+    return ids.length >= 2 && ids.every(function(id){ return sel.indexOf(id) >= 0; });
+  }
 
   function getAlbumByKey(key) {
     return getAlbumsOnly()[parseInt(key.replace("album_", "")) - 1];
@@ -57,9 +66,20 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     var a = keyOrId.startsWith("album_") ? getAlbumByKey(keyOrId) : getAlbumById(keyOrId);
     return parseFloat((a && a.priceOld) || "0");
   }
+  function calcSubtotal(sel, foundAlbumsCount) {
+    if (isComboGravadoSelected(sel)) {
+      var gravIds = getGravacaoIds();
+      var extras = sel.filter(function(id){ return gravIds.indexOf(id) < 0; });
+      var comboPrice = (foundAlbumsCount >= 1) ? COMBO_GRAVADO_ONE_MISSING : COMBO_GRAVADO_PRICE_FULL;
+      return comboPrice + extras.reduce(function(s,k){ return s + priceOf(k); }, 0);
+    }
+    return sel.reduce(function(s,k){ return s + priceOf(k); }, 0);
+  }
   function calcTotal() {
     return children.reduce(function(t, c) {
-      return t + (c.selectedAlbums || []).reduce(function(s, k) { return s + priceOf(k); }, 0);
+      var sel = c.selectedAlbums || [];
+      var foundCount = (c.albumResult && c.albumResult.found) ? (c.albumResult.albums || []).length : 0;
+      return t + calcSubtotal(sel, foundCount);
     }, 0).toFixed(2);
   }
 
@@ -130,8 +150,37 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     });
   }
 
+  // ── Toggle combo gravado ──────────────────────────────────────────────────────
+  function toggleComboGravado(childId) {
+    var gravIds = getGravacaoIds();
+    children = children.map(function(c){
+      if (c.id !== childId) return c;
+      var sel = c.selectedAlbums || [];
+      var ativo = isComboGravadoSelected(sel);
+      var semGrav = sel.filter(function(id){ return gravIds.indexOf(id) < 0; });
+      return Object.assign({}, c, { selectedAlbums: ativo ? semGrav : semGrav.concat(gravIds) });
+    });
+    albumErrors[childId] = "";
+    renderStep2();
+  }
+
   // ── SVG check ─────────────────────────────────────────────────────────────────
   var CHECK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+
+  function comboGravadoBtn(childId, ativo, price) {
+    var cls = ativo ? "border-orange-500 bg-orange-50" : "border-dashed border-orange-400 hover:bg-orange-50";
+    var dotCls = ativo ? "border-orange-500 bg-orange-500" : "border-orange-400";
+    return '<button type="button" class="tc-combo-grav w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all '+cls+'" data-cid="'+childId+'">' +
+      '<div class="flex items-center gap-2">' +
+        '<div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 '+dotCls+'">'+(ativo?CHECK:'')+'</div>' +
+        '<div class="text-left">' +
+          '<span class="text-sm font-bold text-orange-700 block">🎁 Combo Gravado</span>' +
+          '<span class="text-xs text-orange-600">Os 2 álbuns gravados — melhor custo-benefício!</span>' +
+        '</div>' +
+      '</div>' +
+      '<span class="text-sm font-bold text-orange-700 ml-2 flex-shrink-0">R$ '+price.toFixed(2).replace(".",",")+'</span>' +
+    '</button>';
+  }
 
   function albumBtn(childId, key, selected, disabled, label, pNew, pOld, selCls, unselCls, checkCls, green) {
     var disAttr = disabled ? " disabled" : "";
@@ -161,16 +210,21 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     var sel = child.selectedAlbums || [];
     var comboId = combo ? combo.id : "combo";
     var comboSel = sel.indexOf(comboId) >= 0;
+    var comboGravSel = isComboGravadoSelected(sel);
 
-    var btns = (child.albumResult.albums || []).map(function(key){
-      var a = getAlbumByKey(key);
-      var isSelected = sel.indexOf(a ? a.id : key) >= 0;
-      return albumBtn(child.id, key, isSelected, comboSel,
-        a ? a.name : getAlbumLabel(key), priceOf(key), priceOldOf(key),
+    // álbuns digitais já gravados (disponíveis para compra)
+    var btns = (child.albumResult.albums || []).map(function(albumId){
+      var a = getAlbumById(albumId);
+      var isSelected = sel.indexOf(albumId) >= 0;
+      return albumBtn(child.id, albumId, isSelected && !comboGravSel, comboSel || comboGravSel,
+        a ? a.name : getAlbumLabel(albumId),
+        parseFloat((a && a.priceNew) || "0"),
+        parseFloat((a && a.priceOld) || "0"),
         "border-primary bg-primary/5", "border-gray-200 hover:border-primary/50 hover:bg-gray-50",
         "border-primary bg-primary", false);
     }).join("");
 
+    // combo digital (verde) — só se tiver 2+ álbuns gravados
     var comboBtn = "";
     if ((child.albumResult.albums||[]).length >= 2 && combo) {
       var cs = sel.indexOf(combo.id) >= 0;
@@ -180,28 +234,80 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
         "border-green-500 bg-green-500", true);
     }
 
+    // seção de gravação para álbuns faltantes
+    var gravSection = "";
+    var albumsOnly = getAlbumsOnly();
+    var childAlbumIds = child.albumResult.albums || [];
+    var missing = albumsOnly.filter(function(a){ return childAlbumIds.indexOf(a.id) < 0; });
+    var gravacaoAlbums = getGravacao();
+    var gravIndividuais = getGravacaoIndividuais();
+
+    if (missing.length > 0 && gravacaoAlbums.length > 0) {
+      if (missing.length >= 2) {
+        gravSection =
+          '<div class="space-y-1 pt-1">' +
+            '<p class="text-xs font-semibold text-orange-600 px-1">🎙️ Grave os 2 álbuns com o nome de '+esc(child.albumResult.display_name||child.name)+':</p>' +
+            comboGravadoBtn(child.id, comboGravSel, COMBO_GRAVADO_PRICE_FULL) +
+          '</div>';
+      } else {
+        var missingIndex = albumsOnly.findIndex(function(a){ return a.id === missing[0].id; });
+        var gravOffer = gravIndividuais[missingIndex];
+        var gravBtnHtml = "";
+        if (gravOffer) {
+          var gravSel = sel.indexOf(gravOffer.id) >= 0;
+          gravBtnHtml = albumBtn(child.id, gravOffer.id, gravSel && !comboGravSel, comboGravSel,
+            "🎙️ "+gravOffer.name,
+            parseFloat(gravOffer.priceNew),
+            parseFloat(gravOffer.priceOld || "0"),
+            "border-orange-500 bg-orange-50", "border-dashed border-orange-400 hover:bg-orange-50",
+            "border-orange-500 bg-orange-500", false);
+        }
+        gravSection =
+          '<div class="space-y-1 pt-1">' +
+            '<p class="text-xs font-semibold text-orange-600 px-1">🎙️ Disponível em versão gravada:</p>' +
+            gravBtnHtml +
+            comboGravadoBtn(child.id, comboGravSel, COMBO_GRAVADO_ONE_MISSING) +
+          '</div>';
+      }
+    }
+
     return '<div class="space-y-2">' +
       '<p class="text-xs font-semibold text-gray-600 px-1">Álbuns disponíveis para <span class="text-primary">'+esc(child.albumResult.display_name||child.name)+'</span>:</p>' +
       '<div class="space-y-2">'+btns+comboBtn+'</div>' +
+      gravSection +
     '</div>';
   }
 
   function buildNotFound(child) {
     var grav = getGravacao();
+    var gravIndiv = getGravacaoIndividuais();
+    var albumsOnly = getAlbumsOnly();
     var sel = child.selectedAlbums || [];
-    var btns = grav.map(function(a){
+    var comboGravSel = isComboGravadoSelected(sel);
+
+    var btns = gravIndiv.map(function(a){
       var isSel = sel.indexOf(a.id) >= 0;
-      return albumBtn(child.id, a.id, isSel, false,
-        "🎙️ "+a.name, parseFloat(a.priceNew), parseFloat(a.priceOld),
-        "border-primary bg-primary/5", "border-gray-200 hover:border-primary/50 hover:bg-gray-50",
-        "border-primary bg-primary", false);
+      return albumBtn(child.id, a.id, isSel && !comboGravSel, comboGravSel,
+        "🎙️ "+a.name, parseFloat(a.priceNew), parseFloat(a.priceOld || "0"),
+        "border-orange-500 bg-orange-50", "border-dashed border-orange-400 hover:bg-orange-50",
+        "border-orange-500 bg-orange-500", false);
     }).join("");
+
+    var comboBtn = (albumsOnly.length >= 2 && grav.length > 0)
+      ? comboGravadoBtn(child.id, comboGravSel, COMBO_GRAVADO_PRICE_FULL)
+      : "";
+
     return '<div class="space-y-2">' +
       '<div class="px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">' +
         '<p class="text-xs text-amber-700">⚠️ Nenhum álbum encontrado para <strong>"'+esc(child.name)+'"</strong>. '+
           (grav.length===0?"Será feito sob encomenda.":"")+'</p>' +
       '</div>' +
-      (grav.length>0?'<div class="space-y-2"><p class="text-xs font-semibold text-gray-600 px-1">Serviço de gravação disponível:</p>'+btns+'</div>':'') +
+      (grav.length>0?
+        '<div class="space-y-1">' +
+          '<p class="text-xs font-semibold text-orange-600 px-1">🎙️ Grave os álbuns com o nome de <strong>'+esc(child.name)+'</strong>:</p>' +
+          btns + comboBtn +
+        '</div>'
+      :'') +
     '</div>';
   }
 
@@ -209,9 +315,13 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     var rows = children.map(function(c){
       var sel = c.selectedAlbums || [];
       if (!c.name || !sel.length) return "";
-      var sub = sel.reduce(function(s,k){ return s+priceOf(k); }, 0);
+      var foundCount = (c.albumResult && c.albumResult.found) ? (c.albumResult.albums || []).length : 0;
+      var sub = calcSubtotal(sel, foundCount);
+      var labels = isComboGravadoSelected(sel)
+        ? ["Combo Gravado"]
+        : sel.map(function(k){ return esc(getAlbumLabel(k)); });
       return '<div class="flex justify-between text-xs text-gray-600">' +
-        '<span>'+esc(c.albumResult&&c.albumResult.display_name||c.name)+' — '+sel.map(function(k){return esc(getAlbumLabel(k));}).join(" + ")+'</span>' +
+        '<span>'+esc(c.albumResult&&c.albumResult.display_name||c.name)+' — '+labels.join(" + ")+'</span>' +
         '<span class="font-semibold">R$ '+sub.toFixed(2).replace(".",",")+'</span></div>';
     }).join("");
     if (!rows) return "";
@@ -257,7 +367,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
           '<p class="text-xs text-blue-600">Vamos verificar quais álbuns estão disponíveis para cada nome</p>' +
         '</div>' +
         (loadingAlbums?'<div class="flex items-center gap-2 py-2"><div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div><span class="text-xs text-gray-500">Carregando preços...</span></div>':"") +
-        '<div id="tc-children" class="space-y-5 max-h-[420px] overflow-y-auto pr-1">'+cards+'</div>' +
+        '<div id="tc-children" class="space-y-5 max-h-[520px] overflow-y-auto pr-1">'+cards+'</div>' +
         '<button id="tc-add-child" class="w-full py-3 border-2 border-dashed border-primary text-primary rounded-xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2 font-medium">' +
           '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>' +
           'Adicionar outra criança</button>' +
@@ -305,6 +415,8 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
       }
       var ab = e.target.closest(".tc-album");
       if (ab && !ab.disabled) toggleAlbum(ab.dataset.cid, ab.dataset.key);
+      var cg = e.target.closest(".tc-combo-grav");
+      if (cg) toggleComboGravado(cg.dataset.cid);
     });
   }
 

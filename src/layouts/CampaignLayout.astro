@@ -11,10 +11,6 @@ import {
   Star, ChevronLeft, ChevronRight, ShoppingCart
 } from "../components/Icons.tsx";
 
-import album1Raw from "../assets/album1.png";
-import album2Raw from "../assets/album2.png";
-import comboRaw from "../assets/combo.png";
-
 import kidHeadphones from "../../public/imagens/menino.png";
 import musician from "../../public/imagens/musico_.png";
 import familyCollage from "../../public/imagens/familia.png";
@@ -39,129 +35,15 @@ interface Props {
 
 const { campaignId } = Astro.props;
 const [
-  album1_sm,
-  album1_md,
-  album1_lg,
-
-  combo_sm,
-  combo_md,
-  combo_lg,
-
-  album2_sm,
-  album2_md,
-  album2_lg,
-
   hero_sm,
   hero_md,
   hero_lg,
   hero_xl
 ] = await Promise.all([
-
-  // ALBUM 1
-  getImage({
-    src: album1Raw,
-    format: "webp",
-    width: 128,
-    height: 128,
-    quality: 72
-  }),
-
-  getImage({
-    src: album1Raw,
-    format: "webp",
-    width: 192,
-    height: 192,
-    quality: 75
-  }),
-
-  getImage({
-    src: album1Raw,
-    format: "webp",
-    width: 256,
-    height: 256,
-    quality: 78
-  }),
-
-
-    // Combo
-  getImage({
-    src: comboRaw,
-    format: "webp",
-    width: 128,
-    height: 128,
-    quality: 72
-  }),
-
-  getImage({
-    src: comboRaw,
-    format: "webp",
-    width: 192,
-    height: 192,
-    quality: 75
-  }),
-
-  getImage({
-    src: comboRaw,
-    format: "webp",
-    width: 256,
-    height: 256,
-    quality: 78
-  }),
-  
-
-  // ALBUM 2
-  getImage({
-    src: album2Raw,
-    format: "webp",
-    width: 128,
-    height: 128,
-    quality: 72
-  }),
-
-  getImage({
-    src: album2Raw,
-    format: "webp",
-    width: 192,
-    height: 192,
-    quality: 75
-  }),
-
-  getImage({
-    src: album2Raw,
-    format: "webp",
-    width: 256,
-    height: 256,
-    quality: 78
-  }),
-
-  // HERO
-  getImage({
-    src: criancasHero,
-    format: "avif",
-    width: 480,
-    quality: 50
-  }),
-
-  getImage({
-    src: criancasHero,
-    format: "avif",
-    width: 768,
-    quality: 55
-  }),
-
-  getImage({
-    src: criancasHero,
-    format: "avif",
-    width: 960,
-    quality: 60
-  }),
-
-  getImage({
-    src: criancasHero,
-    format: "avif",
-    width: 1440,
-    quality: 65
-  }),
+  getImage({ src: criancasHero, format: "avif", width: 480,  quality: 50 }),
+  getImage({ src: criancasHero, format: "avif", width: 768,  quality: 55 }),
+  getImage({ src: criancasHero, format: "avif", width: 960,  quality: 60 }),
+  getImage({ src: criancasHero, format: "avif", width: 1440, quality: 65 }),
 ]);
 
 const heroSrcset = `
@@ -171,12 +53,6 @@ const heroSrcset = `
   ${hero_xl.src} 1440w
 `;
 const heroSizes = "(max-width: 768px) 95vw, 55vw";
-
-const album1Srcset = `${album1_sm.src} 128w, ${album1_md.src} 192w, ${album1_lg.src} 256w`;
-const album2Srcset = `${album2_sm.src} 128w, ${album2_md.src} 192w, ${album2_lg.src} 256w`;
-const comboSrcset = `${combo_sm.src} 128w, ${combo_md.src} 192w, ${combo_lg.src} 256w`;
-
-const albumSizes = "(max-width: 768px) 192px, 224px";
 
 const benefits = [
   {
@@ -405,8 +281,17 @@ const year = new Date().getFullYear();
             <div class="w-full flex-1 flex justify-center md:justify-start relative z-10 md:-mb-[100px]">
               <div class="relative p-3 rounded-[2.5rem] shadow-2xl w-52 md:w-72" style="background: #1D4ED8;">
                 <div class="relative overflow-hidden rounded-[2rem] bg-black" style="aspect-ratio: 9/16;">
-                  <div class="absolute inset-0 bg-gradient-to-br from-grape to-coral"></div>
-                  <div class="absolute inset-0 flex items-center justify-center">
+                  <video
+                    id="hero-video"
+                    src="https://pub-18a54ea1b0da4af78a932befd1b519d6.r2.dev/videos/video.mp4"
+                    class="absolute inset-0 w-full h-full object-cover"
+                    playsinline
+                    preload="metadata"
+                  ></video>
+                  <div
+                    id="hero-play-btn"
+                    class="absolute inset-0 flex items-center justify-center cursor-pointer"
+                  >
                     <button
                       type="button"
                       aria-label="Reproduzir vídeo"
@@ -415,9 +300,6 @@ const year = new Date().getFullYear();
                     >
                       <Play className="h-8 w-8 fill-white text-white ml-1" />
                     </button>
-                  </div>
-                  <div class="absolute bottom-4 left-1/2 -translate-x-1/2">
-                    <Heart className="h-10 w-10 fill-red-500 text-red-500 drop-shadow-md" />
                   </div>
                 </div>
               </div>
@@ -629,14 +511,10 @@ const year = new Date().getFullYear();
             </div>
           </section>
       <!-- PRODUCTS — dynamic per campaign -->
-      <CampaignProducts client:visible campaignId={campaignId} album1Srcset={album1Srcset} album2Srcset={album2Srcset} albumSizes={albumSizes} album1Src={album1_lg.src} album2Src={album2_lg.src} />
+      <CampaignProducts client:visible campaignId={campaignId} />
 
       <!-- COMBO — dynamic per campaign -->
-      <CampaignCombo
-        campaignId={campaignId}
-        comboSrc={combo_lg.src}
-        comboSrcset={comboSrcset}
-      />
+      <CampaignCombo campaignId={campaignId} />
 <!-- MUSICIAN 1 -->
 <section class="relative bg-white pt-16 pb-0 overflow-hidden" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
 
@@ -944,6 +822,42 @@ const year = new Date().getFullYear();
         </div>
       </footer>
     </div>
+
+    <script is:inline>
+      (function () {
+        var video = document.getElementById('hero-video');
+        var btn = document.getElementById('hero-play-btn');
+        if (video && btn) {
+          btn.addEventListener('click', function () {
+            video.play();
+            btn.style.display = 'none';
+          });
+          video.addEventListener('click', function () {
+            if (!video.paused) {
+              video.pause();
+              btn.style.display = 'flex';
+            }
+          });
+          video.addEventListener('ended', function () {
+            btn.style.display = 'flex';
+          });
+
+          var autoPlayed = false;
+          new IntersectionObserver(function (entries) {
+            var entry = entries[0];
+            if (entry.isIntersecting) {
+              if (!autoPlayed) autoPlayed = true;
+              video.play().then(function () {
+                btn.style.display = 'none';
+              }).catch(function () {});
+            } else if (autoPlayed) {
+              video.pause();
+              btn.style.display = 'flex';
+            }
+          }, { threshold: 0.5 }).observe(video);
+        }
+      })();
+    </script>
 
     <script is:inline>
       (function () {
