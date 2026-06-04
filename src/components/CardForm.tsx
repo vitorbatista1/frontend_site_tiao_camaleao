@@ -56,7 +56,11 @@ export default function CardForm({
   const [isSdkInitialized, setIsSdkInitialized] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [pixExpired, setPixExpired] = useState(false);
+  const [pixPaid, setPixPaid] = useState(false);
+  const [cardError, setCardError] = useState<string | null>(null);
+  const [isProcessingCard, setIsProcessingCard] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const cleanAmount = amount.replace('R$ ', '').replace(',', '.').trim();
   const numericAmount = parseFloat(cleanAmount);
@@ -93,8 +97,37 @@ export default function CardForm({
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      if (pollRef.current) clearInterval(pollRef.current);
     };
   }, []);
+
+  // Polling de status após PIX gerado
+  useEffect(() => {
+    if (!pixData || pixExpired) return;
+
+    if (pollRef.current) clearInterval(pollRef.current);
+
+    pollRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/payments/status/${pixData.payment_id}`);
+        const json = await res.json();
+        if (json.status === 'approved') {
+          clearInterval(pollRef.current!);
+          setPixPaid(true);
+          clearPixStorage();
+          setTimeout(() => {
+            window.location.href = `/confirmacao?ref=${pixData.external_reference}&method=pix`;
+          }, 2000);
+        }
+      } catch {
+        // ignora erros de rede no polling
+      }
+    }, 5000);
+
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [pixData, pixExpired]);
 
   function clearPixStorage() {
     localStorage.removeItem(PIX_STORAGE_KEY);
@@ -147,7 +180,7 @@ export default function CardForm({
       }
 
       const pix: PixData = {
-        payment_id: json.data.payment_id,
+        payment_id: json.data.order_id,
         external_reference: json.data.external_reference,
         qr_code: json.data.pix.qr_code,
         qr_code_base64: json.data.pix.qr_code_base64,
@@ -156,10 +189,8 @@ export default function CardForm({
         amount: json.data.amount,
       };
 
-      const expiryDate = new Date(pix.expires_at);
-      const now = Date.now();
-      const secondsLeft = Math.floor((expiryDate.getTime() - now) / 1000);
-      const expiryTimestamp = now + secondsLeft * 1000;
+      const secondsLeft = 5 * 60;
+      const expiryTimestamp = Date.now() + secondsLeft * 1000;
 
       localStorage.setItem(PIX_STORAGE_KEY, JSON.stringify(pix));
       localStorage.setItem(PIX_EXPIRY_KEY, String(expiryTimestamp));
@@ -190,7 +221,33 @@ export default function CardForm({
   };
 
   const handleCardSubmit = async (param: any) => {
-    console.log('Pagamento cartão:', param);
+    setIsProcessingCard(true);
+    setCardError(null);
+    try {
+      const res = await fetch(`${API_URL}/api/payments/process-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(param),
+      });
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json.message || 'Erro ao processar pagamento');
+      }
+
+      const mpStatus = json.data?.status;
+      if (mpStatus === 'approved') {
+        window.location.href = `/confirmacao?method=card&status=approved`;
+      } else if (mpStatus === 'in_process' || mpStatus === 'pending') {
+        window.location.href = `/confirmacao?method=card&status=pending`;
+      } else {
+        throw new Error(json.data?.status_detail || 'Pagamento recusado. Verifique os dados do cartão.');
+      }
+    } catch (err: any) {
+      setCardError(err.message || 'Erro ao processar pagamento');
+    } finally {
+      setIsProcessingCard(false);
+    }
   };
 
   if (step !== 3) return null;
@@ -238,8 +295,22 @@ export default function CardForm({
         </button>
       </div>
 
+      {/* Erro cartão */}
+      {paymentMethod === 'card' && cardError && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-3">
+          <p className="text-red-700 text-sm">❌ {cardError}</p>
+        </div>
+      )}
+
       {/* Cartão */}
-      {paymentMethod === 'card' && (
+      {paymentMethod === 'card' && !isSdkInitialized && (
+        <div className="flex items-center justify-center py-8 gap-3 text-gray-500">
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
+          <span className="text-sm">Carregando formulário de pagamento...</span>
+        </div>
+      )}
+
+      {paymentMethod === 'card' && isSdkInitialized && (
         <CardPayment
           initialization={{
             amount: numericAmount,
@@ -315,23 +386,32 @@ export default function CardForm({
             </button>
           )}
 
+          {/* PIX pago */}
+          {pixPaid && (
+            <div className="bg-green-50 border-2 border-green-400 rounded-2xl p-6 text-center">
+              <div className="text-5xl mb-3">✅</div>
+              <p className="font-bold text-green-700 text-lg">Pagamento confirmado!</p>
+              <p className="text-green-600 text-sm mt-1">Redirecionando...</p>
+            </div>
+          )}
+
           {/* QR Code gerado */}
-          {pixData && !pixExpired && (
+          {pixData && !pixExpired && !pixPaid && (
             <div className="space-y-3">
               {/* Timer */}
               <div className={`flex items-center justify-center gap-2 py-2 px-4 rounded-xl ${
-                timeLeft < 300
+                timeLeft < 60
                   ? "bg-red-50 border border-red-200"
                   : "bg-blue-50 border border-blue-200"
               }`}>
                 <span className="text-lg">⏱️</span>
                 <span className={`font-bold text-lg ${
-                  timeLeft < 300 ? "text-red-600" : "text-blue-600"
+                  timeLeft < 60 ? "text-red-600" : "text-blue-600"
                 }`}>
                   {formatTimer(timeLeft)}
                 </span>
                 <span className={`text-sm ${
-                  timeLeft < 300 ? "text-red-500" : "text-blue-500"
+                  timeLeft < 60 ? "text-red-500" : "text-blue-500"
                 }`}>
                   para expirar
                 </span>
@@ -351,17 +431,6 @@ export default function CardForm({
                 >
                   {pixCopied ? '✅ Código copiado!' : '📋 Copiar código PIX'}
                 </button>
-
-                  {pixData.ticket_url && (
-                    <a
-                      href={pixData.ticket_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-xs text-blue-500 hover:underline mt-1"
-                    >
-                      Abrir página do pagamento
-                    </a>
-                  )}
                 <p className="text-xs text-gray-500 mt-3">
                   Escaneie o QR Code ou cole o código no app do seu banco
                 </p>
@@ -390,7 +459,7 @@ export default function CardForm({
           {!pixData && !pixExpired && (
             <div className="bg-yellow-50 rounded-xl p-3 border border-yellow-200">
               <p className="text-xs text-yellow-800 text-center">
-                ⏱️ O QR Code PIX expira em 30 minutos após gerado
+                ⏱️ O QR Code PIX expira em 5 minutos após gerado
               </p>
             </div>
           )}
