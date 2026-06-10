@@ -136,6 +136,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   // ── Step 2 — Quantidade de crianças ──────────────────────────────────────────
   function renderStep2() {
     var options = [1, 2, 3, 4, 5, 6];
+    var customSelected = childrenCount > 0 && options.indexOf(childrenCount) < 0;
     var btns = options.map(function(n) {
       var sel = childrenCount === n;
       var cls = sel
@@ -148,18 +149,34 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
       '<div class="space-y-6 pt-4">' +
         '<div class="bg-blue-50 rounded-xl p-4 border border-blue-200">' +
           '<p class="text-sm text-blue-800 font-medium mb-1">👧👦 Quantas crianças vão receber?</p>' +
-          '<p class="text-xs text-blue-600">Selecione a quantidade para continuar</p>' +
+          '<p class="text-xs text-blue-600">Selecione a quantidade ou digite outra</p>' +
         '</div>' +
         '<div id="tc-qty-grid" class="grid grid-cols-3 gap-3">' + btns + '</div>' +
+        '<div class="flex items-center gap-3">' +
+          '<div class="flex-1 h-px bg-gray-200"></div>' +
+          '<span class="text-xs text-gray-400 whitespace-nowrap">ou digite outra quantidade</span>' +
+          '<div class="flex-1 h-px bg-gray-200"></div>' +
+        '</div>' +
+        '<input id="tc-qty-custom" type="number" min="1" max="50" placeholder="Ex: 10" value="' + (customSelected ? childrenCount : "") + '"' +
+          ' class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors text-center text-xl font-bold ' +
+          (customSelected ? "border-primary" : "border-gray-200 focus:border-primary") + '" />' +
       '</div>';
 
     document.getElementById("tc-qty-grid").addEventListener("click", function(e) {
       var btn = e.target.closest(".tc-qty-btn");
       if (!btn) return;
       childrenCount = parseInt(btn.dataset.qty);
+      document.getElementById("tc-qty-custom").value = "";
       renderStep2();
       updateNextBtn();
     });
+
+    document.getElementById("tc-qty-custom").addEventListener("input", function(e) {
+      var val = parseInt(e.target.value);
+      childrenCount = (!isNaN(val) && val >= 1) ? val : 0;
+      updateNextBtn();
+    });
+
     updateNextBtn();
   }
 
