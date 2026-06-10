@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { X, Check, ChevronRight, Plus, Trash2 } from "./Icons.tsx";
+import { X, Check, ChevronRight } from "./Icons.tsx";
 
 interface ModalProps {
   isOpen: boolean;
@@ -62,6 +62,7 @@ export default function Modal({
   isCombo = false,
 }: ModalProps) {
   const [step, setStep] = useState(1);
+  const [childrenCount, setChildrenCount] = useState(0);
   const [customerData, setCustomerData] = useState<CustomerData>({
     fullName: "",
     email: "",
@@ -277,30 +278,12 @@ export default function Modal({
     setCustomerData((prev) => ({ ...prev, telefone: numbers }));
   };
 
-  const addChild = () => {
-    setChildren((prev) => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        name: "",
-        albumResult: null,
-        isSearching: false,
-        selectedAlbums: [],
-      },
-    ]);
-  };
-
-  const removeChild = (id: string) => {
-    setChildren((prev) => {
-      if (prev.length <= 1) return prev;
-      return prev.filter((c) => c.id !== id);
-    });
-  };
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
       setStep(1);
+      setChildrenCount(0);
       setCustomerData({ fullName: "", email: "", telefone: "" });
       setChildren([
         {
@@ -324,7 +307,8 @@ export default function Modal({
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
-        step > 1 ? setStep(step - 1) : onClose();
+        if (step > 1) setStep(step - 1);
+        else onClose();
       }
     };
     window.addEventListener("keydown", handleEsc);
@@ -370,7 +354,9 @@ export default function Modal({
     return isValid;
   };
 
-  const validateStep2 = () => {
+  const validateStep2 = () => childrenCount > 0;
+
+  const validateStep3 = () => {
     const hasEmpty = children.some((c) => !c.name.trim());
     if (hasEmpty) {
       alert("Por favor, preencha o nome de todas as crianças");
@@ -399,6 +385,19 @@ export default function Modal({
     if (step === 1 && validateStep1()) {
       setStep(2);
     } else if (step === 2 && validateStep2()) {
+      // Inicializa exatamente childrenCount crianças
+      setChildren(
+        Array.from({ length: childrenCount }, (_, i) => ({
+          id: `${Date.now()}-${i}`,
+          name: "",
+          albumResult: null,
+          isSearching: false,
+          selectedAlbums: [],
+        }))
+      );
+      setAlbumErrors({});
+      setStep(3);
+    } else if (step === 3 && validateStep3()) {
       localStorage.setItem(
         "orderData",
         JSON.stringify({
@@ -425,18 +424,21 @@ export default function Modal({
         onClick={() => (step === 1 ? onClose() : setStep(step - 1))}
       />
 
+
       <div className="relative max-w-md w-full bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-100 p-6 rounded-t-3xl z-10">
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl font-bold text-gray-800">
-                {step === 1 ? "Pré-checkout" : "Dados das Crianças"}
+                {step === 1 && "Pré-checkout"}
+                {step === 2 && "Quantas crianças?"}
+                {step === 3 && "Dados das Crianças"}
               </h2>
               <p className="text-sm text-gray-500 mt-1">
-                {step === 1
-                  ? "Informe seus dados para continuar"
-                  : "Adicione o nome das crianças"}
+                {step === 1 && "Informe seus dados para continuar"}
+                {step === 2 && "Selecione a quantidade de crianças"}
+                {step === 3 && `${childrenCount} ${childrenCount === 1 ? "criança" : "crianças"} — preencha os nomes`}
               </p>
             </div>
             <button
@@ -448,7 +450,7 @@ export default function Modal({
           </div>
 
           <div className="flex gap-2 mt-6">
-            {[1, 2].map((s) => (
+            {[1, 2, 3].map((s) => (
               <div
                 key={s}
                 className={`flex-1 h-1 rounded-full transition-all ${
@@ -534,8 +536,51 @@ export default function Modal({
             </div>
           )}
 
-          {/* Step 2 */}
+          {/* Step 2 — Seletor de quantidade */}
           {step === 2 && (
+            <div className="space-y-6 pt-2">
+              <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                <p className="text-sm text-blue-800 font-medium mb-1">
+                  👧👦 Para quantas crianças você quer personalizar?
+                </p>
+                <p className="text-xs text-blue-600">
+                  Você poderá adicionar os nomes na próxima etapa
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                {[1, 2, 3, 4, 5, 6].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setChildrenCount(n)}
+                    className={`flex flex-col items-center justify-center gap-2 py-5 rounded-2xl border-2 transition-all font-bold text-2xl ${
+                      childrenCount === n
+                        ? "border-primary bg-primary/10 text-primary scale-105 shadow-md"
+                        : "border-gray-200 text-gray-600 hover:border-primary/50 hover:bg-gray-50"
+                    }`}
+                  >
+                    <span>{n}</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      {n === 1 ? "criança" : "crianças"}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {childrenCount > 0 && (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-center gap-2">
+                  <Check className="h-4 w-4 text-green-600 shrink-0" />
+                  <p className="text-sm text-green-800 font-medium">
+                    {childrenCount} {childrenCount === 1 ? "criança selecionada" : "crianças selecionadas"}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 3 — Nomes das crianças */}
+          {step === 3 && (
             <div className="space-y-4">
               <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
                 <p className="text-sm text-blue-800 font-medium mb-1">
@@ -566,12 +611,6 @@ export default function Modal({
                         onChange={(e) => updateChild(child.id, e.target.value)}
                         className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none transition-colors"
                       />
-                      <button
-                        onClick={() => removeChild(child.id)}
-                        className="p-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
                     </div>
 
                     {/* Buscando */}
@@ -951,13 +990,6 @@ export default function Modal({
                 ))}
               </div>
 
-              <button
-                onClick={addChild}
-                className="w-full py-3 border-2 border-dashed border-primary text-primary rounded-xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2 font-medium"
-              >
-                <Plus className="h-5 w-5" />
-                Adicionar outra criança
-              </button>
 
               {/* Resumo do total */}
               {hasSelections && (
@@ -998,10 +1030,11 @@ export default function Modal({
         <div className="sticky bottom-0 border-t border-gray-100 p-6 bg-gray-50 rounded-b-3xl">
           <button
             onClick={handleNext}
-            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-2xl transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 shadow-lg"
+            disabled={step === 2 && childrenCount === 0}
+            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-2xl transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             <span>
-              {step === 2
+              {step === 3
                 ? hasSelections
                   ? `Ir para o Pagamento — R$ ${calcularTotal().replace(".", ",")}`
                   : "Ir para o Pagamento"

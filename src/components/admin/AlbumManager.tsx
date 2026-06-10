@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 interface Faixa {
   nome: string;
@@ -15,6 +15,8 @@ interface Album {
   campanha: string;
   tipo: 'ALBUM' | 'COMBO' | 'GRAVACAO';
   repertorio: Faixa[];
+  isOrderBump: boolean;
+  orderBumpDiscount: number;
 }
 
 interface AlbumFormData {
@@ -26,6 +28,15 @@ interface AlbumFormData {
   campanha: string;
   tipo: 'ALBUM' | 'COMBO' | 'GRAVACAO';
   repertorio: Faixa[];
+  isOrderBump: boolean;
+  orderBumpDiscount: number;
+}
+
+interface BucketImage {
+  key: string;
+  url: string;
+  lastModified?: string;
+  size?: number;
 }
 
 interface AlbumManagerProps {
@@ -41,6 +52,8 @@ const EMPTY_FORM: AlbumFormData = {
   campanha: '',
   tipo: 'ALBUM',
   repertorio: [],
+  isOrderBump: false,
+  orderBumpDiscount: 0,
 };
 
 export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) {
@@ -54,6 +67,10 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
   const [newTrack, setNewTrack] = useState('');
   const [newTrackPersonalizada, setNewTrackPersonalizada] = useState(false);
   const [formData, setFormData] = useState<AlbumFormData>(EMPTY_FORM);
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const [bucketImages, setBucketImages] = useState<BucketImage[]>([]);
+  const [loadingBucketImages, setLoadingBucketImages] = useState(false);
+  const [imagePickerSearch, setImagePickerSearch] = useState('');
 
   const API_URL = import.meta.env.PUBLIC_API_URL;
 
@@ -108,11 +125,36 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
     }
   };
 
+  const openImagePicker = useCallback(async () => {
+    setShowImagePicker(true);
+    setImagePickerSearch('');
+    if (bucketImages.length > 0) return;
+    setLoadingBucketImages(true);
+    try {
+      const response = await authenticatedFetch(`${API_URL}/api/upload/imagens-albums`);
+      if (response.ok) {
+        const result = await response.json();
+        setBucketImages(result.data ?? []);
+      }
+    } catch {
+      // silently fail — user can still upload
+    } finally {
+      setLoadingBucketImages(false);
+    }
+  }, [bucketImages.length, authenticatedFetch, API_URL]);
+
+  const handleSelectBucketImage = useCallback((url: string) => {
+    setFormData(prev => ({ ...prev, linkImgAlbum: url }));
+    setShowImagePicker(false);
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name.includes('price') ? parseFloat(value) || 0 : value,
+      [name]: type === 'checkbox'
+        ? (e.target as HTMLInputElement).checked
+        : (name.includes('price') || name === 'orderBumpDiscount') ? parseFloat(value) || 0 : value,
     }));
   };
 
@@ -162,6 +204,8 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
       campanha: album.campanha,
       tipo: album.tipo,
       repertorio: album.repertorio,
+      isOrderBump: album.isOrderBump ?? false,
+      orderBumpDiscount: album.orderBumpDiscount ?? 0,
     });
     setNewTrack('');
     setNewTrackPersonalizada(false);
@@ -260,17 +304,24 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
                 <img src={album.linkImgAlbum} alt={album.name} className="w-full h-48 object-cover" />
               )}
               <div className="p-4">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-2 flex-wrap gap-1">
                   <h3 className="font-semibold text-lg text-gray-800">{album.name}</h3>
-                  {album.tipo && (
-                    <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                      album.tipo === 'COMBO' ? 'bg-purple-100 text-purple-700'
-                      : album.tipo === 'GRAVACAO' ? 'bg-orange-100 text-orange-700'
-                      : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      {album.tipo}
-                    </span>
-                  )}
+                  <div className="flex gap-1 flex-wrap">
+                    {album.isOrderBump && (
+                      <span className="text-xs font-semibold px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">
+                        🎁 Order Bump{album.orderBumpDiscount > 0 ? ` -${album.orderBumpDiscount}%` : ''}
+                      </span>
+                    )}
+                    {album.tipo && (
+                      <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                        album.tipo === 'COMBO' ? 'bg-purple-100 text-purple-700'
+                        : album.tipo === 'GRAVACAO' ? 'bg-orange-100 text-orange-700'
+                        : 'bg-blue-100 text-blue-700'
+                      }`}>
+                        {album.tipo}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {album.campanha && (
                   <p className="text-sm text-blue-600 mb-2">Campanha: {album.campanha}</p>
@@ -377,19 +428,31 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
                     </button>
                   </div>
                 )}
-                <label className={`flex items-center justify-center gap-2 w-full px-3 py-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${uploadingImg ? 'border-blue-300 bg-blue-50 text-blue-400' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50 text-gray-500'}`}>
-                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span className="text-sm">{uploadingImg ? 'Enviando...' : formData.linkImgAlbum ? 'Substituir imagem' : 'Selecionar imagem'}</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    disabled={uploadingImg}
-                    onChange={handleImageUpload}
-                  />
-                </label>
+                <div className="flex gap-2">
+                  <label className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${uploadingImg ? 'border-blue-300 bg-blue-50 text-blue-400' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50 text-gray-500'}`}>
+                    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-sm">{uploadingImg ? 'Enviando...' : 'Upload'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploadingImg}
+                      onChange={handleImageUpload}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={openImagePicker}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border-2 border-gray-300 hover:border-purple-400 hover:bg-purple-50 text-gray-500 hover:text-purple-600 rounded-lg transition-colors text-sm"
+                  >
+                    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                    Selecionar existente
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -466,6 +529,52 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
                 </div>
               </div>
 
+              <div className="border border-yellow-200 bg-yellow-50 rounded-lg p-3 space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    name="isOrderBump"
+                    checked={formData.isOrderBump}
+                    onChange={handleInputChange}
+                    className="w-4 h-4 accent-yellow-500"
+                  />
+                  <div>
+                    <span className="text-sm font-medium text-gray-800">🎁 Marcar como Order Bump</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Oferecido no checkout para quem ainda não tem este álbum</p>
+                  </div>
+                </label>
+
+                {formData.isOrderBump && (
+                  <div className="pl-7 space-y-2">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Desconto no Order Bump (%)</label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="number"
+                          name="orderBumpDiscount"
+                          value={formData.orderBumpDiscount}
+                          onChange={handleInputChange}
+                          min={0}
+                          max={100}
+                          step={1}
+                          className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                          placeholder="0"
+                        />
+                        <span className="text-sm text-gray-500">%</span>
+                        {formData.orderBumpDiscount > 0 && formData.priceNew > 0 && (
+                          <span className="text-sm text-green-700 font-semibold">
+                            de R$ {formData.priceNew.toFixed(2)} por{' '}
+                            <span className="text-green-600 font-bold">
+                              R$ {(formData.priceNew * (1 - formData.orderBumpDiscount / 100)).toFixed(2)}
+                            </span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="flex gap-3 pt-4">
                 <button type="button" onClick={closeModal}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
@@ -477,6 +586,71 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Image Picker Modal */}
+      {showImagePicker && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+            <div className="flex justify-between items-center p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-800">Selecionar imagem do bucket</h2>
+              <button onClick={() => setShowImagePicker(false)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+            </div>
+
+            <div className="p-3 border-b border-gray-100">
+              <input
+                type="text"
+                placeholder="Filtrar por nome..."
+                value={imagePickerSearch}
+                onChange={e => setImagePickerSearch(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+              />
+            </div>
+
+            <div className="overflow-y-auto flex-1 p-4">
+              {loadingBucketImages ? (
+                <p className="text-center text-gray-400 py-8">Carregando imagens...</p>
+              ) : bucketImages.length === 0 ? (
+                <p className="text-center text-gray-400 py-8">Nenhuma imagem encontrada na pasta /album</p>
+              ) : (
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                  {bucketImages
+                    .filter(img => !imagePickerSearch || img.key.toLowerCase().includes(imagePickerSearch.toLowerCase()))
+                    .map(img => (
+                      <button
+                        key={img.key}
+                        type="button"
+                        onClick={() => handleSelectBucketImage(img.url)}
+                        className="group relative aspect-square rounded-lg overflow-hidden border-2 border-transparent hover:border-purple-500 transition-all focus:outline-none focus:border-purple-500"
+                      >
+                        <img
+                          src={img.url}
+                          alt={img.key}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-end">
+                          <p className="w-full text-white text-[10px] px-1 py-0.5 bg-black/50 truncate opacity-0 group-hover:opacity-100 transition-opacity">
+                            {img.key.replace('album/', '')}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                </div>
+              )}
+            </div>
+
+            <div className="p-3 border-t border-gray-100 text-right">
+              <button
+                type="button"
+                onClick={() => setShowImagePicker(false)}
+                className="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50"
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}

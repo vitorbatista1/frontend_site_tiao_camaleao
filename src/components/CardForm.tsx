@@ -9,7 +9,7 @@ type CardFormProps = {
   email: string;
   customerName?: string;
   cpf?: string;
-  selectedAlbums?: { albumId: string; childName: string }[];
+  selectedAlbums?: { albumId: string; childName: string; name?: string; price?: number }[];
 };
 
 interface PixData {

@@ -2,6 +2,13 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import CardForm from './CardForm.tsx';
 import { ArrowLeft, Lock, CheckCircle, Music, Heart, Zap, Gift, TrendingUp, X } from './Icons.tsx';
 
+interface GravacaoItem {
+  albumId: string;
+  childName: string;
+  name: string;
+  price: number;
+}
+
 interface OrderData {
   customerData: {
     fullName: string;
@@ -19,6 +26,7 @@ interface OrderData {
   productName: string;
   productPrice: string;
   total: string;
+  gravacaoItems?: GravacaoItem[];
 }
 
 interface OrderBump {
@@ -31,6 +39,23 @@ interface OrderBump {
   badge: string | null;
   popularText?: string;
 }
+
+interface AlbumOrderBump {
+  id: string;
+  name: string;
+  linkImgAlbum: string;
+  priceOld: number | null;
+  priceNew: number;
+  orderBumpDiscount: number;
+}
+
+interface AlbumBumpSuggestion {
+  childName: string;
+  albums: AlbumOrderBump[];
+}
+
+// Key to uniquely identify a (childName, albumId) selection
+type AlbumBumpKey = string; // `${childName}::${albumId}`
 
 const OrderBumpItem = React.memo(({
   bump,
@@ -188,11 +213,15 @@ export default function PaymentPage() {
   const [timeLeft, setTimeLeft] = useState(300);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [bumps, setBumps] = useState<OrderBump[]>([]);
+  const [albumBumpSuggestions, setAlbumBumpSuggestions] = useState<AlbumBumpSuggestion[]>([]);
+  const [selectedAlbumBumps, setSelectedAlbumBumps] = useState<Set<AlbumBumpKey>>(new Set());
 
   useEffect(() => {
     const savedData = localStorage.getItem('orderData');
+    let parsed: OrderData | null = null;
     if (savedData) {
-      setOrderData(JSON.parse(savedData));
+      parsed = JSON.parse(savedData);
+      setOrderData(parsed);
     }
 
     fetch(`${API_URL}/api/orderbumps?active=true`)
@@ -208,6 +237,38 @@ export default function PaymentPage() {
         }
       })
       .catch(() => {});
+
+    if (parsed) {
+      const cartItems = parsed.children.flatMap((child) =>
+        (child.selectedAlbums ?? []).map((albumId) => ({
+          albumId,
+          childName: child.albumResult?.display_name ?? child.name,
+        }))
+      );
+      if (cartItems.length > 0) {
+        fetch(`${API_URL}/api/albums/suggest-order-bumps`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cartItems }),
+        })
+          .then(r => r.json())
+          .then(json => {
+            if (json.success) {
+              setAlbumBumpSuggestions(
+                json.data.map((s: AlbumBumpSuggestion) => ({
+                  ...s,
+                  albums: s.albums.map((a: AlbumOrderBump) => ({
+                    ...a,
+                    priceOld: a.priceOld != null ? Number(a.priceOld) : null,
+                    priceNew: Number(a.priceNew),
+                  })),
+                }))
+              );
+            }
+          })
+          .catch(() => {});
+      }
+    }
 
     setIsLoading(false);
 
@@ -236,15 +297,37 @@ export default function PaymentPage() {
       const bump = bumps.find(b => b.id === bumpId);
       return total + (bump?.offerPrice || 0);
     }, 0);
-    return baseTotal + bumpsTotal;
-  }, [orderData, selectedBumps]);
+    const albumBumpsTotal = Array.from(selectedAlbumBumps).reduce((total, key) => {
+      const [childName, albumId] = key.split('::');
+      const suggestion = albumBumpSuggestions.find(s => s.childName === childName);
+      const album = suggestion?.albums.find(a => a.id === albumId);
+      if (!album) return total;
+      const offerPrice = album.orderBumpDiscount > 0
+        ? album.priceNew * (1 - album.orderBumpDiscount / 100)
+        : album.priceNew;
+      return total + offerPrice;
+    }, 0);
+    return baseTotal + bumpsTotal + albumBumpsTotal;
+  }, [orderData, selectedBumps, selectedAlbumBumps, albumBumpSuggestions]);
 
   const calculateSavings = useMemo(() => {
-    return selectedBumps.reduce((total, bumpId) => {
+    const bumpSavings = selectedBumps.reduce((total, bumpId) => {
       const bump = bumps.find(b => b.id === bumpId);
       return total + ((bump?.originalPrice || 0) - (bump?.offerPrice || 0));
     }, 0);
-  }, [selectedBumps]);
+    const albumBumpSavings = Array.from(selectedAlbumBumps).reduce((total, key) => {
+      const [childName, albumId] = key.split('::');
+      const suggestion = albumBumpSuggestions.find(s => s.childName === childName);
+      const album = suggestion?.albums.find(a => a.id === albumId);
+      if (!album) return total;
+      const offerPrice = album.orderBumpDiscount > 0
+        ? album.priceNew * (1 - album.orderBumpDiscount / 100)
+        : album.priceNew;
+      const basePrice = album.priceOld ?? album.priceNew;
+      return total + (basePrice - offerPrice);
+    }, 0);
+    return bumpSavings + albumBumpSavings;
+  }, [selectedBumps, bumps, selectedAlbumBumps, albumBumpSuggestions]);
 
   const formatTime = useCallback(() => {
     const minutes = Math.floor(timeLeft / 60);
@@ -261,9 +344,23 @@ export default function PaymentPage() {
     }
   }, []);
 
+  const handleToggleAlbumBump = useCallback((childName: string, albumId: string, selected: boolean) => {
+    const key: AlbumBumpKey = `${childName}::${albumId}`;
+    setSelectedAlbumBumps(prev => {
+      const next = new Set(prev);
+      if (selected) {
+        next.add(key);
+        setShowSuccessAlert(true);
+      } else {
+        next.delete(key);
+      }
+      return next;
+    });
+  }, []);
+
   const handlePaymentClick = useCallback(() => {
-    if (selectedBumps.length === 0) setShowBumpModal(true);
-  }, [selectedBumps.length]);
+    if (selectedBumps.length === 0 && selectedAlbumBumps.size === 0) setShowBumpModal(true);
+  }, [selectedBumps.length, selectedAlbumBumps.size]);
 
   const handleViewBumps = useCallback(() => {
     setShowBumpModal(false);
@@ -274,16 +371,27 @@ export default function PaymentPage() {
     return `R$ ${calculateTotalWithBumps.toFixed(2).replace('.', ',')}`;
   }, [calculateTotalWithBumps]);
 
-  // Monta selectedAlbums para o CardForm a partir dos dados das crianças
+  // Monta selectedAlbums para o CardForm: itens do carrinho + gravação + álbuns bumps selecionados
   const selectedAlbumsForPayment = useMemo(() => {
     if (!orderData) return [];
-    return orderData.children.flatMap((child) =>
+    const baseItems = orderData.children.flatMap((child) =>
       (child.selectedAlbums ?? []).map((albumId) => ({
         albumId,
         childName: child.albumResult?.display_name ?? child.name,
       }))
     );
-  }, [orderData]);
+    const gravItems = (orderData.gravacaoItems ?? []).map((item) => ({
+      albumId: item.albumId,
+      childName: item.childName,
+      name: item.name,
+      price: item.price,
+    }));
+    const bumpItems = Array.from(selectedAlbumBumps).map(key => {
+      const [childName, albumId] = key.split('::');
+      return { albumId, childName };
+    });
+    return [...baseItems, ...gravItems, ...bumpItems];
+  }, [orderData, selectedAlbumBumps]);
 
   if (isLoading) {
     return (
@@ -343,7 +451,7 @@ export default function PaymentPage() {
         {/* Coluna esquerda */}
         <div className="space-y-6">
           {/* Order Bumps */}
-          <div id="order-bumps" className="scroll-mt-4">
+          {(bumps.length > 0 || albumBumpSuggestions.length > 0) && <div id="order-bumps" className="scroll-mt-4">
             {timeLeft > 0 && (
               <div className="bg-gradient-to-r from-red-500 to-orange-500 rounded-t-2xl p-3 text-white text-center animate-pulse">
                 <div className="flex items-center justify-center gap-2">
@@ -385,7 +493,92 @@ export default function PaymentPage() {
                 ))}
               </div>
 
-              {selectedBumps.length > 0 && (
+              {/* Álbuns Order Bump por pessoa */}
+              {albumBumpSuggestions.length > 0 && (
+                <div className="mt-4 space-y-4">
+                  <div className="border-t border-yellow-300 pt-4">
+                    <p className="text-center text-sm font-bold text-gray-700 mb-3">
+                      🎵 Álbuns complementares para seus filhos
+                    </p>
+                    {albumBumpSuggestions.map((suggestion) =>
+                      suggestion.albums.map((album) => {
+                        const key: AlbumBumpKey = `${suggestion.childName}::${album.id}`;
+                        const isSelected = selectedAlbumBumps.has(key);
+                        const offerPrice = album.orderBumpDiscount > 0
+                          ? album.priceNew * (1 - album.orderBumpDiscount / 100)
+                          : album.priceNew;
+                        const basePrice = album.priceOld ?? album.priceNew;
+                        const savingsPct = album.orderBumpDiscount > 0
+                          ? album.orderBumpDiscount
+                          : album.priceOld
+                            ? Math.round(((album.priceOld - album.priceNew) / album.priceOld) * 100)
+                            : null;
+                        return (
+                          <div
+                            key={key}
+                            className={`relative rounded-2xl p-4 cursor-pointer transition-all duration-300 ${
+                              isSelected
+                                ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-400 shadow-lg scale-[1.02]'
+                                : 'bg-white border-2 border-gray-200 hover:border-yellow-300 hover:shadow-md'
+                            }`}
+                            onClick={() => handleToggleAlbumBump(suggestion.childName, album.id, !isSelected)}
+                          >
+                            {savingsPct !== null && (
+                              <div className="absolute -top-3 -right-3 z-10">
+                                <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg">
+                                  🔥 -{savingsPct}% OFF
+                                </div>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-3">
+                              {album.linkImgAlbum && (
+                                <img
+                                  src={album.linkImgAlbum}
+                                  alt={album.name}
+                                  className={`w-16 h-16 rounded-xl object-cover flex-shrink-0 transition-transform ${isSelected ? 'scale-110' : ''}`}
+                                />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                  <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs font-bold">
+                                    Para {suggestion.childName}
+                                  </span>
+                                  {isSelected && <CheckCircle className="h-4 w-4 text-green-500" />}
+                                </div>
+                                <p className="font-bold text-gray-900 text-sm truncate">{album.name}</p>
+                                <div className="flex items-baseline gap-2 mt-1 flex-wrap">
+                                  {offerPrice < basePrice && (
+                                    <span className="text-gray-400 line-through text-xs">
+                                      R$ {basePrice.toFixed(2)}
+                                    </span>
+                                  )}
+                                  <span className="text-lg font-bold text-green-600">
+                                    R$ {offerPrice.toFixed(2)}
+                                  </span>
+                                  {offerPrice < basePrice && (
+                                    <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">
+                                      Economize R$ {(basePrice - offerPrice).toFixed(2)}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex-shrink-0">
+                                <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
+                                  isSelected ? 'bg-green-500 border-green-500 shadow-md' : 'border-gray-400 bg-white'
+                                }`}>
+                                  {isSelected && <CheckCircle className="h-4 w-4 text-white" />}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {(selectedBumps.length > 0 || selectedAlbumBumps.size > 0) && (
                 <div className="mt-4 bg-gradient-to-r from-green-100 to-emerald-100 border-l-4 border-green-500 rounded-xl p-4">
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-6 w-6 text-green-600" />
@@ -396,7 +589,7 @@ export default function PaymentPage() {
                 </div>
               )}
             </div>
-          </div>
+          </div>}
 
           {/* Resumo do Pedido */}
           <div className="bg-white rounded-3xl shadow-xl overflow-hidden sticky top-6">
@@ -432,14 +625,21 @@ export default function PaymentPage() {
                   ))}
                 </div>
                 {/* Álbuns selecionados por criança */}
-                {orderData.children.some(c => (c.selectedAlbums ?? []).length > 0) && (
+                {(orderData.children.some(c => (c.selectedAlbums ?? []).length > 0) || (orderData.gravacaoItems ?? []).length > 0) && (
                   <div className="mt-2 space-y-1">
                     {orderData.children.map((child) => {
-                      if (!child.selectedAlbums?.length) return null;
+                      const childDisplay = child.albumResult?.display_name ?? child.name;
+                      const digitalAlbums = child.selectedAlbums ?? [];
+                      const gravItems = (orderData.gravacaoItems ?? []).filter(g => g.childName === childDisplay);
+                      if (!digitalAlbums.length && !gravItems.length) return null;
+                      const allNames = [
+                        ...digitalAlbums.map(id => id),
+                        ...gravItems.map(g => `${g.name} (R$ ${g.price.toFixed(2).replace('.', ',')})`),
+                      ];
                       return (
                         <p key={child.id} className="text-xs text-gray-500">
-                          <span className="font-medium">{child.albumResult?.display_name ?? child.name}:</span>{' '}
-                          {child.selectedAlbums.join(', ')}
+                          <span className="font-medium">{childDisplay}:</span>{' '}
+                          {allNames.join(', ')}
                         </p>
                       );
                     })}
@@ -450,7 +650,7 @@ export default function PaymentPage() {
                 )}
               </div>
 
-              {selectedBumps.length > 0 && (
+              {(selectedBumps.length > 0 || selectedAlbumBumps.size > 0) && (
                 <div className="border-b border-gray-100 pb-4">
                   <h3 className="font-semibold text-gray-700 mb-2">🎁 Bônus adicionados</h3>
                   <div className="space-y-1">
@@ -460,6 +660,21 @@ export default function PaymentPage() {
                         <div key={bumpId} className="flex justify-between text-sm">
                           <span>{bump?.title}</span>
                           <span className="text-green-600 font-bold">+ R$ {bump?.offerPrice.toFixed(2)}</span>
+                        </div>
+                      );
+                    })}
+                    {Array.from(selectedAlbumBumps).map(key => {
+                      const [childName, albumId] = key.split('::');
+                      const suggestion = albumBumpSuggestions.find(s => s.childName === childName);
+                      const album = suggestion?.albums.find(a => a.id === albumId);
+                      if (!album) return null;
+                      const offerPrice = album.orderBumpDiscount > 0
+                        ? album.priceNew * (1 - album.orderBumpDiscount / 100)
+                        : album.priceNew;
+                      return (
+                        <div key={key} className="flex justify-between text-sm">
+                          <span>{album.name} <span className="text-purple-600 text-xs">(para {childName})</span></span>
+                          <span className="text-green-600 font-bold">+ R$ {offerPrice.toFixed(2)}</span>
                         </div>
                       );
                     })}
