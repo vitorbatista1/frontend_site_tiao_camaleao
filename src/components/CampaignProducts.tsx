@@ -1,6 +1,6 @@
 // CampaignProducts.tsx
-import { useEffect, useState } from 'react';
-import { ShoppingCart, Play } from "./Icons.tsx";
+import { useEffect, useRef, useState } from 'react';
+import { ShoppingCart, Play, Pause } from "./Icons.tsx";
 
 const API_URL = import.meta.env.PUBLIC_API_URL;
 
@@ -31,6 +31,8 @@ interface Props {
 export default function CampaignProducts({ campaignId }: Props) {
   const [albums, setAlbums] = useState<AlbumAPI[]>([]);
   const [loading, setLoading] = useState(true);
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const currentAudio = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     fetch(`${API_URL}/api/albums`)
@@ -48,8 +50,8 @@ export default function CampaignProducts({ campaignId }: Props) {
   }, [campaignId]);
 
   return (
-    <section id="produtos" style={{ background: "#6ab248" }} className="py-14 px-4">
-      <h2 className="text-center text-white mb-16" style={{ fontSize: "clamp(26px, 6vw, 48px)", fontWeight: 800 }}>
+    <section id="produtos" style={{ background: "#6ab248", paddingBottom: typeof window !== 'undefined' && window.innerWidth >= 768 ? "10rem" : "3.5rem" }} className="pt-14 px-4">
+      <h2 className="text-center text-white mb-6 md:mb-16" style={{ fontSize: "34px", fontWeight: 800 }}>
         Nossos produtos
       </h2>
 
@@ -69,19 +71,90 @@ export default function CampaignProducts({ campaignId }: Props) {
               className="bg-white rounded-3xl flex flex-col items-center w-full md:w-[340px]"
               style={{ paddingBottom: "1.5rem" }}
             >
-              {/* Capa do álbum — sai do card com margem negativa */}
-              <div className="w-full flex justify-center" style={{ marginTop: "-3.5rem" }}>
+
+              {/* ── MOBILE: imagem esquerda + áudio/título/preço direita ── */}
+              <div className="flex md:hidden w-full items-start">
+                {/* Imagem à esquerda */}
+                <div className="w-[52%] flex-shrink-0 flex justify-end pr-0">
+                  <img
+                    src={album.linkImgAlbum}
+                    alt={album.name}
+                    width={448}
+                    height={448}
+                    className="w-[90%] object-contain rounded-tl-3xl ml-auto mt-6"
+                  />
+                </div>
+                {/* Direita: botão ouvir + título + preço */}
+                <div className="flex-1 flex flex-col items-start justify-start pt-12 pl-1 pr-2 gap-2">
+                  <div
+                    className="rounded-xl flex flex-col px-3 py-2 gap-1"
+                    style={{ background: "#F2C200" }}
+                  >
+                    <span className="font-bold" style={{ fontSize: "14px", lineHeight: 1, color: "#555" }}>Clique para ouvir</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="h-8 w-8 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow"
+                        aria-label="Ouvir amostra"
+                        onClick={() => {
+                          if (!album.linkAmostra) return;
+                          if (playingId === album.id) {
+                            currentAudio.current?.pause();
+                            setPlayingId(null);
+                            return;
+                          }
+                          currentAudio.current?.pause();
+                          const audio = new Audio(album.linkAmostra);
+                          currentAudio.current = audio;
+                          audio.play().catch(() => {});
+                          setPlayingId(album.id);
+                          audio.onended = () => setPlayingId(null);
+                        }}
+                      >
+                        {playingId === album.id
+                          ? <Pause className="h-4 w-4 fill-[#F2C200] text-[#F2C200]" />
+                          : <Play className="h-4 w-4 fill-[#F2C200] text-[#F2C200] ml-0.5" />
+                        }
+                      </button>
+                      <svg viewBox="0 0 80 28" style={{ width: "70px", height: "22px" }}>
+                        {[6,10,18,9,16,22,14,7,18,13,20,9,14,7,18,11].map((h, k) => (
+                          <rect
+                            key={k}
+                            x={k * 5}
+                            y={(28 - h) / 2}
+                            width="3"
+                            height={h}
+                            rx="1.5"
+                            fill="#888"
+                            opacity="0.85"
+                            style={playingId === album.id ? {
+                              animation: `wave ${0.6 + (k % 4) * 0.15}s ease-in-out infinite alternate`,
+                              transformOrigin: 'center',
+                            } : {}}
+                          />
+                        ))}
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-0 mt-6">
+                    <h3 className="text-gray-800" style={{ fontSize: "22px", fontWeight: 800, lineHeight: 1.1 }}>{album.name}</h3>
+                    <span className="text-[#FF0000]" style={{ fontSize: "28px", fontWeight: 800, lineHeight: 1 }}>
+                      R$ {priceNew % 1 === 0 ? Math.floor(priceNew) : priceNew.toFixed(2).replace('.', ',')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── DESKTOP: layout original ── */}
+              <div className="hidden md:flex w-full justify-center" style={{ marginTop: "-3.5rem" }}>
                 <img
                   src={album.linkImgAlbum}
                   alt={album.name}
                   width={448}
                   height={448}
-                  className="w-48 md:w-56 object-contain"
+                  className="w-56 object-contain"
                 />
               </div>
-
-              {/* Título e preço */}
-              <div className="text-center mt-2 px-6">
+              <div className="hidden md:block text-center mt-2 px-6">
                 <h3 className="text-gray-800" style={{ fontSize: "clamp(20px, 4vw, 30px)", fontWeight: 800 }}>{album.name}</h3>
                 <p className="mt-0.5">
                   {priceOld > priceNew && (
@@ -95,17 +168,16 @@ export default function CampaignProducts({ campaignId }: Props) {
                 </p>
               </div>
 
-              {/* Lista de faixas — flex-1 para empurrar botões pro fim */}
-              <div className="mt-4 px-8 w-full flex-1">
+              {/* Lista de faixas */}
+              <div className="mt-4 pr-8 pl-12 md:pl-4 w-full flex-1">
                 {tracks.length > 0 && (
                   <>
-                    <p className="text-gray-500 mb-1" style={{ fontSize: "14px", fontWeight: 500 }}>Repertório:</p>
-                    <ol className="w-full space-y-1 list-none" style={{ fontSize: "14px", fontWeight: 500 }}>
+                    <ol className="w-full space-y-0.5 list-none" style={{ fontSize: "14px", fontWeight: 500 }}>
                       {tracks.map((faixa, j) => (
-                        <li key={j} className="flex gap-1">
-                          <span className="text-gray-700 shrink-0">{j + 1}</span>
+                        <li key={j} className="flex gap-6">
+                          <span className="text-gray-700 shrink-0 text-right" style={{ minWidth: "1.4em", fontVariantNumeric: "tabular-nums" }}>{j + 1}</span>
                           {faixa.personalizada ? (
-                            <span className="text-black" style={{ fontWeight: 800 }}>
+                            <span className="text-black md:whitespace-nowrap" style={{ fontWeight: 800 }}>
                               {faixa.nome} – personalizada
                             </span>
                           ) : (
@@ -115,15 +187,15 @@ export default function CampaignProducts({ campaignId }: Props) {
                       ))}
                     </ol>
                   </>
-                )}
+                )} 
               </div>
 
               {/* Divider + nota */}
               <div className="mt-4 w-full px-8">
                 <hr className="border-red-400 border-t-2" />
                 <p className="mt-3 text-center whitespace-pre-line leading-snug">
-                  <span className="text-red-500" style={{ fontSize: "clamp(16px, 3.5vw, 22px)", fontWeight: 800 }}>
-                    São 7 cantigas personalizadas
+                  <span className="text-red-500" style={{ fontSize: "22px", fontWeight: 800 }}>
+                     7 cantigas personalizadas
                   </span>
                   <br />
                   <span className="text-gray-500" style={{ fontSize: "16px", fontWeight: 600 }}>
@@ -132,25 +204,52 @@ export default function CampaignProducts({ campaignId }: Props) {
                 </p>
               </div>
 
-              {/* Botão de áudio */}
+              {/* Botão de áudio — desktop */}
               <div
-                className="mt-4 mx-auto w-fit rounded-2xl flex items-center gap-2 px-4 py-1.5"
+                className="hidden md:flex mt-4 mx-auto w-fit rounded-2xl flex-col px-4 py-2 gap-1"
                 style={{ background: "#F2C200" }}
               >
-                <button
-                  className="h-8 w-8 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow"
-                  aria-label="Ouvir amostra"
-                  onClick={() => {
-                    if (album.linkAmostra) new Audio(album.linkAmostra).play().catch(() => {});
-                  }}
-                >
-                  <Play className="h-4 w-4 fill-[#F2C200] text-[#F2C200] ml-0.5" />
-                </button>
-                <div className="flex flex-col flex-1">
-                  <span className="text-xs font-bold text-white">Clique para ouvir</span>
-                  <svg viewBox="0 0 120 20" className="w-full h-4 mt-0.5">
-                    {[4,8,14,6,12,16,10,5,13,9,15,7,11,6,14,8,12,5,10,16,7,13,9,11,6].map((h, k) => (
-                      <rect key={k} x={k * 5} y={(20 - h) / 2} width="3" height={h} rx="1.5" fill="white" opacity="0.85" />
+                <span className="font-bold text-center" style={{ fontSize: "13px", lineHeight: 1, color: "#555" }}>Clique para ouvir</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    className="h-8 w-8 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow"
+                    aria-label="Ouvir amostra"
+                    onClick={() => {
+                      if (!album.linkAmostra) return;
+                      if (playingId === album.id) {
+                        currentAudio.current?.pause();
+                        setPlayingId(null);
+                        return;
+                      }
+                      currentAudio.current?.pause();
+                      const audio = new Audio(album.linkAmostra);
+                      currentAudio.current = audio;
+                      audio.play().catch(() => {});
+                      setPlayingId(album.id);
+                      audio.onended = () => setPlayingId(null);
+                    }}
+                  >
+                    {playingId === album.id
+                      ? <Pause className="h-4 w-4 fill-[#F2C200] text-[#F2C200]" />
+                      : <Play className="h-4 w-4 fill-[#F2C200] text-[#F2C200] ml-0.5" />
+                    }
+                  </button>
+                  <svg viewBox="0 0 80 28" style={{ width: "70px", height: "22px" }}>
+                    {[6,10,18,9,16,22,14,7,18,13,20,9,14,7,18,11].map((h, k) => (
+                      <rect
+                        key={k}
+                        x={k * 5}
+                        y={(28 - h) / 2}
+                        width="3"
+                        height={h}
+                        rx="1.5"
+                        fill="#888"
+                        opacity="0.85"
+                        style={playingId === album.id ? {
+                          animation: `wave ${0.6 + (k % 4) * 0.15}s ease-in-out infinite alternate`,
+                          transformOrigin: 'center',
+                        } : {}}
+                      />
                     ))}
                   </svg>
                 </div>

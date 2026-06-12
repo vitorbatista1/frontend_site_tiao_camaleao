@@ -18,6 +18,7 @@
 
 @layer base {
   :root {
+    color-scheme: light only;
     --background: 48 100% 97%;
     --foreground: 220 35% 18%;
 
@@ -147,11 +148,11 @@
 .btn-red-rounded {
   background: #ff0000;
   color: white;
-  font-weight: 500;
-  font-size: 16px;
-  letter-spacing: 0.04em;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.06em;
 
-  padding: clamp(9px, 1.5vw, 10px) clamp(18px, 4vw, 34px);
+  padding: clamp(8px, 1.5vw, 10px) clamp(18px, 3.5vw, 30px);
   border-radius: 9999px;
 
   display: inline-flex;
@@ -187,16 +188,28 @@
 @media (max-width: 767px) {
   .hero-img {
     width: 100%;
-    transform: scale(2.4);
+    transform: scale(2.0) translateX(28px) translateY(5px);
     transform-origin: center bottom;
     margin-top: auto;
-    margin-bottom: -16rem;
+    margin-bottom: -10rem;
   }
 }
 
+.hero-wrapper {
+  min-height: 100dvh;
+}
+
 @media (max-width: 767px) {
+  .hero-wrapper {
+    min-height: 82dvh;
+  }
   .hero-header {
     padding-bottom: 5rem;
+  }
+  .hero-title {
+    letter-spacing: 0.05em;
+    word-spacing: 0.15em;
+    white-space: nowrap;
   }
 }
 
@@ -207,17 +220,11 @@
   .hero-img {
     height: clamp(620px, 74vw, 880px);
   }
-}
-
-@media (min-width: 768px) {
-  .benefits-bg {
-    background-image: url('/imagens/benefits/fundo_benefits.png');
-    background-size: contain;
-    background-position: 45% center;
-    background-repeat: no-repeat;
-    opacity: 0.6;
+  #produtos {
+    padding-bottom: 10rem !important;
   }
 }
+
 
 /* ── Scroll animations ─────────────────────────────────────────── */
 .fade-up {
@@ -260,4 +267,21 @@
 }
 .btn-cta-glow {
   animation: cta-glow 2.2s ease-out infinite;
+}
+
+@keyframes wave {
+  0%   { transform: scaleY(0.4); }
+  100% { transform: scaleY(1.4); }
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14%       { transform: scale(1.22); }
+  28%       { transform: scale(1); }
+  42%       { transform: scale(1.15); }
+  56%       { transform: scale(1); }
+}
+.heartbeat {
+  animation: heartbeat 1.4s ease-in-out infinite;
+  transform-origin: center;
 }

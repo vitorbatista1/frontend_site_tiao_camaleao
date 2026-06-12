@@ -11,15 +11,15 @@ import {
   Star, ChevronLeft, ChevronRight, ShoppingCart
 } from "../components/Icons.tsx";
 
-import kidHeadphones from "../../public/imagens/menino.png";
-import musician from "../../public/imagens/musico_.png";
+import kidHeadphones from "../../public/imagens/kid-headphones2.png";
+import musician from "../../public/imagens/musico1.png";
 import familyCollage from "../../public/imagens/familia.png";
 import studio from "../../public/imagens/studio.png";
 import listMusicas from "../../public/imagens/list_studio.png";
 import criancasHero from "../../public/imagens/criancas_hero.png";
 import logoImg from "../../public/imagens/logo.png";
 import mascoteImg from "../../public/imagens/mascote.png";
-import cantorNomesImg from "../../public/imagens/cantor_nomes.png";
+import cantorNomesImg from "../../public/imagens/cantor_nomes2.png";
 import tiaoDuvidaImg from "../../public/imagens/tiao_duvida.png";
 
 import rostoFeliz from "../../public/imagens/benefits/emoji_feliz.png";
@@ -95,6 +95,7 @@ const year = new Date().getFullYear();
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
     <title>Tião Camaleão – Cantigas com o nome da criança</title>
     <meta
       name="description"
@@ -123,12 +124,12 @@ const year = new Date().getFullYear();
     <div class="min-h-screen overflow-x-hidden bg-background">
 
       <!-- TOP STRIP + HERO ocupam 100% da tela -->
-<div style="min-height: 100dvh; display: flex; flex-direction: column;">
+<div class="hero-wrapper" style="display: flex; flex-direction: column;">
 
 <!-- TOP STRIP -->
 <div
-  class="py-3 md:py-5 text-center font-normal uppercase tracking-widest"
-  style="background-color: #69B34C; color: #fff;"
+  class="md:py-5 text-center font-normal uppercase tracking-widest"
+  style="background-color: #69B34C; color: #fff; padding-top: 3px; padding-bottom: 3px;"
 >
 <span style="color: #F2E300; font-size: 13px;">💛</span>
 <span style="font-size: clamp(11px, 3.5vw, 20px); white-space: nowrap;">
@@ -139,7 +140,7 @@ const year = new Date().getFullYear();
 <!-- HERO -->
 <header class="hero-header relative bg-white flex flex-col" style="flex: 1;">
   <!-- Logo centralizada no topo, dentro do hero -->
-  <div class="relative z-10 w-full flex justify-center pt-4 pb-2">
+  <div class="relative z-10 w-full flex justify-center pt-0 pb-1 md:pt-4 md:pb-2">
     <Image
       src={logoImg}
       alt="Tião Camaleão"
@@ -153,7 +154,7 @@ const year = new Date().getFullYear();
   </div>
 
   <!-- Texto do hero -->
-  <div class="relative z-10 container flex items-start md:items-center flex-none md:flex-1 pt-6 pb-6 md:py-10">
+  <div class="relative z-10 container flex items-start md:items-center flex-none md:flex-1 pt-1 pb-6 md:py-10">
     <div class="w-full md:max-w-[55%] text-center md:text-left">
       <p
         class="font-normal uppercase tracking-widest mb-3"
@@ -163,7 +164,7 @@ const year = new Date().getFullYear();
       </p>
 
       <h1
-        class="font-black leading-tight"
+        class="font-black leading-tight hero-title"
         style="font-size: clamp(30px, 9vw, 60px); color: #333; line-height: 1.05;"
       >
         Cantigas com o<br />nome da criança
@@ -219,20 +220,22 @@ const year = new Date().getFullYear();
 >
   <div class="container grid items-center gap-4 md:grid-cols-2">
 
-    <!-- IMAGEM -->
-    <div class="relative mx-auto w-full flex justify-end">
-      <Image
-        src={kidHeadphones}
-        alt="Criança ouvindo cantigas com fone amarelo"
-        width={600}
-        height={600}
-        class="w-full max-w-sm md:max-w-md h-auto object-contain"
-        loading="lazy"
-      />
-    </div>
+<!-- IMAGEM -->
+<div class="relative mx-auto w-full flex justify-center overflow-visible pointer-events-none">
+  <Image
+    src={kidHeadphones}
+    alt="Criança ouvindo cantigas com fone amarelo"
+    width={1920}
+    height={1080}
+    quality={100}
+    format="webp"
+    class="w-full max-w-none md:scale-[1.8] lg:scale-[2.2] origin-center h-auto object-contain"
+    loading="lazy"
+  />
+</div>
 
     <!-- TEXTO -->
-    <div class="text-primary-foreground text-center md:text-left">
+    <div class="relative z-10 text-primary-foreground text-center md:text-left">
       <h2
         class="leading-tight"
         aria-label="Um presente para ouvir hoje"
@@ -247,13 +250,10 @@ const year = new Date().getFullYear();
 
       <a
         href="#produtos"
-        class="btn-pop mt-7"
+        class="btn-red-rounded mt-7"
         aria-label="Quero ouvir"
-        style="background: #e53e3e; color: #fff; box-shadow: 0 6px 0 0 #9b1c1c;"
-        data-buy
-        data-buy-name="Cantigas Personalizadas"
       >
-        Quero ouvir
+        QUERO OUVIR
       </a>
     </div>
 
@@ -264,42 +264,49 @@ const year = new Date().getFullYear();
       <section id="amostra" class="relative w-full" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
 
         <!-- Faixa azul escura: título + celular (celular vaza 100px sobre o azul claro) -->
-        <div class="w-full pt-12 pb-0 md:pt-16" style="background: #00AEEF;">
-          <div class="container max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-stretch md:items-end justify-between gap-8">
+        <div class="w-full pt-12 pb-10 md:pb-0 md:pt-16" style="background: #00AEEF;">
+          <div class="container max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-stretch md:items-end justify-between gap-3 md:gap-8">
 
             <!-- Título -->
-            <div class="w-full flex-1 text-center md:text-right text-white pb-6 md:pb-10">
+            <div class="w-full flex-1 text-center md:text-right text-white pb-2 md:pb-10">
               <p class="mb-2 uppercase tracking-widest" style="color: #FFFFFF; font-size: clamp(13px, 2.5vw, 18px); font-weight: 400;">
                 Veja a reação quando a
               </p>
-              <h2 class="leading-tight" style="font-size: clamp(26px, 6vw, 48px); font-weight: 800;" aria-label="Criança ouve o próprio nome na música">
+              <h2 class="leading-tight" style="font-size: clamp(32px, 6vw, 48px); font-weight: 800;" aria-label="Criança ouve o próprio nome na música">
                 Criança ouve o<br />próprio nome<br />na música
               </h2>
             </div>
 
             <!-- Celular: vaza 100px para dentro do azul claro -->
             <div class="w-full flex-1 flex justify-center md:justify-start relative z-10 md:-mb-[100px]">
-              <div class="relative p-3 rounded-[2.5rem] shadow-2xl w-52 md:w-72" style="background: #1D4ED8;">
-                <div class="relative overflow-hidden rounded-[2rem] bg-black" style="aspect-ratio: 9/16;">
-                  <video
-                    id="hero-video"
-                    src="https://pub-18a54ea1b0da4af78a932befd1b519d6.r2.dev/videos/video.mp4"
-                    class="absolute inset-0 w-full h-full object-cover"
-                    playsinline
-                    preload="metadata"
-                  ></video>
-                  <div
-                    id="hero-play-btn"
-                    class="absolute inset-0 flex items-center justify-center cursor-pointer"
-                  >
-                    <button
-                      type="button"
-                      aria-label="Reproduzir vídeo"
-                      class="grid h-16 w-16 place-items-center rounded-full shadow-lg transition-transform hover:scale-110"
-                      style="background: #FF3B30;"
+              <div class="relative pt-2 px-2 pb-7 rounded-xl shadow-2xl w-52 md:w-72" style="background: #1D4ED8;">
+                <div class="relative">
+                  <div class="relative overflow-hidden rounded-none bg-black" style="aspect-ratio: 9/16;">
+                    <video
+                      id="hero-video"
+                      src="https://pub-18a54ea1b0da4af78a932befd1b519d6.r2.dev/videos/video.mp4"
+                      class="absolute inset-0 w-full h-full object-cover"
+                      playsinline
+                      preload="metadata"
+                    ></video>
+                    <div
+                      id="hero-play-btn"
+                      class="absolute inset-0 flex items-center justify-center cursor-pointer"
                     >
-                      <Play className="h-8 w-8 fill-white text-white ml-1" />
-                    </button>
+                      <button
+                        type="button"
+                        aria-label="Reproduzir vídeo"
+                        class="grid h-16 w-16 place-items-center rounded-full shadow-lg transition-transform hover:scale-110"
+                        style="background: #FF3B30;"
+                      >
+                        <Play className="h-8 w-8 fill-white text-white ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                  <div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-10">
+                    <svg class="heartbeat" xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="#FF0000" stroke="#FF0000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 1.5A5.48 5.48 0 0 0 7.5 3C4.47 3 2 5.47 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                    </svg>
                   </div>
                 </div>
               </div>
@@ -313,8 +320,8 @@ const year = new Date().getFullYear();
   <div class="container max-w-6xl mx-auto px-6 flex flex-col md:flex-row gap-4 md:gap-6">
     <!-- Coluna esquerda: alinhada ao título acima -->
     <div class="w-full flex-1 text-center md:text-right pt-2 md:pt-[60px]">
-      <h3 style="color: #1D4ED8; font-size: clamp(13px, 2.5vw, 18px); font-weight: 800;" aria-label="Quer ver a reação da sua criança?">
-        Quer ver a reação da SUA CRIANÇA?
+      <h3 style="color: #1D4ED8; font-size: 17px; font-weight: 400; white-space: nowrap;" aria-label="Quer ver a reação da sua criança?">
+        Quer ver a reação da <strong style="font-weight: 800;">SUA CRIANÇA?</strong>
       </h3>
       <p class="mt-1" style="color: #1D4ED8; font-size: 14px; font-weight: 600;">
         Clique no botão abaixo e receba uma cantiga.
@@ -349,48 +356,64 @@ const year = new Date().getFullYear();
       > -->
 
       <section
-        class="relative py-20"
+        class="relative pt-10 pb-20"
         style="background-color: #ffffff;"
       >
       <div class="benefits-bg absolute inset-0 pointer-events-none"></div>
 <div class="container">
 <div class="text-center mb-16">
-  <p class="uppercase tracking-widest" style="color: #9CA3AF; letter-spacing: 0.18em; font-size: clamp(13px, 2.5vw, 18px); font-weight: 400;">
+  <p class="uppercase tracking-widest" style="color: #9CA3AF; letter-spacing: 0.18em; font-size: clamp(13px, 2.5vw, 18px); font-weight: 700;">
     Porque as famílias amam
   </p>
-  <h2 class="mt-2 leading-tight" style="font-size: clamp(26px, 6vw, 48px); font-weight: 800; color: #6B7280;">
+  <h2 class="mt-2 leading-tight whitespace-nowrap" style="font-size: clamp(28px, 6vw, 65px); font-weight: 800; color: #6B7280;">
     Muito mais que cantigas
   </h2>
 </div>
-<div class="grid gap-x-6 gap-y-16 grid-cols-1 md:grid-cols-2 max-w-2xl mx-auto justify-items-center">
+<div class="grid gap-x-6 gap-y-10 grid-cols-1 md:grid-cols-2 max-w-2xl mx-auto justify-items-center">
   {
     benefits.map(({ icon, title, text }) => (
       <article
-        class="card-pop border-2 rounded-[32px] transition-all hover:scale-[1.02] relative bg-white w-full max-w-[260px] min-h-[220px] mx-auto px-4 pt-12 pb-6 flex flex-col items-center text-center"
-        style={{ borderColor: "#6ab248" }}
+        class="card-pop border-2 rounded-lg transition-all hover:scale-[1.02] relative bg-white w-full max-w-[260px] md:max-w-full px-4 pt-10 pb-4 flex flex-col items-center text-center"
+        style={{ borderColor: "#b8dfa0", boxShadow: "none" }}
       >
-        <div class="absolute -top-10 left-0 right-0 flex justify-center">
+        <div class="absolute -top-8 left-0 right-0 flex justify-center">
           <Image
             src={icon}
             alt=""
-            width={96}
-            height={96}
+            width={72}
+            height={72}
             quality={45}
-            class="h-[96px] w-[96px] object-contain"
+            class="h-[72px] w-[72px] object-contain"
             loading="lazy"
           />
         </div>
 
-        <h3 class="text-gray-700 leading-tight mt-5" style="font-size: clamp(16px, 3vw, 22px); font-weight: 800;">
+        <h3 class="text-gray-700 leading-tight mt-2" style="font-size: clamp(16px, 3vw, 22px); font-weight: 800;">
           {title}
         </h3>
 
-        <p class="mt-4 text-gray-600 leading-relaxed" style="font-size: 14px; font-weight: 600;">
+        <p class="mt-2 text-gray-600 leading-relaxed" style="font-size: 14px; font-weight: 600;">
           {text}
         </p>
       </article>
     ))
   }
+</div>
+<div class="flex justify-center mt-12">
+  <a
+    href="#produtos"
+    class="btn-red-rounded"
+    data-buy
+    data-buy-name="Cantigas Personalizadas"
+    data-buy-price="R$ 47,00"
+  >
+    QUERO COMPRAR
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="21" r="1"></circle>
+      <circle cx="20" cy="21" r="1"></circle>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+    </svg>
+  </a>
 </div>
 </div>
       </section>
@@ -462,50 +485,55 @@ const year = new Date().getFullYear();
               
               <div class="z-20 flex flex-col items-center text-center md:items-end md:text-right md:w-1/2 md:pr-4">
                 
-                  <h2 class="leading-[1.1] text-[#4D4D4D]" style="font-size: clamp(26px, 6vw, 48px); font-weight: 800;">
-                    Já cantamos mais de<br />
-                    2.000 nomes
+                  <h2 class="leading-[1.1] text-[#4D4D4D]" style="font-size: clamp(36px, 6vw, 58px); font-weight: 800;">
+                    <span class="md:hidden">Já cantamos mais<br />de 2.000 nomes</span>
+                    <span class="hidden md:inline">Já cantamos mais de<br />2.000 nomes</span>
                   </h2>
 
-                <p class="mt-6 leading-relaxed text-[#666666] max-w-[450px]" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 600;">
-                    Temos um grande acervo gravado em estúdio,
-                    incluindo nomes raros, compostos, apelidos e
-                    até nomes estrangeiros
+                <p class="mt-6 leading-relaxed text-[#666666] max-w-[450px]" style="font-size: 17.5px; font-weight: 600;">
+                    Temos um grande acervo gravado<br />
+                    em estúdio, incluindo nomes<br />
+                    raros, compostos, apelidos e até<br />
+                    nomes estrangeiros
                 </p>
 
-                  <div class="mt-8 inline-block rounded-full bg-[#00AEEF] px-6 py-2 text-white shadow-md">
+                  <div class="mt-2 inline-block rounded-full bg-[#00AEEF] px-6 py-2 text-white shadow-md">
                     <p style="font-size: clamp(16px, 3.5vw, 24px); font-weight: 800;">
                       E se não tiver o nome que eu quero?
                     </p>
                   </div>
 
-                <p class="mt-4 text-[#666666] max-w-[420px]" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 600;">
-                  Sem problema! Nós fazemos a gravação personalizada do nome sob encomenda, com entrega em até 7 dias e um pequeno acréscimo de estúdio.
+                <p class="mt-4 text-[#666666] max-w-[420px]" style="font-size: 17.5px; font-weight: 600;">
+                  Sem problema! Nós fazemos a<br />
+                  gravação personalizada do nome sob<br />
+                  encomenda, com entrega em até 7 dias<br />
+                  e um pequeno acréscimo de estúdio.
                 </p>
-
-                <a
-                   href="#produtos"
-                    class="mt-8 btn-red-rounded"
-                  >
-                    QUERO COMPRAR
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="9" cy="21" r="1"></circle>
-                      <circle cx="20" cy="21" r="1"></circle>
-                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                    </svg>
-                  </a>
                   </div>
 
-              <div class="relative mt-12 md:mt-0 md:w-1/2 flex justify-start md:justify-start">
+              <div class="relative mt-4 md:mt-0 md:w-1/2 flex justify-start md:justify-start">
 
                 <Image
                   src={cantorNomesImg}
                   alt="Cantor Personalizado"
                   width={550}
                   height={635}
+                  quality={100}
+                  format="png"
                   class="relative z-10 w-full max-w-[550px] object-contain md:-ml-8 md:-mt-16"
                   loading="lazy"
                 />
+              </div>
+
+              <div class="md:hidden w-full flex justify-center mt-6">
+                <a href="#produtos" class="btn-red-rounded" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">
+                  QUERO COMPRAR
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                  </svg>
+                </a>
               </div>
 
             </div>
@@ -530,6 +558,8 @@ const year = new Date().getFullYear();
         alt="Bruno Grossi, voz do Tião Camaleão, com sua filha"
         width={1000}
         height={1200}
+        quality={100}
+        format="png"
         class="relative z-10 h-[300px] sm:h-[420px] md:h-[720px] w-auto object-contain object-bottom block"
         loading="lazy"
         style="margin-bottom: 0; vertical-align: bottom;"
@@ -737,7 +767,7 @@ const year = new Date().getFullYear();
 </section>
       <!-- FOOTER -->
       <footer>
-        <div class="bg-card py-14">
+        <div class="bg-card pt-6 pb-14">
           <div class="container">
             <div class="mx-auto flex h-28 md:h-40 w-full max-w-[240px] md:max-w-none md:w-96 items-center justify-center rounded-2xl overflow-hidden">
               <Image
@@ -750,57 +780,44 @@ const year = new Date().getFullYear();
               />
             </div>
             <h3
-              class="mt-6 text-center text-foreground"
-              style={{ fontFamily: "'Nunito Variable', system-ui, sans-serif", fontSize: "30px", fontWeight: 700 }}
+              class="mt-2 text-center text-foreground"
+              style={{ fontFamily: "'Nunito Variable', system-ui, sans-serif", fontSize: "25px", fontWeight: 700 }}
             >
-              Cantigas feitas com carinho,<br />da nossa família para a sua
+              Cantigas feitas com carinho<br />da nossa família para a sua.
             </h3>
-            <div class="mx-auto mt-10 grid max-w-3xl gap-8 text-sm text-muted-foreground sm:grid-cols-2">
-              <div class="space-y-3 sm:border-r sm:border-border sm:pr-8 sm:text-right">
-                <p class="flex items-start gap-2 sm:justify-end">
-                  <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" />
+            <div class="mx-auto mt-6 max-w-3xl flex flex-row items-center gap-0 text-sm text-muted-foreground">
+              <!-- Coluna esquerda: segurança -->
+              <div class="flex-1 space-y-2 pr-4 text-right" style="font-size: 11px;">
+                <p class="flex items-center justify-end gap-1.5">
+                  <Lock className="h-4 w-4 flex-shrink-0 text-accent" />
                   <span class="font-bold text-foreground">Compra segura</span>
                 </p>
                 <p>Pagamentos via Mercado Pago</p>
                 <p>Entrega digital rápida e segura</p>
               </div>
-              <div class="space-y-3 sm:pl-2" style="font-size: 14px; font-weight: 600;">
-                <p class="flex items-center gap-2">
-                  <a
-                    href="mailto:ivan@tiaocamaleao.com.br"
-                    class="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                  >
-                    <span class="grid h-6 w-6 place-items-center rounded-full bg-secondary text-secondary-foreground">
+              <!-- Separador azul vertical -->
+              <div class="self-stretch w-[2px] flex-shrink-0" style="background:#3b82f6; border-radius:1px;"></div>
+              <!-- Coluna direita: contatos -->
+              <div class="flex-1 space-y-2 pl-4" style="font-size: 11px; font-weight: 600;">
+                <p class="flex items-center gap-1.5">
+                  <a href="mailto:ivan@tiaocamaleao.com.br" class="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                    <span class="grid h-6 w-6 place-items-center rounded-full bg-secondary text-secondary-foreground flex-shrink-0">
                       <Mail className="h-3.5 w-3.5" />
                     </span>
-                    ivan@tiaocamaleao.com.br
+                    <span class="break-all">ivan@tiaocamaleao.com.br</span>
                   </a>
                 </p>
-
-                <p class="flex items-center gap-2">
-                  <a
-                    href="https://wa.me/5537991996545"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                  >
-                    <span class="grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-foreground">
+                <p class="flex items-center gap-1.5">
+                  <a href="https://wa.me/5537991996545" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                    <span class="grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-foreground flex-shrink-0">
                       <Phone className="h-3.5 w-3.5" />
                     </span>
                     (37) 99199-6545
                   </a>
                 </p>
-                <p class="flex items-center gap-2">
-                  <a
-                    href="https://instagram.com/tiaocamaleao"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                  >
-                    <span
-                      class="grid h-6 w-6 place-items-center rounded-full text-card"
-                      style={{ background: "linear-gradient(135deg, hsl(330 80% 55%), hsl(28 100% 60%))" }}
-                    >
+                <p class="flex items-center gap-1.5">
+                  <a href="https://instagram.com/tiaocamaleao" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                    <span class="grid h-6 w-6 place-items-center rounded-full text-card flex-shrink-0" style={{ background: "linear-gradient(135deg, hsl(330 80% 55%), hsl(28 100% 60%))" }}>
                       <Instagram className="h-3.5 w-3.5" />
                     </span>
                     tiaocamaleao
@@ -815,7 +832,7 @@ const year = new Date().getFullYear();
           style={{ background: "hsl(var(--secondary))", color: "hsl(0 0% 100%)", fontSize: "12px", fontWeight: 600 }}
         >
           <p>© {year} Tião Camaleão – Todos os direitos reservados</p>
-          <p class="mt-3 text-secondary-foreground/90">
+          <p class="mt-3" style="color: #777;">
             A marca Tião Camaleão é operada pela Agência<br />
             Futuro Marketing Ltda – CNPJ: 15.727.842/0001-17
           </p>
