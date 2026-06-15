@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { initMercadoPago, CardPayment } from '@mercadopago/sdk-react';
 import { CreditCard, QrCode, Lock } from './Icons.tsx';
+import { getTrackingPayload } from '../lib/tracking';
 
 type CardFormProps = {
   step: number;
@@ -21,6 +22,7 @@ interface PixData {
   expires_at: string;
   amount: number;
 }
+
 
 const API_URL = import.meta.env.PUBLIC_API_URL;
 const PIX_STORAGE_KEY = "pix_payment_data";
@@ -170,14 +172,25 @@ export default function CardForm({
           fullName: customerName,
           cpf: cpf.replace(/\D/g, ""),
           selectedAlbums,
+          tracking: getTrackingPayload(),
         }),
       });
 
       const json = await res.json();
 
+
       if (!res.ok || json.status !== "success") {
         throw new Error(json.message || "Erro ao gerar PIX");
       }
+
+      try {
+        localStorage.setItem("tc_last_order", JSON.stringify({
+          order_id: json.data.external_reference,
+          external_reference: json.data.external_reference,
+          amount: json.data.amount,
+          method: "pix",
+        }));
+      } catch (e) {}
 
       const pix: PixData = {
         payment_id: json.data.order_id,
@@ -227,12 +240,28 @@ export default function CardForm({
       const res = await fetch(`${API_URL}/api/payments/process-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(param),
+        body: JSON.stringify({
+          ...param,
+          fullName: customerName,
+          tracking: getTrackingPayload(),
+        }),
       });
       const json = await res.json();
 
       if (!res.ok) {
         throw new Error(json.message || 'Erro ao processar pagamento');
+      }
+
+      const orderRef = json.data?.external_reference || json.data?.order_id;
+      if (orderRef) {
+        try {
+          localStorage.setItem("tc_last_order", JSON.stringify({
+            order_id: orderRef,
+            external_reference: orderRef,
+            amount: json.data?.transaction_amount,
+            method: "card",
+          }));
+        } catch (e) {}
       }
 
       const mpStatus = json.data?.status;

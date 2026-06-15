@@ -27,6 +27,23 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
 (function () {
   var API = document.getElementById("tc-modal").dataset.api;
 
+  function getCookie(name) {
+    var m = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+    return m ? decodeURIComponent(m[2]) : null;
+  }
+  function getFbc(){
+    var c = getCookie("_fbc");
+    if (c) return c;
+    var fbclid = new URLSearchParams(location.search).get("fbclid");
+    if (fbclid) return "fb.1." + Date.now() + "." + fbclid;
+    return null;
+  }
+  function getSessionId() {
+    var s = sessionStorage.getItem("tc_session");
+    if (!s) { s = (crypto.randowUUID ? crypto.randomUUID(): String(Date.now())); sessionStorage.setItem("tc_session", s);}
+    return s
+  }
+
   // ── Estado ──────────────────────────────────────────────────────────────────
   var isOpen = false, step = 1;
   var childrenCount = 0;
@@ -628,7 +645,16 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
 
   document.getElementById("tc-next-btn").onclick = function(){
     if (step === 1) {
-      if (validateStep1()) goStep(2);
+      if (validateStep1()){
+        if (window.fbq) {
+          var icEventId = "ic_" + getSessionId() + "_" + Date.now();
+          window.fbq("track", "InitiateCheckout", {content_name: productName, currency: "BRL"}, { eventID: icEventId });
+        }
+        if(window.ttq){
+          window.ttq.track("InitiateCheckout", { content_name: productName, currency: "BRL" });
+        }
+        goStep(2);
+      }
     } else if (step === 2) {
       if (childrenCount > 0) {
         var newChildren = [];
@@ -673,7 +699,16 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
         localStorage.setItem("orderData", JSON.stringify({
           customerData: customer, children: childrenClean, albumsAPI: albumsAPI,
           productName: productName, total: calcTotal(), isCombo: isCombo,
-          gravacaoItems: gravacaoItems
+          gravacaoItems: gravacaoItems,
+
+          tracking: {
+            fbp: getCookie("_fbp"),
+            fbc: getFbc(),
+            user_agent: navigator.userAgent,
+            event_source_url: location.href,
+            referrer: document.referrer || null,
+            session_id: getSessionId()
+          }
         }));
         closeModal();
         window.location.href = "/pagamento";

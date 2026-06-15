@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(curl *)",
-      "Bash(xargs cat)",
-      "Bash(node seed-admin.mjs)"
-    ]
-  }
-}

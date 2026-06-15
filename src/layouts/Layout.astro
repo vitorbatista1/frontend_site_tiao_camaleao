@@ -1,6 +1,7 @@
 ---
 // src/layouts/Layout.astro
 import "../styles/global.css";
+import PixelHead from "../components/PixelHead.astro"; // === PIXEL: novo import ===
 ---
 
 <!doctype html>
@@ -13,6 +14,8 @@ import "../styles/global.css";
       name="description"
       content={Astro.props.description || "Cantigas infantis personalizadas com o nome da sua criança. Mais de 2.000 nomes gravados em estúdio. Presente único que vira memória de família."}
     />
+    {/* === PIXEL: injeta Meta + TikTok no <head> === */}
+    <PixelHead />
     {Astro.props.slot}
   </head>
   <body>

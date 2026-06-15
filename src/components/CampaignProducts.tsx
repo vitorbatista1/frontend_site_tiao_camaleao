@@ -34,21 +34,37 @@ export default function CampaignProducts({ campaignId }: Props) {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const currentAudio = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    fetch(`${API_URL}/api/albums`)
-      .then(r => r.json())
-      .then(data => {
-        if (!data.success) return;
-        const campKey = campaignId.toUpperCase();
-        const filtered = (data.data as AlbumAPI[])
-          .filter(a => a.campanha === campKey && a.tipo === 'ALBUM')
-          .map(a => ({ ...a, repertorio: a.repertorio ?? [] }));
-        setAlbums(filtered);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [campaignId]);
+    useEffect(() => {
+      fetch(`${API_URL}/api/albums`)
+        .then(r => r.json())
+        .then(data => {
+          if (!data.success) return;
+          const campKey = campaignId.toUpperCase();
+          const filtered = (data.data as AlbumAPI[])
+            .filter(a => a.campanha === campKey && a.tipo === 'ALBUM')
+            .map(a => ({ ...a, repertorio: a.repertorio ?? [] }));
+          setAlbums(filtered);
 
+          try {
+            if (filtered.length && !sessionStorage.getItem('tc_vc_fired')){
+              const ids = filtered.map(a => a.id);
+              const eventId = `vc_${campKey}_${Date.now()}`;
+              if ((window as any).fbq){
+                (window as any).fbq('track', 'ViewContent', {
+                  content_ids: ids, content_type: 'product', content_name: `Campanha ${campKey}`,
+                }, { eventID: eventId });
+
+                }
+                if ((window as any).ttq) {
+                  (window as any).ttq.track('ViewContent', { content_id: ids[0], event_id: eventId });
+                }
+                sessionStorage.setItem('tc_vc_fired', '1');
+              }
+            }catch (e) {}
+          })
+          .catch(() => {})
+          .finally(() => setLoading(false));
+    }, [campaignId]);
   return (
     <section id="produtos" style={{ background: "#6ab248", paddingBottom: typeof window !== 'undefined' && window.innerWidth >= 768 ? "10rem" : "3.5rem" }} className="pt-14 px-4">
       <h2 className="text-center text-white mb-6 md:mb-16" style={{ fontSize: "34px", fontWeight: 800 }}>
