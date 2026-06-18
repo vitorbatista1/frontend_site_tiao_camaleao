@@ -28,9 +28,37 @@ export default function ConfirmacaoPage() {
     setStatus(params.get('status') || 'approved');
 
     const saved = localStorage.getItem('orderData');
-    if (saved) {
-      setOrderData(JSON.parse(saved));
-    }
+    const parsed = saved ? JSON.parse(saved) : null;
+    if (parsed) setOrderData(parsed);
+
+    try {
+      const lastOrderRaw = localStorage.getItem('tc_last_order');
+      const lastOrder = lastOrderRaw ? JSON.parse(lastOrderRaw) : null;
+      const queryOrderId = params.get('order_id') || params.get('ref');
+      const currentStatus = params.get('status') || 'approved';
+      const orderId = lastOrder?.order_id || queryOrderId;
+
+      if (currentStatus === 'approved' && orderId) {
+        const alreadyFired = sessionStorage.getItem(`tc_purchase_fired_${orderId}`);
+        if (!alreadyFired) {
+          const value = parseFloat(parsed?.total || lastOrder?.amount || '0');
+          const childIds = (parsed?.children ?? []).map((c: any) => c.name);
+          if ((window as any).fbq) {
+            (window as any).fbq('track', 'Purchase', {
+              value, currency: 'BRL',
+              content_ids: childIds,
+              num_items: childIds.length || 1,
+            }, { eventID: `purchase_${orderId}` });
+          }
+          if ((window as any).ttq) {
+            (window as any).ttq.track('CompletePayment', {
+              value, currency: 'BRL', event_id: `purchase_${orderId}`,
+            });
+          }
+          sessionStorage.setItem(`tc_purchase_fired_${orderId}`, '1');
+        }
+      }
+    } catch (e) {}
 
     // limpa dados de PIX após confirmação
     localStorage.removeItem('pix_payment_data');

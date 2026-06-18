@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import CardForm from './CardForm.tsx';
 import { ArrowLeft, Lock, CheckCircle, Music, Heart, Zap, Gift, TrendingUp, X } from './Icons.tsx';
+import { fbqTrack, ttqTrack, getSessionId } from '../lib/tracking.ts';
 
 interface GravacaoItem {
   albumId: string;
@@ -359,8 +360,14 @@ export default function PaymentPage() {
   }, []);
 
   const handlePaymentClick = useCallback(() => {
+    if (!sessionStorage.getItem('tc_api_fired')) {
+      const apiEventId = `api_${getSessionId()}_${Date.now()}`;
+      fbqTrack('AddPaymentInfo', { value: calculateTotalWithBumps, currency: 'BRL' }, { eventID: apiEventId });
+      ttqTrack('AddPaymentInfo', { value: calculateTotalWithBumps, currency: 'BRL' }, { event_id: apiEventId });
+      sessionStorage.setItem('tc_api_fired', '1');
+    }
     if (selectedBumps.length === 0 && selectedAlbumBumps.size === 0) setShowBumpModal(true);
-  }, [selectedBumps.length, selectedAlbumBumps.size]);
+  }, [selectedBumps.length, selectedAlbumBumps.size, calculateTotalWithBumps]);
 
   const handleViewBumps = useCallback(() => {
     setShowBumpModal(false);

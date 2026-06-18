@@ -44,6 +44,22 @@ export default function CampaignProducts({ campaignId }: Props) {
           .filter(a => a.campanha === campKey && a.tipo === 'ALBUM')
           .map(a => ({ ...a, repertorio: a.repertorio ?? [] }));
         setAlbums(filtered);
+
+        try {
+          if (filtered.length && !sessionStorage.getItem('tc_vc_fired')) {
+            const ids = filtered.map(a => a.id);
+            const eventId = `vc_${campKey}_${Date.now()}`;
+            if ((window as any).fbq) {
+              (window as any).fbq('track', 'ViewContent', {
+                content_ids: ids, content_type: 'product', content_name: `Campanha ${campKey}`,
+              }, { eventID: eventId });
+            }
+            if ((window as any).ttq) {
+              (window as any).ttq.track('ViewContent', { content_id: ids[0], event_id: eventId });
+            }
+            sessionStorage.setItem('tc_vc_fired', '1');
+          }
+        } catch (e) {}
       })
       .catch(() => {})
       .finally(() => setLoading(false));

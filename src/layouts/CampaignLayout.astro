@@ -4,6 +4,7 @@ import "../styles/global.css";
 import FaqAccordion from "../components/FaqAccordion.astro";
 import PlayerSection from "../components/PlayerSection.astro";
 import ModalVanilla from "../components/ModalVanilla.astro";
+import PixelHead from "../components/PixelHead.astro";
 import CampaignProducts from "../components/CampaignProducts.tsx";
 import CampaignCombo from "../components/CampaignCombo.astro";
 import {
@@ -117,6 +118,7 @@ const year = new Date().getFullYear();
       type="font/woff2"
       crossorigin
     />
+    <PixelHead />
   </head>
   <body>
     <ModalVanilla />
@@ -229,13 +231,13 @@ const year = new Date().getFullYear();
     height={1080}
     quality={100}
     format="webp"
-    class="w-full max-w-none md:scale-[1.8] lg:scale-[2.2] origin-center h-auto object-contain"
+    class="w-full max-w-none scale-[2.2] md:scale-[1.8] lg:scale-[2.2] origin-center h-auto object-contain"
     loading="lazy"
   />
 </div>
 
     <!-- TEXTO -->
-    <div class="relative z-10 text-primary-foreground text-center md:text-left">
+    <div class="relative z-10 text-primary-foreground text-center md:text-left mt-16 md:mt-0">
       <h2
         class="leading-tight"
         aria-label="Um presente para ouvir hoje"
@@ -442,7 +444,7 @@ const year = new Date().getFullYear();
       />
     </div>
 
-    <div class="absolute top-6 right-8 flex gap-1">
+    <div class="absolute top-2 right-8 flex gap-1">
       {
         [0, 1, 2, 3, 4].map((i) => (
           <Star className="fill-yellow-400 text-yellow-400 w-6 h-6 md:w-8 md:h-8" />
@@ -450,24 +452,67 @@ const year = new Date().getFullYear();
       }
     </div>
 
-    <div
-      class="w-full bg-white/10 rounded-2xl h-64 border-2 border-dashed border-white/20 flex items-center justify-center"
-    >
-      <p class="text-white/60 italic">Espaço para os depoimentos</p>
+    <!-- Carrossel de depoimentos -->
+    <div class="w-full overflow-hidden rounded-2xl" id="dep-track-wrapper">
+      <div id="dep-track" class="flex transition-transform duration-500 ease-in-out">
+
+        <!-- Slide 1: prioritário sozinho -->
+        <div class="w-full flex-shrink-0">
+          <img
+            src="/imagens/depoimentos/depoimento_prioritario.jpeg"
+            alt="Depoimento"
+            class="w-full h-auto rounded-2xl object-contain"
+            loading="lazy"
+          />
+        </div>
+
+        <!-- Slide 2: os três pequenos empilhados -->
+        <div class="w-full flex-shrink-0 flex flex-col gap-3">
+          {[
+            "/imagens/depoimentos/depoimento.jpeg",
+            "/imagens/depoimentos/depoimento2.jpeg",
+            "/imagens/depoimentos/depoimetno.jpeg",
+          ].map((src, i) => (
+            <img
+              src={src}
+              alt={`Depoimento ${i + 2}`}
+              class="w-full h-auto rounded-xl object-contain"
+              loading="lazy"
+            />
+          ))}
+        </div>
+
+      </div>
     </div>
 
     <button
+      id="dep-prev"
       class="absolute left-3 top-1/2 -translate-y-1/2 text-white hover:scale-110 transition"
       aria-label="Anterior"
     >
       <ChevronLeft size={40} strokeWidth={3} />
     </button>
     <button
+      id="dep-next"
       class="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:scale-110 transition"
       aria-label="Próximo"
     >
       <ChevronRight size={40} strokeWidth={3} />
     </button>
+
+    <script>
+      const track = document.getElementById('dep-track') as HTMLElement;
+      const total = track ? track.children.length : 0;
+      let current = 0;
+
+      function goTo(index: number) {
+        current = (index + total) % total;
+        track.style.transform = `translateX(-${current * 100}%)`;
+      }
+
+      document.getElementById('dep-prev')?.addEventListener('click', () => goTo(current - 1));
+      document.getElementById('dep-next')?.addEventListener('click', () => goTo(current + 1));
+    </script>
   </div>
 
   <button
@@ -745,7 +790,10 @@ const year = new Date().getFullYear();
   <p class="mt-2 text-foreground/80" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 500;">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
   
 <a
-  href="https://wa.me/5537933003534?text=Olá!%20Tenho%20dúvidas%20sobre%20as%20cantigas%20personalizadas%20e%20gostaria%20de%20mais%20informações."
+  href="https://wa.me/5537933003534"
+  data-wa-track
+  data-wa-text="Olá! Tenho dúvidas sobre as cantigas personalizadas e gostaria de mais informações."
+  data-wa-source="faq_duvida"
   target="_blank"
   rel="noopener noreferrer"
   class="btn-pop mt-5 inline-flex items-center gap-2"
@@ -911,6 +959,35 @@ const year = new Date().getFullYear();
           );
         });
       });
+    </script>
+
+    <script is:inline>
+      (function () {
+        function getSessionId() {
+          var s = sessionStorage.getItem("tc_session");
+          if (!s) { s = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())); sessionStorage.setItem("tc_session", s); }
+          return s;
+        }
+        document.addEventListener("click", function (e) {
+          var a = e.target.closest && e.target.closest("a[data-wa-track]");
+          if (!a) return;
+          e.preventDefault();
+
+          var baseText = a.dataset.waText || "Olá!";
+          var source = a.dataset.waSource || "whatsapp_click";
+          var eventID = "lead_" + getSessionId() + "_" + Date.now();
+
+          if (window.fbq) {
+            window.fbq("track", "Lead", { content_name: source }, { eventID: eventID });
+          }
+          if (window.ttq) {
+            window.ttq.track("Contact", { content_name: source, event_id: eventID });
+          }
+
+          var url = a.href.split("?")[0] + "?text=" + encodeURIComponent(baseText);
+          setTimeout(function () { window.open(url, "_blank", "noopener"); }, 150);
+        });
+      })();
     </script>
   </body>
 </html>
