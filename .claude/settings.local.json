@@ -3,7 +3,11 @@
     "allow": [
       "Bash(curl *)",
       "Bash(xargs cat)",
-      "Bash(node seed-admin.mjs)"
+      "Bash(node seed-admin.mjs)",
+      "Bash(identify /home/vitor/Projetos/ivan/site-tiao/frontend_site_tiao_camaleao/public/imagens/criancas_hero.png)",
+      "Bash(python3 -c \"from PIL import Image; img = Image.open\\('/home/vitor/Projetos/ivan/site-tiao/frontend_site_tiao_camaleao/public/imagens/criancas_hero.png'\\); print\\(img.size, img.mode\\)\")",
+      "Bash(npx astro *)",
+      "Bash(node *)"
     ]
   }
 }

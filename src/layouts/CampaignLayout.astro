@@ -41,10 +41,10 @@ const [
   hero_lg,
   hero_xl
 ] = await Promise.all([
-  getImage({ src: criancasHero, format: "avif", width: 480,  quality: 50 }),
-  getImage({ src: criancasHero, format: "avif", width: 768,  quality: 55 }),
-  getImage({ src: criancasHero, format: "avif", width: 960,  quality: 60 }),
-  getImage({ src: criancasHero, format: "avif", width: 1440, quality: 65 }),
+  getImage({ src: criancasHero, format: "webp", width: 480,  quality: 75 }),
+  getImage({ src: criancasHero, format: "webp", width: 768,  quality: 75 }),
+  getImage({ src: criancasHero, format: "webp", width: 960,  quality: 80 }),
+  getImage({ src: criancasHero, format: "webp", width: 1440, quality: 80 }),
 ]);
 
 const heroSrcset = `
@@ -108,7 +108,7 @@ const year = new Date().getFullYear();
       href={hero_md.src}
       imagesrcset={heroSrcset}
       imagesizes={heroSizes}
-      type="image/avif"
+      type="image/webp"
       fetchpriority="high"
     />
     <link

@@ -188,10 +188,10 @@
 @media (max-width: 767px) {
   .hero-img {
     width: 100%;
-    transform: scale(2.2) translateX(28px) translateY(5px);
+    transform: scale(1.6) translateX(12px) translateY(0px);
     transform-origin: center center;
-    margin-top: 11rem;
-    margin-bottom: -10rem;
+    margin-top: 6rem;
+    margin-bottom: -5rem;
   }
 }
 
