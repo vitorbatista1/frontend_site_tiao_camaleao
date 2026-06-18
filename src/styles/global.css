@@ -188,9 +188,9 @@
 @media (max-width: 767px) {
   .hero-img {
     width: 100%;
-    transform: scale(2.0) translateX(28px) translateY(5px);
-    transform-origin: center bottom;
-    margin-top: auto;
+    transform: scale(2.2) translateX(28px) translateY(5px);
+    transform-origin: center center;
+    margin-top: 11rem;
     margin-bottom: -10rem;
   }
 }
@@ -200,8 +200,16 @@
 }
 
 @media (max-width: 767px) {
+  section {
+    min-height: 100dvh;
+  }
+
+  section.section-compact {
+    min-height: unset;
+  }
+
   .hero-wrapper {
-    min-height: 82dvh;
+    min-height: 100dvh;
   }
   .hero-header {
     padding-bottom: 5rem;

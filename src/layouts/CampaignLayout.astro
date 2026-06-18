@@ -179,7 +179,7 @@ const year = new Date().getFullYear();
         A maioria dos presentes<br />passa… esse fica!
       </p>
 
-      <div class="mt-6 md:mt-10 flex justify-center md:justify-start">
+      <div class="mt-14 md:mt-10 flex justify-center md:justify-start">
         <a
           href="#produtos"
           class="btn-red-rounded"
@@ -217,7 +217,7 @@ const year = new Date().getFullYear();
 </div><!-- fim do wrapper 100dvh -->
       <!-- GREEN BAND -->
 <section
-  class="relative py-16 md:py-32 overflow-hidden"
+  class="relative py-16 md:py-32 overflow-hidden flex flex-col justify-center"
   style="background-color: #6ab248; content-visibility: auto; contain-intrinsic-size: 0 600px;"
 >
   <div class="container grid items-center gap-4 md:grid-cols-2">
@@ -589,7 +589,7 @@ const year = new Date().getFullYear();
       <!-- COMBO — dynamic per campaign -->
       <CampaignCombo campaignId={campaignId} />
 <!-- MUSICIAN 1 -->
-<section class="relative bg-white pt-16 pb-0 overflow-hidden" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
+<section class="relative bg-white pt-16 pb-0 overflow-hidden flex flex-col justify-center" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
 
   <div class="container flex flex-col md:flex-row items-center gap-0 relative">
 
@@ -616,7 +616,7 @@ const year = new Date().getFullYear();
 
       <p
         class="mb-5 uppercase tracking-widest text-right"
-        style="color: #9CA3AF; font-size: clamp(9px, 1.6vw, 13px); font-weight: 400; letter-spacing: 0.18em;"
+        style="color: #9CA3AF; font-size: clamp(12px, 1.6vw, 13px); font-weight: 400; letter-spacing: 0.18em;"
       >
         A diferença está na voz, na intenção e<br />
         no cuidado em cada detalhe
@@ -624,7 +624,7 @@ const year = new Date().getFullYear();
 
       <h2
         class="leading-tight text-right"
-        style="color: #898989; font-size: clamp(26px, 6vw, 48px); font-weight: 800; line-height: 1.02;"
+        style="color: #898989; font-size: clamp(24px, 6vw, 48px); font-weight: 800; line-height: 1.02; white-space: nowrap;"
       >
         Quem dá voz ao Tião é<br />
         um músico de verdade
@@ -632,7 +632,7 @@ const year = new Date().getFullYear();
 
       <p
         class="mt-7 text-right"
-        style="color: #6B7280; font-size: clamp(15px, 2.8vw, 20px); font-weight: 600; line-height: 1.55;"
+        style="color: #6B7280; font-size: clamp(17px, 2.8vw, 20px); font-weight: 600; line-height: 1.55;"
       >
         A voz do Tião Camaleão é interpretada pelo
         <strong style="color: #111827; font-weight: 800;">Bruno Grossi</strong>, músico formado em Música Popular
@@ -785,7 +785,7 @@ const year = new Date().getFullYear();
     </section>
 
 <!--BOTAO DE DUVIDA DO FAQ -->
-<section class="bg-[#cae2a6] py-20 text-center" style="content-visibility: auto; contain-intrinsic-size: 0 300px;">
+<section class="bg-[#cae2a6] py-20 text-center section-compact" style="content-visibility: auto; contain-intrinsic-size: 0 300px;">
   <p style="font-size: clamp(20px, 4vw, 32px); font-weight: 700;">AINDA FICOU COM ALGUMA DÚVIDA?</p>
   <p class="mt-2 text-foreground/80" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 500;">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
   
@@ -939,6 +939,52 @@ const year = new Date().getFullYear();
         });
       })();
     </script>
+
+    <!-- WhatsApp floating button -->
+    <style>
+      @keyframes wa-ring {
+        0%   { transform: scale(1); opacity: 0.55; }
+        100% { transform: scale(2.4); opacity: 0; }
+      }
+      .wa-wrap { position: fixed; bottom: 20px; right: 20px; z-index: 9999; width: 60px; height: 60px; }
+      .wa-ring {
+        position: absolute; inset: 0;
+        border-radius: 50%;
+        background: #25D366;
+        animation: wa-ring 2.4s ease-out infinite;
+        pointer-events: none;
+      }
+      .wa-ring-2 { animation-delay: 1.2s; }
+      .wa-btn {
+        position: relative; z-index: 1;
+        display: flex; align-items: center; justify-content: center;
+        width: 60px; height: 60px;
+        border-radius: 50%;
+        background: #25D366;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.28);
+        transition: transform 0.2s;
+        text-decoration: none;
+      }
+      .wa-btn:hover { transform: scale(1.12); }
+    </style>
+    <div class="wa-wrap">
+      <div class="wa-ring"></div>
+      <div class="wa-ring wa-ring-2"></div>
+      <a
+        href="https://wa.me/5537991996545"
+        data-wa-track
+        data-wa-text="Olá! Tenho dúvidas sobre as cantigas personalizadas e gostaria de mais informações."
+        data-wa-source="floating_button"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Falar no WhatsApp"
+        class="wa-btn"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-4.821 4.754a8.132 8.132 0 01-3.984-1.03l-.286-.17-2.96.776.791-2.887-.186-.296a8.14 8.14 0 01-1.247-4.346c0-4.519 3.674-8.19 8.19-8.19a8.19 8.19 0 018.19 8.19c0 4.52-3.674 8.19-8.19 8.19m0-18.054C7.452 1.082 2.591 5.943 2.591 11.956c0 1.92.487 3.793 1.412 5.46L2.4 23l5.688-1.491a9.357 9.357 0 004.515 1.156c6.012 0 10.874-4.861 10.874-10.873 0-2.864-1.115-5.556-3.141-7.581C18.303 2.197 15.612 1.082 12.651 1.082z" />
+        </svg>
+      </a>
+    </div>
 
     <script is:inline>
       document.addEventListener("click", function (e) {
