@@ -99,9 +99,9 @@ const CONFIRMACOES = [
             </div>
           </div>
 
-          <ul class="inline-block space-y-0.5 text-left text-slate-600 mb-10" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 600;">
+          <ul class="block w-full space-y-0.5 text-left text-slate-600 mb-10" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 600;">
             {ITEMS.map((item) => (
-              <li class="flex items-center gap-0">
+              <li class="flex items-start gap-0">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="18"
@@ -112,12 +112,12 @@ const CONFIRMACOES = [
                   stroke-width="3"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  class="flex-shrink-0 text-green-500 mr-1"
+                  class="flex-shrink-0 text-green-500 mr-1 mt-0.5"
                   aria-hidden="true"
                 >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
-                <span class="whitespace-nowrap" style="font-size: 15px; letter-spacing: 0.03em;" set:html={item} />
+                <span style="font-size: 15px; letter-spacing: 0.03em;" set:html={item} />
               </li>
             ))}
           </ul>
