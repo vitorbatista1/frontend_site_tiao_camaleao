@@ -67,7 +67,7 @@ export default function CampaignProducts({ campaignId }: Props) {
 
   return (
     <section id="produtos" style={{ background: "#6ab248", paddingBottom: typeof window !== 'undefined' && window.innerWidth >= 768 ? "10rem" : "3.5rem" }} className="pt-14 px-4">
-      <h2 className="text-center text-white mb-6 md:mb-16" style={{ fontSize: "34px", fontWeight: 800 }}>
+      <h2 className="text-center text-white mb-6 md:mb-16" style={{ fontSize: "clamp(30px, 9vw, 60px)", fontWeight: 800 }}>
         Nossos produtos
       </h2>
 

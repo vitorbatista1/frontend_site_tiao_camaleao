@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle, Music, Heart, Lock } from './Icons.tsx';
+import cabecaAlta from '../assets/images/Cabeça-Alta-RGB.png';
 
 interface OrderData {
   customerData: {
@@ -75,8 +76,14 @@ export default function ConfirmacaoPage() {
           ? 'bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-300'
           : 'bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300'
       }`}>
-        <div className="text-6xl mb-4">
-          {isPending ? '⏳' : '🎉'}
+        <div className="mb-4 flex justify-center">
+          {isPending ? (
+            <span className="text-6xl">⏳</span>
+          ) : method === 'pix' ? (
+            <span className="text-6xl">🎉</span>
+          ) : (
+            <img src={cabecaAlta.src} alt="Tião Camaleão" className="h-32 w-auto object-contain" />
+          )}
         </div>
         <h1 className={`text-2xl font-bold mb-2 ${isPending ? 'text-yellow-800' : 'text-green-800'}`}>
           {isPending ? 'Pagamento em análise' : 'Pedido confirmado!'}

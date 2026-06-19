@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import AlbumManager from './AlbumManager';
 import OrderBumpManager from './OrderBumpManager';
+import PaymentsManager from './PaymentsManager';
 
 interface User {
   id: string;
@@ -8,14 +9,14 @@ interface User {
   name: string;
 }
 
-type Section = 'albums' | 'orderbumps';
+type Section = 'albums' | 'orderbumps' | 'payments';
 
 const API_URL = import.meta.env.PUBLIC_API_URL;
 
 export default function AdminPanel() {
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
-  const [activeSection, setActiveSection] = useState<Section>('albums');
+  const [activeSection, setActiveSection] = useState<Section>('payments');
 
   async function refreshAccessToken(): Promise<string | null> {
     const refreshToken = localStorage.getItem('refreshToken');
@@ -121,14 +122,16 @@ export default function AdminPanel() {
   }
 
   const navItems: { id: Section; label: string; icon: string }[] = [
+    { id: 'payments', label: 'Pagamentos', icon: '💳' },
     { id: 'albums', label: 'Álbuns', icon: '🎵' },
     { id: 'orderbumps', label: 'Order Bumps', icon: '🎁' },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
-      {/* Sidebar */}
-      <aside className="w-56 bg-white border-r border-gray-200 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row">
+
+      {/* ── Sidebar desktop ── */}
+      <aside className="hidden md:flex w-56 bg-white border-r border-gray-200 flex-col flex-shrink-0">
         <div className="p-5 border-b border-gray-200">
           <p className="font-bold text-gray-800 text-sm">Tião Camaleão</p>
           <p className="text-xs text-gray-500 mt-0.5">Painel Admin</p>
@@ -165,8 +168,43 @@ export default function AdminPanel() {
         </div>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 p-8 overflow-auto">
+      {/* ── Top bar mobile ── */}
+      <div className="md:hidden bg-white border-b border-gray-200 flex flex-col">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div>
+            <p className="font-bold text-gray-800 text-sm">Tião Camaleão</p>
+            <p className="text-xs text-gray-400">{user?.name}</p>
+          </div>
+          <button
+            onClick={logout}
+            className="text-xs text-red-500 font-medium px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-50 transition-colors"
+          >
+            ↩ Sair
+          </button>
+        </div>
+        <nav className="flex border-t border-gray-100 overflow-x-auto">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveSection(item.id)}
+              className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 px-2 text-xs font-medium whitespace-nowrap transition-colors border-b-2 ${
+                activeSection === item.id
+                  ? 'border-blue-600 text-blue-700 bg-blue-50'
+                  : 'border-transparent text-gray-500'
+              }`}
+            >
+              <span className="text-base">{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* ── Main content ── */}
+      <main className="flex-1 p-4 md:p-8 overflow-auto min-w-0">
+        {activeSection === 'payments' && (
+          <PaymentsManager authenticatedFetch={authenticatedFetch} />
+        )}
         {activeSection === 'albums' && (
           <AlbumManager authenticatedFetch={authenticatedFetch} />
         )}

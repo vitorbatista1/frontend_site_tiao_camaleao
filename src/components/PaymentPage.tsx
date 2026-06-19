@@ -184,12 +184,14 @@ const MemoizedCardForm = React.memo(({
   amount,
   email,
   customerName,
+  telefone,
   cpf,
   selectedAlbums,
 }: {
   amount: string;
   email: string;
   customerName: string;
+  telefone?: string;
   cpf?: string;
   selectedAlbums?: { albumId: string; childName: string }[];
 }) => (
@@ -199,6 +201,7 @@ const MemoizedCardForm = React.memo(({
     publicKey={import.meta.env.PUBLIC_MP_PUBLIC_KEY || ''}
     email={email}
     customerName={customerName}
+    telefone={telefone}
     cpf={cpf}
     selectedAlbums={selectedAlbums}
   />
@@ -720,6 +723,7 @@ export default function PaymentPage() {
                 amount={formattedAmount}
                 email={orderData.customerData.email}
                 customerName={orderData.customerData.fullName}
+                telefone={orderData.customerData.telefone}
                 cpf={orderData.customerData.cpf ?? ""}
                 selectedAlbums={selectedAlbumsForPayment}
               />

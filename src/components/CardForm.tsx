@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { initMercadoPago, CardPayment } from '@mercadopago/sdk-react';
 import { CreditCard, QrCode, Lock } from './Icons.tsx';
+import { getTrackingPayload } from '../lib/tracking.ts';
 
 type CardFormProps = {
   step: number;
@@ -8,6 +9,7 @@ type CardFormProps = {
   publicKey: string;
   email: string;
   customerName?: string;
+  telefone?: string;
   cpf?: string;
   selectedAlbums?: { albumId: string; childName: string; name?: string; price?: number }[];
 };
@@ -45,6 +47,7 @@ export default function CardForm({
   publicKey,
   email,
   customerName = "",
+  telefone = "",
   cpf = "",
   selectedAlbums = [],
 }: CardFormProps) {
@@ -224,10 +227,20 @@ export default function CardForm({
     setIsProcessingCard(true);
     setCardError(null);
     try {
+      const tracking = getTrackingPayload();
       const res = await fetch(`${API_URL}/api/payments/process-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(param),
+        body: JSON.stringify({
+          ...param,
+          customerName,
+          telefone,
+          selectedAlbums,
+          fbp: tracking.fbp,
+          fbc: tracking.fbc,
+          user_agent: tracking.user_agent,
+          event_source_url: tracking.event_source_url,
+        }),
       });
       const json = await res.json();
 
@@ -236,10 +249,13 @@ export default function CardForm({
       }
 
       const mpStatus = json.data?.status;
+      const externalReference = json.data?.external_reference ?? '';
+      const orderParam = externalReference ? `&order_id=${externalReference}` : '';
+
       if (mpStatus === 'approved') {
-        window.location.href = `/confirmacao?method=card&status=approved`;
+        window.location.href = `/confirmacao?method=card&status=approved${orderParam}`;
       } else if (mpStatus === 'in_process' || mpStatus === 'pending') {
-        window.location.href = `/confirmacao?method=card&status=pending`;
+        window.location.href = `/confirmacao?method=card&status=pending${orderParam}`;
       } else {
         throw new Error(json.data?.status_detail || 'Pagamento recusado. Verifique os dados do cartão.');
       }
