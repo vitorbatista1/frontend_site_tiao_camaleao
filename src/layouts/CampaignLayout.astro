@@ -30,6 +30,8 @@ import jogoPeca from "../../public/imagens/benefits/jogo_peca.png";
 import nuvemCoracao from "../../public/imagens/benefits/nuvem_coracao.png";
 import nuvems from "../../public/imagens/benefits/nuvems.png";
 
+import whatsappIcon from "../../public/icons/WhatsApp.svg";
+
 interface Props {
   campaignId: string;
 }
@@ -180,7 +182,8 @@ const year = new Date().getFullYear();
       </p>
 
       <div class="mt-14 md:mt-10 flex justify-center md:justify-start">
-        <a
+        <!-- Botão Quero Comprar hero antigo -->
+        <!-- <a
           href="#produtos"
           class="btn-red-rounded"
           data-buy
@@ -193,6 +196,23 @@ const year = new Date().getFullYear();
             <circle cx="20" cy="21" r="1"></circle>
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
           </svg>
+        </a> -->
+
+        <a
+          href="#contato"
+          aria-label="Pedir amostra grátis"
+          class="inline-flex items-center gap-3 text-white px-6 sm:px-7 py-[14px] rounded-full shadow-lg transition-transform hover:scale-105 font-bold"
+          style="background: #72BC44; font-size: 17px;"
+        >
+          PEDIR AMOSTRA GRÁTIS
+
+          <Image
+            src={whatsappIcon}
+            alt="WhatsApp"
+            width={32}
+            height={32}
+            class="h-8 w-8"
+          />
         </a>
       </div>
     </div>
@@ -262,7 +282,7 @@ const year = new Date().getFullYear();
   </div>
 </section>
 
-      <!-- SAMPLE -->
+<!-- SAMPLE -->
       <section id="amostra" class="relative w-full" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
 
         <!-- Faixa azul escura: título + celular (celular vaza 100px sobre o azul claro) -->
@@ -317,36 +337,39 @@ const year = new Date().getFullYear();
           </div>
         </div>
 
-<!-- Faixa azul claro: CTA (celular passa por cima) -->
-<div class="w-full" style="background: #E0F7FF; padding-top: 0.5rem; padding-bottom: 0.75rem;">
-  <div class="container max-w-6xl mx-auto px-6 flex flex-col md:flex-row gap-4 md:gap-6">
-    <!-- Coluna esquerda: alinhada ao título acima -->
-    <div class="w-full flex-1 text-center md:text-right pt-2 md:pt-[60px]">
-      <h3 style="color: #1D4ED8; font-size: 17px; font-weight: 400; white-space: nowrap;" aria-label="Quer ver a reação da sua criança?">
-        Quer ver a reação da <strong style="font-weight: 800;">SUA CRIANÇA?</strong>
-      </h3>
-      <p class="mt-1" style="color: #1D4ED8; font-size: 14px; font-weight: 600;">
-        Clique no botão abaixo e receba uma cantiga.
-      </p>
-      <a
-        href="#contato"
-        aria-label="Pedir amostra grátis"
-        class="mt-3 inline-flex items-center gap-2 sm:gap-3 text-white px-5 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg transition-transform hover:scale-105 md:ml-auto"
-        style="background: #72BC44; font-weight: 500; font-size: 16px;"
-      >
-        PEDIR AMOSTRA GRÁTIS
-        <span class="grid h-6 w-6 sm:h-7 sm:w-7 place-items-center rounded-full bg-white">
-          <svg class="h-3 w-3 sm:h-4 sm:w-4" style="color: #72BC44;" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-4.821 4.754a8.132 8.132 0 01-3.984-1.03l-.286-.17-2.96.776.791-2.887-.186-.296a8.14 8.14 0 01-1.247-4.346c0-4.519 3.674-8.19 8.19-8.19a8.19 8.19 0 018.19 8.19c0 4.52-3.674 8.19-8.19 8.19m0-18.054C7.452 1.082 2.591 5.943 2.591 11.956c0 1.92.487 3.793 1.412 5.46L2.4 23l5.688-1.491a9.357 9.357 0 004.515 1.156c6.012 0 10.874-4.861 10.874-10.873 0-2.864-1.115-5.556-3.141-7.581C18.303 2.197 15.612 1.082 12.651 1.082z" />
-          </svg>
-        </span>
-      </a>
-    </div>
-    <!-- Coluna direita: espaço para o celular (mesmo flex-1) -->
-    <div class="flex-1 hidden md:block"></div>
-  </div>
-</div>
-        <!-- Faixa azul escura abaixo do azul claro -->
+      <!-- Faixa azul claro: CTA (celular passa por cima) -->
+      <div class="w-full" style="background: #E0F7FF; padding-top: 1.5rem; padding-bottom: 2rem;">
+        <div class="container max-w-6xl mx-auto px-6 flex flex-col md:flex-row gap-4 md:gap-6">
+          <!-- Coluna esquerda: alinhada ao título acima -->
+          <div class="w-full flex-1 text-center md:text-right pt-2 md:pt-0">
+            <h3 style="color: #1D4ED8; font-size: 18.7px; font-weight: 400; white-space: nowrap;" aria-label="Quer ver a reação da sua criança?">
+              Quer ver a reação da <strong style="font-weight: 800;">SUA CRIANÇA?</strong>
+            </h3>
+            <p class="mt-1" style="color: #1D4ED8; font-size: 15.4px; font-weight: 600;">
+              Clique no botão abaixo e receba uma cantiga.
+            </p>
+          <a
+            href="#contato"
+            aria-label="Pedir amostra grátis"
+            class="inline-flex items-center gap-3 text-white px-5 sm:px-6 py-3 rounded-full shadow-lg transition-transform hover:scale-105 font-bold mt-4"
+            style="background: #72BC44; font-size: 17.6px; padding-top: 0.825rem; padding-bottom: 0.825rem; padding-left: 1.65rem; padding-right: 1.65rem;"
+          >
+            PEDIR AMOSTRA GRÁTIS
+
+            <Image
+              src={whatsappIcon}
+              alt="WhatsApp"
+              width={31}
+              height={31}
+              class="h-[31px] w-[31px]"
+            />
+          </a>
+          </div>
+          <!-- Coluna direita: espaço para o celular (mesmo flex-1) -->
+          <div class="flex-1 hidden md:block"></div>
+        </div>
+      </div>
+              <!-- Faixa azul escura abaixo do azul claro -->
         <div class="w-full py-10" style="background: #00AEEF;"></div>
 
       </section>
@@ -796,21 +819,18 @@ const year = new Date().getFullYear();
   data-wa-source="faq_duvida"
   target="_blank"
   rel="noopener noreferrer"
-  class="btn-pop mt-5 inline-flex items-center gap-2"
-  style={{
-    background: "hsl(142 65% 42%)",
-    color: "hsl(0 0% 100%)",
-    padding: "16px 32px",
-    borderRadius: "40px",
-    textDecoration: "none",
-    fontWeight: "500",
-    fontSize: "16px",
-  }}
+  class="mt-5 inline-flex items-center gap-3 text-white px-6 sm:px-7 py-[14px] rounded-full shadow-lg transition-transform hover:scale-105 font-bold"
+  style="background: #72BC44; font-size: 17px;"
 >
-  <span>Preciso de mais informações</span>
-  <span class="grid h-7 w-7 place-items-center rounded-full bg-white text-[hsl(142_65%_42%)]">
-    <MessageCircle className="h-4 w-4" />
-  </span>
+  PRECISO DE MAIS INFORMAÇÕES
+
+  <Image
+    src={whatsappIcon}
+    alt="WhatsApp"
+    width={32}
+    height={32}
+    class="h-8 w-8"
+  />
 </a>
 </section>
       <!-- FOOTER -->
@@ -857,9 +877,15 @@ const year = new Date().getFullYear();
                 </p>
                 <p class="flex items-center gap-1.5">
                   <a href="https://wa.me/5537991996545" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
-                    <span class="grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-foreground flex-shrink-0">
-                      <Phone className="h-3.5 w-3.5" />
-                    </span>
+                      <span class="flex-shrink-0">
+                        <Image
+                          src={whatsappIcon}
+                          alt="WhatsApp"
+                          width={24}
+                          height={24}
+                          class="h-6 w-6"
+                        />
+                      </span>
                     (37) 99199-6545
                   </a>
                 </p>
