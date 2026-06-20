@@ -1034,7 +1034,7 @@ const year = new Date().getFullYear();
       });
     </script>
 
-    <script is:inline>
+    <script define:vars={{ TC_API_URL }}>
       (function () {
         function getSessionId() {
           var s = sessionStorage.getItem("tc_session");
@@ -1059,10 +1059,9 @@ const year = new Date().getFullYear();
           // [TC-CAPI 2026-06] espelho CAPI do Lead (mesmo event_id → deduplica).
           // sendBeacon garante entrega mesmo após navegação para wa.me.
           try {
-            var API = "{TC_API_URL}";
-            if (API) {
+            if (TC_API_URL) {
               navigator.sendBeacon(
-                API + "/api/track",
+                TC_API_URL + "/api/track",
                 new Blob([JSON.stringify({
                   event_name: "Lead",
                   event_id: eventID,
