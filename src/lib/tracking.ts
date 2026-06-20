@@ -1,3 +1,5 @@
+const API_URL = import.meta.env.PUBLIC_API_URL as string;
+
 export function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
   const m = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
@@ -9,6 +11,8 @@ export function getFbp(): string | null {
 }
 
 export function getFbc(): string | null {
+  // [TC-CAPI 2026-06] lê o cookie _fbc primeiro (timestamp correto do clique);
+  // só reconstrói a partir do fbclid se o cookie não existir.
   const c = getCookie("_fbc");
   if (c) return c;
   if (typeof window === "undefined") return null;
@@ -54,4 +58,59 @@ export function ttqTrack(event: string, params?: object, opts?: { event_id?: str
   } else {
     (window as any).ttq.track(event, params || {});
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// [TC-CAPI 2026-06] Disparo server-side via backend → N8N → Meta CAPI.
+// NÃO chamamos o N8N direto do browser (o token JWT ficaria exposto).
+// Mandamos email/telefone CRUS — o hash SHA-256 é feito no N8N.
+// `keepalive: true` garante o envio mesmo se a página navegar (caso do Lead → wa.me).
+// ═══════════════════════════════════════════════════════════════════════════
+type CapiInput = {
+  event_name: string;
+  event_id: string;
+  value?: number;
+  currency?: string;
+  content_ids?: (string | number)[];
+  content_name?: string;
+  em?: string | null;   // email cru (opcional)
+  ph?: string | null;   // telefone cru (opcional)
+};
+
+export function trackCapi(input: CapiInput): void {
+  if (!API_URL) return;
+  try {
+    const t = getTrackingPayload();
+    const body = {
+      event_name: input.event_name,
+      event_id: input.event_id,
+      value: input.value,
+      currency: input.currency,
+      content_ids: input.content_ids,
+      content_name: input.content_name,
+      fbp: t.fbp,
+      fbc: t.fbc,
+      user_agent: t.user_agent,
+      event_source_url: t.event_source_url,
+      em: input.em ?? null,
+      ph: input.ph ?? null,
+    };
+    fetch(`${API_URL}/api/track`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      keepalive: true,
+    }).catch(() => {});
+  } catch (e) { /* nunca quebra a UX */ }
+}
+
+/** Dispara o pixel (browser) E o CAPI (server) com o MESMO event_id → deduplica. */
+export function trackBoth(
+  event: string,
+  params: object,
+  capi: CapiInput,
+): void {
+  fbqTrack(event, params, { eventID: capi.event_id });
+  ttqTrack(event, params, { event_id: capi.event_id });
+  trackCapi(capi);
 }

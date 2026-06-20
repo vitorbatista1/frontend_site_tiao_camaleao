@@ -530,7 +530,7 @@ export default function Modal({
 
               <div className="bg-amber-50 rounded-xl p-3 border border-amber-200">
                 <p className="text-xs text-amber-800">
-                  ⚠️ <strong>Campos obrigatórios:</strong> Nome completo, E-mail e Telefone
+                  <strong>Campos obrigatórios:</strong> Nome completo, E-mail e Telefone
                 </p>
               </div>
             </div>
@@ -1020,7 +1020,6 @@ export default function Modal({
 
               <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
                 <Check className="h-3 w-3 text-green-500" />
-                <span>Personalização ilimitada para todas as crianças</span>
               </div>
             </div>
           )}

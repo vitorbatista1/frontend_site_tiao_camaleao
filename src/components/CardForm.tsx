@@ -165,6 +165,7 @@ export default function CardForm({
     try {
       const cleanEmail = sanitizeEmail(email);
 
+      const tracking = getTrackingPayload();
       const res = await fetch(`${API_URL}/api/payments/pix`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -173,6 +174,11 @@ export default function CardForm({
           fullName: customerName,
           cpf: cpf.replace(/\D/g, ""),
           selectedAlbums,
+          telefone: telefone || null,
+          fbp: tracking.fbp,
+          fbc: tracking.fbc,
+          user_agent: tracking.user_agent,
+          event_source_url: tracking.event_source_url,
         }),
       });
 

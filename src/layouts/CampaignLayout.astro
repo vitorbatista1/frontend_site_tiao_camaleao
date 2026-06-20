@@ -1055,6 +1055,25 @@ const year = new Date().getFullYear();
           if (window.ttq) {
             window.ttq.track("Contact", { content_name: source, event_id: eventID });
           }
+          // [TC-CAPI 2026-06] espelho CAPI do Lead (mesmo event_id → deduplica).
+          // sendBeacon garante entrega mesmo após navegação para wa.me.
+          try {
+            var API = document.getElementById("tc-modal") ? document.getElementById("tc-modal").dataset.api : "";
+            if (API) {
+              navigator.sendBeacon(
+                API + "/api/track",
+                new Blob([JSON.stringify({
+                  event_name: "Lead",
+                  event_id: eventID,
+                  content_name: source,
+                  fbp: (document.cookie.match(/(?:^| )_fbp=([^;]+)/) || [])[1] || null,
+                  fbc: (document.cookie.match(/(?:^| )_fbc=([^;]+)/) || [])[1] || null,
+                  user_agent: navigator.userAgent,
+                  event_source_url: location.href
+                })], { type: "application/json" })
+              );
+            }
+          } catch (e) {}
 
           var url = a.href.split("?")[0] + "?text=" + encodeURIComponent(baseText);
           setTimeout(function () { window.open(url, "_blank", "noopener"); }, 150);

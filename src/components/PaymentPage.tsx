@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import CardForm from './CardForm.tsx';
 import { ArrowLeft, Lock, CheckCircle, Music, Heart, Zap, Gift, TrendingUp, X } from './Icons.tsx';
-import { fbqTrack, ttqTrack, getSessionId } from '../lib/tracking.ts';
+import { fbqTrack, ttqTrack, getSessionId, trackCapi } from '../lib/tracking.ts';
 
 interface GravacaoItem {
   albumId: string;
@@ -243,11 +243,17 @@ export default function PaymentPage() {
       .catch(() => {});
 
     if (parsed) {
+      // Combo já contempla todos os álbuns — excluir filhos com combo das sugestões de album bump
+      const albumsAPI: Array<{ id: string; tipo: string }> = (parsed as any).albumsAPI ?? [];
+      const comboIds = new Set(albumsAPI.filter(a => a.tipo === 'COMBO').map(a => a.id));
+
       const cartItems = parsed.children.flatMap((child) =>
-        (child.selectedAlbums ?? []).map((albumId) => ({
-          albumId,
-          childName: child.albumResult?.display_name ?? child.name,
-        }))
+        (child.selectedAlbums ?? [])
+          .filter(albumId => !comboIds.has(albumId))
+          .map((albumId) => ({
+            albumId,
+            childName: child.albumResult?.display_name ?? child.name,
+          }))
       );
       if (cartItems.length > 0) {
         fetch(`${API_URL}/api/albums/suggest-order-bumps`, {
@@ -367,6 +373,15 @@ export default function PaymentPage() {
       const apiEventId = `api_${getSessionId()}_${Date.now()}`;
       fbqTrack('AddPaymentInfo', { value: calculateTotalWithBumps, currency: 'BRL' }, { eventID: apiEventId });
       ttqTrack('AddPaymentInfo', { value: calculateTotalWithBumps, currency: 'BRL' }, { event_id: apiEventId });
+      // [TC-CAPI 2026-06] espelho CAPI do AddPaymentInfo. Aqui já temos email/telefone.
+      trackCapi({
+        event_name: 'AddPaymentInfo',
+        event_id: apiEventId,
+        value: calculateTotalWithBumps,
+        currency: 'BRL',
+        em: orderData?.customerData?.email ?? null,
+        ph: orderData?.customerData?.telefone ?? null,
+      });
       sessionStorage.setItem('tc_api_fired', '1');
     }
     if (selectedBumps.length === 0 && selectedAlbumBumps.size === 0) setShowBumpModal(true);

@@ -14,10 +14,12 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   <div class="relative max-w-md w-full bg-white rounded-3xl shadow-2xl max-h-[90vh] flex flex-col">
     <div id="tc-header" class="sticky top-0 bg-white border-b border-gray-100 p-6 rounded-t-3xl z-10"></div>
     <div id="tc-body" class="px-6 pb-6 overflow-y-auto flex-1 min-h-0"></div>
-    <div class="sticky bottom-0 border-t border-gray-100 p-6 bg-gray-50 rounded-b-3xl">
-      <button id="tc-next-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-3 shadow-lg">
-        <span id="tc-next-lbl">Continuar</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    <div class="sticky bottom-0 border-t border-gray-100 p-6 bg-gray-50 rounded-b-3xl flex gap-3">
+      <button id="tc-back-btn" style="display:none" class="flex-1 bg-green-50 hover:bg-green-100 text-gray-600 font-bold py-2 px-4 rounded-full transition-all flex items-center justify-center shadow-lg uppercase">
+        VOLTAR
+      </button>
+      <button id="tc-next-btn" style="background-color:#6ab248" class="flex-1 hover:opacity-90 text-white font-bold py-2 px-4 rounded-full transition-all flex items-center justify-center shadow-lg uppercase">
+        <span id="tc-next-lbl">CONTINUAR</span>
       </button>
     </div>
   </div>
@@ -130,15 +132,15 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
 
   // ── Header ────────────────────────────────────────────────────────────────────
   function renderHeader() {
-    var titles = ["Pré-checkout", "Quantidade de Crianças", "Dados das Crianças"];
-    var descs = ["Informe seus dados para continuar", "Quantas crianças vão receber?", "Adicione o nome das crianças"];
+    var titles = ["Informe seus dados", "Quantidade de Crianças", "Nome da(s) criança(s)"];
+    var descs = ["Informe seus dados para continuar", "Você está comprando para quantas crianças?", "Adicione o nome das crianças"];
     $header().innerHTML =
-      '<div class="flex justify-between items-start">' +
-        '<div>' +
+      '<div class="flex items-start">' +
+        '<div class="flex-1">' +
           '<h2 class="text-2xl font-bold text-gray-800">' + titles[step - 1] + '</h2>' +
           '<p class="text-sm text-gray-500 mt-1">' + descs[step - 1] + '</p>' +
         '</div>' +
-        '<button id="tc-close" class="p-2 hover:bg-gray-100 rounded-full transition-colors">' +
+        '<button id="tc-close" class="p-2 hover:bg-gray-100 rounded-full transition-colors ml-2 flex-shrink-0" aria-label="Fechar">' +
           '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>' +
         '</button>' +
       '</div>' +
@@ -147,7 +149,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
         '<div class="flex-1 h-1 rounded-full transition-all ' + (step >= 2 ? "bg-primary" : "bg-gray-200") + '"></div>' +
         '<div class="flex-1 h-1 rounded-full transition-all ' + (step >= 3 ? "bg-primary" : "bg-gray-200") + '"></div>' +
       '</div>';
-    document.getElementById("tc-close").onclick = function(){ step > 1 ? goStep(step - 1) : closeModal(); };
+    document.getElementById("tc-close").onclick = function(){ closeModal(); };
   }
 
   // ── Step 2 — Quantidade de crianças ──────────────────────────────────────────
@@ -166,7 +168,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
       '<div class="space-y-6 pt-4">' +
         '<div class="bg-blue-50 rounded-xl p-4 border border-blue-200">' +
           '<p class="text-sm text-blue-800 font-medium mb-1">👧👦 Quantas crianças vão receber?</p>' +
-          '<p class="text-xs text-blue-600">Selecione a quantidade ou digite outra</p>' +
+          '<p class="text-xs text-blue-600">Selecione o número ou digite outra quantidade</p>' +
         '</div>' +
         '<div id="tc-qty-grid" class="grid grid-cols-3 gap-3">' + btns + '</div>' +
         '<div class="flex items-center gap-3">' +
@@ -199,19 +201,21 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
 
   // ── Step 1 ────────────────────────────────────────────────────────────────────
   function renderStep1() {
-    function field(id, type, ph, val, err) {
-      return '<div><input id="'+id+'" type="'+type+'" placeholder="'+ph+'" value="'+esc(val)+'"' +
-        ' class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ' +
-        (err ? "border-red-500" : "border-gray-200 focus:border-primary") + '" />' +
+    function field(id, type, label, ph, val, err) {
+      return '<div>' +
+        '<label for="'+id+'" class="block text-[22px] font-semibold text-black mb-1">'+esc(label)+' <span class="text-red-500">*</span></label>' +
+        '<input id="'+id+'" type="'+type+'" placeholder="'+ph+'" value="'+esc(val)+'"' +
+        ' class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors bg-green-50 ' +
+        (err ? "border-red-500" : "border-green-600 focus:border-green-700") + '" />' +
         (err ? '<p class="text-red-500 text-xs mt-1">'+esc(err)+'</p>' : '') + '</div>';
     }
     $body().innerHTML =
       '<div class="space-y-4 pt-4"><div class="space-y-3">' +
-        field("tc-name",  "text",  "Nome completo *",       customer.fullName,  errors.fullName) +
-        field("tc-email", "email", "Seu melhor e-mail *",   customer.email,     errors.email) +
-        field("tc-phone", "text",  "(DDD) 9XXXX-XXXX *",   customer.telefone,  errors.telefone) +
+        field("tc-name",  "text",  "Nome completo", "Digite seu nome completo",       customer.fullName,  errors.fullName) +
+        field("tc-email", "email", "E-mail", "Digite seu melhor e-mail",   customer.email,     errors.email) +
+        field("tc-phone", "text",  "WhatsApp", "(DDD) 9XXXX-XXXX",   customer.telefone,  errors.telefone) +
       '</div><div class="bg-amber-50 rounded-xl p-3 border border-amber-200">' +
-        '<p class="text-xs text-amber-800">⚠️ <strong>Campos obrigatórios:</strong> Nome completo, E-mail e Telefone</p>' +
+        '<p class="text-xs text-amber-800"><strong>Campos obrigatórios:</strong> Nome completo, E-mail e Telefone</p>' +
       '</div></div>';
 
     document.getElementById("tc-name").addEventListener("input", function(e){
@@ -368,7 +372,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     }
 
     return '<div class="space-y-2">' +
-      '<p class="text-xs font-semibold text-gray-600 px-1">Álbuns disponíveis para <span class="text-primary">'+esc(child.albumResult.display_name||child.name)+'</span>:</p>' +
+      '<p class="text-[16px] font-semibold text-gray-600 px-1">Selecione o(s) álbums(s) para <span class="text-primary">'+esc(child.albumResult.display_name||child.name)+'</span>:</p>' +
       '<div class="space-y-2">'+btns+comboBtn+'</div>' +
       gravSection +
     '</div>';
@@ -457,8 +461,6 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
         '<div id="tc-children" class="space-y-5 max-h-[520px] overflow-y-auto pr-1">'+cards+'</div>' +
         '<div id="tc-summary">'+(hasSel?buildSummary():"")+'</div>' +
         '<div class="flex items-center justify-center gap-2 text-xs text-gray-400">' +
-          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' +
-          '<span>Personalização ilimitada para todas as crianças</span></div>' +
       '</div>';
 
     attachStep3();
@@ -586,14 +588,9 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   function updateNextBtn() {
     var lbl = $nextLbl();
     if (!lbl) return;
-    if (step === 3) {
-      var hasSel = children.some(function(c){ return (c.selectedAlbums||[]).length>0; });
-      lbl.textContent = hasSel ? "Ir para o Pagamento — R$ "+calcTotal().replace(".",",") : "Ir para o Pagamento";
-    } else if (step === 2) {
-      lbl.textContent = childrenCount > 0 ? "Continuar" : "Selecione a quantidade";
-    } else {
-      lbl.textContent = "Continuar";
-    }
+    lbl.textContent = "CONTINUAR";
+    var backBtn = document.getElementById("tc-back-btn");
+    if (backBtn) backBtn.style.display = step > 1 ? "flex" : "none";
   }
 
   function goStep(n) {
@@ -641,18 +638,38 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   // ── Eventos ───────────────────────────────────────────────────────────────────
   window.addEventListener("open-modal", function(e){ openModal(e.detail); });
 
-  document.getElementById("tc-backdrop").onclick = function(){ step > 1 ? goStep(step - 1) : closeModal(); };
+  document.getElementById("tc-backdrop").onclick = function(){ closeModal(); };
+
+  document.getElementById("tc-back-btn").onclick = function(){ if (step > 1) goStep(step - 1); };
 
   document.getElementById("tc-next-btn").onclick = function(){
     if (step === 1) {
       if (validateStep1()) {
+        var icEventId = "ic_" + getSessionId() + "_" + Date.now();
         if (window.fbq) {
-          var icEventId = "ic_" + getSessionId() + "_" + Date.now();
           window.fbq("track", "InitiateCheckout", { content_name: productName, currency: "BRL" }, { eventID: icEventId });
         }
         if (window.ttq) {
-          window.ttq.track("InitiateCheckout", { content_name: productName, currency: "BRL" });
+          window.ttq.track("InitiateCheckout", { content_name: productName, currency: "BRL", event_id: icEventId });
         }
+        // [TC-CAPI 2026-06] espelho CAPI do InitiateCheckout (mesmo event_id → deduplica).
+        try {
+          fetch(API + "/api/track", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            keepalive: true,
+            body: JSON.stringify({
+              event_name: "InitiateCheckout",
+              event_id: icEventId,
+              content_name: productName,
+              currency: "BRL",
+              fbp: (document.cookie.match(/(?:^| )_fbp=([^;]+)/) || [])[1] || null,
+              fbc: (document.cookie.match(/(?:^| )_fbc=([^;]+)/) || [])[1] || null,
+              user_agent: navigator.userAgent,
+              event_source_url: location.href
+            })
+          }).catch(function(){});
+        } catch (e) {}
         goStep(2);
       }
     } else if (step === 2) {
@@ -716,7 +733,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   };
 
   document.addEventListener("keydown", function(e){
-    if (e.key === "Escape" && isOpen) step > 1 ? goStep(step - 1) : closeModal();
+    if (e.key === "Escape" && isOpen) closeModal();
   });
 })();
 </script>
