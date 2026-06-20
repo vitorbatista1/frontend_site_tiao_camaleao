@@ -37,6 +37,7 @@ interface Props {
 }
 
 const { campaignId } = Astro.props;
+const TC_API_URL = import.meta.env.PUBLIC_API_URL ?? "";
 const [
   hero_sm,
   hero_md,
@@ -1058,7 +1059,7 @@ const year = new Date().getFullYear();
           // [TC-CAPI 2026-06] espelho CAPI do Lead (mesmo event_id → deduplica).
           // sendBeacon garante entrega mesmo após navegação para wa.me.
           try {
-            var API = document.getElementById("tc-modal") ? document.getElementById("tc-modal").dataset.api : "";
+            var API = "{TC_API_URL}";
             if (API) {
               navigator.sendBeacon(
                 API + "/api/track",
