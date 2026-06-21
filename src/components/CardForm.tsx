@@ -179,6 +179,7 @@ export default function CardForm({
           fbc: tracking.fbc,
           user_agent: tracking.user_agent,
           event_source_url: tracking.event_source_url,
+          referrer: tracking.referrer,
         }),
       });
 
@@ -246,6 +247,7 @@ export default function CardForm({
           fbc: tracking.fbc,
           user_agent: tracking.user_agent,
           event_source_url: tracking.event_source_url,
+          referrer: tracking.referrer,
         }),
       });
       const json = await res.json();

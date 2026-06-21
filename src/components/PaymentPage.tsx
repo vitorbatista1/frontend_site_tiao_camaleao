@@ -370,17 +370,23 @@ export default function PaymentPage() {
 
   const handlePaymentClick = useCallback(() => {
     if (!sessionStorage.getItem('tc_api_fired')) {
-      const apiEventId = `api_${getSessionId()}_${Date.now()}`;
-      fbqTrack('AddPaymentInfo', { value: calculateTotalWithBumps, currency: 'BRL' }, { eventID: apiEventId });
-      ttqTrack('AddPaymentInfo', { value: calculateTotalWithBumps, currency: 'BRL' }, { event_id: apiEventId });
-      // [TC-CAPI 2026-06] espelho CAPI do AddPaymentInfo. Aqui já temos email/telefone.
+      const apiEventId = `br_api_${getSessionId()}_${Date.now()}`;
+      const nameParts = (orderData?.customerData?.fullName ?? '').trim().split(/\s+/);
+      const contentIds = orderData?.children?.flatMap((c: any) => c.selectedAlbums ?? []) ?? [];
+      fbqTrack('AddPaymentInfo', { value: calculateTotalWithBumps, currency: 'BRL', num_items: orderData?.children?.length }, { eventID: apiEventId });
+      ttqTrack('AddPaymentInfo', { value: calculateTotalWithBumps, currency: 'BRL', event_id: apiEventId });
+      // [TC-CAPI 2026-06] espelho CAPI do AddPaymentInfo — máximo de dados para match quality.
       trackCapi({
         event_name: 'AddPaymentInfo',
         event_id: apiEventId,
         value: calculateTotalWithBumps,
         currency: 'BRL',
+        num_items: orderData?.children?.length,
+        content_ids: contentIds.length > 0 ? contentIds : undefined,
         em: orderData?.customerData?.email ?? null,
         ph: orderData?.customerData?.telefone ?? null,
+        fn: nameParts[0] ?? null,
+        ln: nameParts.slice(1).join(' ') || null,
       });
       sessionStorage.setItem('tc_api_fired', '1');
     }

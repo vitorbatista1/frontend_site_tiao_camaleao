@@ -1048,7 +1048,7 @@ const year = new Date().getFullYear();
 
           var baseText = a.dataset.waText || "Olá!";
           var source = a.dataset.waSource || "whatsapp_click";
-          var eventID = "lead_" + getSessionId() + "_" + Date.now();
+          var eventID = "br_lead_" + getSessionId() + "_" + Date.now();
 
           if (window.fbq) {
             window.fbq("track", "Lead", { content_name: source }, { eventID: eventID });
@@ -1069,7 +1069,9 @@ const year = new Date().getFullYear();
                   fbp: (document.cookie.match(/(?:^| )_fbp=([^;]+)/) || [])[1] || null,
                   fbc: (document.cookie.match(/(?:^| )_fbc=([^;]+)/) || [])[1] || null,
                   user_agent: navigator.userAgent,
-                  event_source_url: location.href
+                  event_source_url: location.href,
+                  referrer: document.referrer || null,
+                  session_id: getSessionId()
                 })], { type: "application/json" })
               );
             }

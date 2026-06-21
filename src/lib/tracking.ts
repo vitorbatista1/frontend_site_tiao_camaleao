@@ -73,8 +73,11 @@ type CapiInput = {
   currency?: string;
   content_ids?: (string | number)[];
   content_name?: string;
+  num_items?: number;
   em?: string | null;   // email cru (opcional)
   ph?: string | null;   // telefone cru (opcional)
+  fn?: string | null;   // primeiro nome (opcional)
+  ln?: string | null;   // sobrenome (opcional)
 };
 
 export function trackCapi(input: CapiInput): void {
@@ -88,12 +91,17 @@ export function trackCapi(input: CapiInput): void {
       currency: input.currency,
       content_ids: input.content_ids,
       content_name: input.content_name,
+      num_items: input.num_items,
       fbp: t.fbp,
       fbc: t.fbc,
       user_agent: t.user_agent,
       event_source_url: t.event_source_url,
+      referrer: t.referrer,
+      session_id: t.session_id,
       em: input.em ?? null,
       ph: input.ph ?? null,
+      fn: input.fn ?? null,
+      ln: input.ln ?? null,
     };
     fetch(`${API_URL}/api/track`, {
       method: "POST",

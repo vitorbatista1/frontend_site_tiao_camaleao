@@ -133,7 +133,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   // ── Header ────────────────────────────────────────────────────────────────────
   function renderHeader() {
     var titles = ["Informe seus dados", "Quantidade de Crianças", "Nome da(s) criança(s)"];
-    var descs = ["Informe seus dados para continuar", "Você está comprando para quantas crianças?", "Adicione o nome das crianças"];
+    var descs = ["Você está comprando para quantas crianças?", "Adicione o nome das crianças"];
     $header().innerHTML =
       '<div class="flex items-start">' +
         '<div class="flex-1">' +
@@ -645,14 +645,17 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   document.getElementById("tc-next-btn").onclick = function(){
     if (step === 1) {
       if (validateStep1()) {
-        var icEventId = "ic_" + getSessionId() + "_" + Date.now();
+        var icEventId = "br_ic_" + getSessionId() + "_" + Date.now();
+        var icNameParts = (customer.fullName || "").trim().split(/\s+/);
+        var icFn = icNameParts[0] || null;
+        var icLn = icNameParts.slice(1).join(" ") || null;
         if (window.fbq) {
           window.fbq("track", "InitiateCheckout", { content_name: productName, currency: "BRL" }, { eventID: icEventId });
         }
         if (window.ttq) {
           window.ttq.track("InitiateCheckout", { content_name: productName, currency: "BRL", event_id: icEventId });
         }
-        // [TC-CAPI 2026-06] espelho CAPI do InitiateCheckout (mesmo event_id → deduplica).
+        // [TC-CAPI 2026-06] espelho CAPI do InitiateCheckout — inclui em/ph para deduplicação por telefone.
         try {
           fetch(API + "/api/track", {
             method: "POST",
@@ -664,9 +667,15 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
               content_name: productName,
               currency: "BRL",
               fbp: (document.cookie.match(/(?:^| )_fbp=([^;]+)/) || [])[1] || null,
-              fbc: (document.cookie.match(/(?:^| )_fbc=([^;]+)/) || [])[1] || null,
+              fbc: getFbc(),
               user_agent: navigator.userAgent,
-              event_source_url: location.href
+              event_source_url: location.href,
+              referrer: document.referrer || null,
+              session_id: getSessionId(),
+              em: customer.email || null,
+              ph: customer.telefone || null,
+              fn: icFn,
+              ln: icLn
             })
           }).catch(function(){});
         } catch (e) {}
