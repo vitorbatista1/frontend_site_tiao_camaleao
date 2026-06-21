@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import CardForm from './CardForm.tsx';
 import { ArrowLeft, Lock, CheckCircle, Music, Heart, Zap, Gift, TrendingUp, X } from './Icons.tsx';
-import { fbqTrack, ttqTrack, getSessionId, trackCapi } from '../lib/tracking.ts';
+import { fbqTrack, ttqTrack, getSessionId, trackCapi, trackPixel } from '../lib/tracking.ts';
 
 interface GravacaoItem {
   albumId: string;
@@ -373,8 +373,25 @@ export default function PaymentPage() {
       const apiEventId = `br_api_${getSessionId()}_${Date.now()}`;
       const nameParts = (orderData?.customerData?.fullName ?? '').trim().split(/\s+/);
       const contentIds = orderData?.children?.flatMap((c: any) => c.selectedAlbums ?? []) ?? [];
-      fbqTrack('AddPaymentInfo', { value: calculateTotalWithBumps, currency: 'BRL', num_items: orderData?.children?.length }, { eventID: apiEventId });
-      ttqTrack('AddPaymentInfo', { value: calculateTotalWithBumps, currency: 'BRL', event_id: apiEventId });
+      // [TC-CAPI 2026-06] AddPaymentInfo: advanced matching (PII via setUserData dentro do trackPixel)
+      // + custom_data rico. PII NUNCA entra no params do pixel.
+      const apiContents = contentIds.map((id: string) => ({ id, quantity: 1 }));
+      trackPixel('AddPaymentInfo', {
+        value: calculateTotalWithBumps,
+        currency: 'BRL',
+        content_ids: contentIds.length ? contentIds : undefined,
+        contents: apiContents.length ? apiContents : undefined,
+        content_category: 'musica_digital',
+        content_type: 'product',
+        num_items: orderData?.children?.length,
+      }, {
+        eventId: apiEventId,
+        user: {
+          email: orderData?.customerData?.email ?? null,
+          phone: orderData?.customerData?.telefone ?? null,
+          fullName: orderData?.customerData?.fullName ?? null,
+        },
+      });
       // [TC-CAPI 2026-06] espelho CAPI do AddPaymentInfo — máximo de dados para match quality.
       trackCapi({
         event_name: 'AddPaymentInfo',
@@ -383,6 +400,9 @@ export default function PaymentPage() {
         currency: 'BRL',
         num_items: orderData?.children?.length,
         content_ids: contentIds.length > 0 ? contentIds : undefined,
+        content_category: 'musica_digital',
+        content_type: 'product',
+        contents: apiContents.length ? apiContents : undefined,
         em: orderData?.customerData?.email ?? null,
         ph: orderData?.customerData?.telefone ?? null,
         fn: nameParts[0] ?? null,

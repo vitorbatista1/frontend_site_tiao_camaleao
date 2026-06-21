@@ -1,3 +1,5 @@
+// [TC-CAPI 2026-06]
+import { trackPixel } from '../lib/tracking.ts';
 import { useEffect, useState } from 'react';
 import { CheckCircle, Music, Heart, Lock } from './Icons.tsx';
 import cabecaAlta from '../assets/images/Cabeça-Alta-RGB.png';
@@ -42,19 +44,23 @@ export default function ConfirmacaoPage() {
       if (currentStatus === 'approved' && orderId) {
         const alreadyFired = sessionStorage.getItem(`tc_purchase_fired_${orderId}`);
         if (!alreadyFired) {
+          // [TC-CAPI 2026-06] Purchase com advanced matching reaplicado nesta página + custom_data rico.
           const value = parseFloat(parsed?.total || lastOrder?.amount || '0');
           const childIds = (parsed?.children ?? []).map((c: any) => c.name);
-          if ((window as any).fbq) {
-            (window as any).fbq('track', 'Purchase', {
-              value, currency: 'BRL',
-              content_ids: childIds,
-              num_items: childIds.length || 1,
-            }, { eventID: `purchase_${orderId}` });
-          }
+          const cd = parsed?.customerData || lastOrder?.customerData || {};
+          trackPixel('Purchase', {
+            value, currency: 'BRL',
+            content_ids: childIds,
+            contents: childIds.map((id: string) => ({ id, quantity: 1 })),
+            content_category: 'musica_digital',
+            content_type: 'product',
+            num_items: childIds.length || 1,
+          }, {
+            eventId: `purchase_${orderId}`,
+            user: { email: cd.email ?? null, phone: cd.telefone ?? null, fullName: cd.fullName ?? null },
+          });
           if ((window as any).ttq) {
-            (window as any).ttq.track('CompletePayment', {
-              value, currency: 'BRL', event_id: `purchase_${orderId}`,
-            });
+            (window as any).ttq.track('CompletePayment', { value, currency: 'BRL', event_id: `purchase_${orderId}` });
           }
           sessionStorage.setItem(`tc_purchase_fired_${orderId}`, '1');
         }

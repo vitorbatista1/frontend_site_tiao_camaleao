@@ -54,6 +54,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   var albumsAPI = [];
   var loadingAlbums = false;
   var albumErrors = {};
+  var albumsExpanded = {};
   var errors = { fullName: "", email: "", telefone: "" };
   var productName = "";
   var isCombo = false;
@@ -240,21 +241,25 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
 
   // ── Toggle combo gravado ──────────────────────────────────────────────────────
   function toggleComboGravado(childId) {
+    var newSel = [];
     children = children.map(function(c){
       if (c.id !== childId) return c;
       var sel = c.selectedAlbums || [];
       var ativo = isComboGravadoSelected(sel);
+      var result;
       if (ativo) {
         var gravIds = getGravacaoIds();
-        return Object.assign({}, c, {
-          selectedAlbums: sel.filter(function(id){
-            return id !== "personalizado:combo" && gravIds.indexOf(id) < 0 && !id.startsWith("personalizado:");
-          })
+        result = sel.filter(function(id){
+          return id !== "personalizado:combo" && gravIds.indexOf(id) < 0 && !id.startsWith("personalizado:");
         });
+      } else {
+        result = ["personalizado:combo"];
       }
-      return Object.assign({}, c, { selectedAlbums: ["personalizado:combo"] });
+      newSel = result;
+      return Object.assign({}, c, { selectedAlbums: result });
     });
     albumErrors[childId] = "";
+    if (newSel.length > 0) albumsExpanded[childId] = false;
     renderStep3();
   }
 
@@ -300,8 +305,22 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   }
 
   function buildFoundAlbums(child) {
-    var combo = getCombo();
     var sel = child.selectedAlbums || [];
+    var isExpanded = !sel.length || albumsExpanded[child.id] === true;
+
+    if (!isExpanded) {
+      var foundCount = (child.albumResult && child.albumResult.found) ? (child.albumResult.albums || []).length : 0;
+      var sub = calcSubtotal(sel, foundCount);
+      var labels = isComboGravadoSelected(sel) ? ["Combo Gravado"] : sel.map(function(k){ return esc(getAlbumLabel(k)); });
+      return '<button type="button" class="tc-alterar w-full flex items-center gap-3 px-4 py-3 bg-green-50 border-2 border-green-400 rounded-xl hover:bg-green-100 transition-colors" data-cid="'+child.id+'">' +
+        '<div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">' + CHECK + '</div>' +
+        '<span class="flex-1 text-sm font-semibold text-green-800 text-left truncate">' + labels.join(" + ") + '</span>' +
+        '<span class="text-sm font-bold text-green-700 flex-shrink-0">R$ ' + sub.toFixed(2).replace(".", ",") + '</span>' +
+        '<span class="text-xs text-green-700 flex-shrink-0 border border-green-500 rounded-lg px-2 py-0.5 bg-white ml-1">Alterar ▾</span>' +
+      '</button>';
+    }
+
+    var combo = getCombo();
     var comboId = combo ? combo.id : "combo";
     var comboSel = sel.indexOf(comboId) >= 0;
     var comboGravSel = isComboGravadoSelected(sel);
@@ -379,8 +398,21 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   }
 
   function buildNotFound(child) {
-    var albumsOnly = getAlbumsOnly();
     var sel = child.selectedAlbums || [];
+    var isExpanded = !sel.length || albumsExpanded[child.id] === true;
+
+    if (!isExpanded) {
+      var sub = calcSubtotal(sel, 0);
+      var labels = isComboGravadoSelected(sel) ? ["Combo Gravado"] : sel.map(function(k){ return esc(getAlbumLabel(k)); });
+      return '<button type="button" class="tc-alterar w-full flex items-center gap-3 px-4 py-3 bg-orange-50 border-2 border-orange-400 rounded-xl hover:bg-orange-100 transition-colors" data-cid="'+child.id+'">' +
+        '<div class="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">' + CHECK + '</div>' +
+        '<span class="flex-1 text-sm font-semibold text-orange-800 text-left truncate">' + labels.join(" + ") + '</span>' +
+        '<span class="text-sm font-bold text-orange-700 flex-shrink-0">R$ ' + sub.toFixed(2).replace(".", ",") + '</span>' +
+        '<span class="text-xs text-orange-700 flex-shrink-0 border border-orange-500 rounded-lg px-2 py-0.5 bg-white ml-1">Alterar ▾</span>' +
+      '</button>';
+    }
+
+    var albumsOnly = getAlbumsOnly();
     var comboGravSel = isComboGravadoSelected(sel);
 
     var btns = albumsOnly.map(function(a) {
@@ -493,6 +525,8 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
       if (ab && !ab.disabled) toggleAlbum(ab.dataset.cid, ab.dataset.key);
       var cg = e.target.closest(".tc-combo-grav");
       if (cg) toggleComboGravado(cg.dataset.cid);
+      var al = e.target.closest(".tc-alterar");
+      if (al) { albumsExpanded[al.dataset.cid] = true; renderStep3(); }
     });
   }
 
@@ -510,17 +544,23 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   function toggleAlbum(childId, key) {
     var combo = getCombo();
     var comboId = combo ? combo.id : "combo";
+    var newSel = [];
     children = children.map(function(c){
       if (c.id !== childId) return c;
       var sel = c.selectedAlbums || [];
-      if (key === "combo") return Object.assign({}, c, { selectedAlbums: sel.indexOf(comboId)>=0 ? [] : [comboId] });
-      var realId = key.startsWith("album_") ? (getAlbumByKey(key) ? getAlbumByKey(key).id : key) : key;
-      var noCombo = sel.filter(function(a){ return a !== comboId && a !== "personalizado:combo"; });
-      return Object.assign({}, c, {
-        selectedAlbums: noCombo.indexOf(realId)>=0 ? noCombo.filter(function(a){ return a!==realId; }) : noCombo.concat([realId])
-      });
+      var result;
+      if (key === "combo") {
+        result = sel.indexOf(comboId)>=0 ? [] : [comboId];
+      } else {
+        var realId = key.startsWith("album_") ? (getAlbumByKey(key) ? getAlbumByKey(key).id : key) : key;
+        var noCombo = sel.filter(function(a){ return a !== comboId && a !== "personalizado:combo"; });
+        result = noCombo.indexOf(realId)>=0 ? noCombo.filter(function(a){ return a!==realId; }) : noCombo.concat([realId]);
+      }
+      newSel = result;
+      return Object.assign({}, c, { selectedAlbums: result });
     });
     albumErrors[childId] = "";
+    if (newSel.length > 0) albumsExpanded[childId] = false;
     renderStep3();
   }
 
@@ -619,7 +659,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     childrenCount = 0;
     customer = { fullName: "", email: "", telefone: "" };
     children = [];
-    albumsAPI = []; albumErrors = {}; errors = { fullName: "", email: "", telefone: "" };
+    albumsAPI = []; albumErrors = {}; albumsExpanded = {}; errors = { fullName: "", email: "", telefone: "" };
     isOpen = true;
     document.getElementById("tc-modal").style.display = "";
     document.body.style.overflow = "hidden";
@@ -649,8 +689,37 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
         var icNameParts = (customer.fullName || "").trim().split(/\s+/);
         var icFn = icNameParts[0] || null;
         var icLn = icNameParts.slice(1).join(" ") || null;
+        // [TC-CAPI 2026-06] ADVANCED MATCHING: email/telefone/nome CRUS -> fbevents.js hasheia no browser.
+        // external_id = telefone normalizado (mesmo padrao do N8N). SO seta com telefone; nunca valor fixo.
+        try {
+          if (window.fbq) {
+            var icPhone = (customer.telefone || "").replace(/\D/g, "");
+            if (icPhone && icPhone.indexOf("55") !== 0) icPhone = "55" + icPhone;
+            var am = { country: "br" };
+            if (customer.email) am.em = customer.email.trim().toLowerCase();
+            if (icPhone) { am.ph = icPhone; am.external_id = icPhone; }
+            if (icFn) am.fn = String(icFn).toLowerCase();
+            if (icLn) am.ln = String(icLn).toLowerCase();
+            window.fbq("init", "2321147791624359", am);
+          }
+        } catch (e) {}
+        // [TC-CAPI 2026-06] InitiateCheckout com custom_data rico (SEM PII no params)
         if (window.fbq) {
-          window.fbq("track", "InitiateCheckout", { content_name: productName, currency: "BRL" }, { eventID: icEventId });
+          window.fbq("track", "InitiateCheckout", {
+            content_name: productName,
+            content_category: "musica_digital",
+            content_type: "product",
+            currency: "BRL",
+            page_title: document.title,
+            page_referrer: document.referrer || undefined,
+            source_platform: "meta",
+            event_source: "browser",
+            geo: "BR", country: "br",
+            viewport_width: window.innerWidth,
+            viewport_height: window.innerHeight,
+            session_id: getSessionId(),
+            event_source_url: location.href
+          }, { eventID: icEventId });
         }
         if (window.ttq) {
           window.ttq.track("InitiateCheckout", { content_name: productName, currency: "BRL", event_id: icEventId });
@@ -666,6 +735,8 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
               event_id: icEventId,
               content_name: productName,
               currency: "BRL",
+              content_category: "musica_digital",
+              content_type: "product",
               fbp: (document.cookie.match(/(?:^| )_fbp=([^;]+)/) || [])[1] || null,
               fbc: getFbc(),
               user_agent: navigator.userAgent,
@@ -689,6 +760,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
         }
         children = newChildren;
         albumErrors = {};
+        albumsExpanded = {};
         goStep(3);
       }
     } else {

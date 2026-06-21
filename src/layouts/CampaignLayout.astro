@@ -1050,8 +1050,23 @@ const year = new Date().getFullYear();
           var source = a.dataset.waSource || "whatsapp_click";
           var eventID = "br_lead_" + getSessionId() + "_" + Date.now();
 
+          // [TC-CAPI 2026-06] Lead enriquecido com contexto (sem PII nesta etapa: é clique p/ wa.me)
           if (window.fbq) {
-            window.fbq("track", "Lead", { content_name: source }, { eventID: eventID });
+            window.fbq("track", "Lead", {
+              content_name: source,
+              content_category: "musica_digital",
+              content_type: "product",
+              currency: "BRL",
+              page_title: document.title,
+              page_referrer: document.referrer || undefined,
+              source_platform: "meta",
+              event_source: "browser",
+              geo: "BR", country: "br",
+              viewport_width: window.innerWidth,
+              viewport_height: window.innerHeight,
+              session_id: getSessionId(),
+              event_source_url: location.href
+            }, { eventID: eventID });
           }
           if (window.ttq) {
             window.ttq.track("Contact", { content_name: source, event_id: eventID });

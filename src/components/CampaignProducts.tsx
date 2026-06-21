@@ -1,6 +1,8 @@
 // CampaignProducts.tsx
 import { useEffect, useRef, useState } from 'react';
 import { ShoppingCart, Play, Pause } from "./Icons.tsx";
+// [TC-CAPI 2026-06] helper de pixel enriquecido
+import { trackPixel } from '../lib/tracking.ts';
 
 const API_URL = import.meta.env.PUBLIC_API_URL;
 
@@ -47,16 +49,17 @@ export default function CampaignProducts({ campaignId }: Props) {
 
         try {
           if (filtered.length && !sessionStorage.getItem('tc_vc_fired')) {
+            // [TC-CAPI 2026-06] ViewContent enriquecido (sem PII nesta etapa)
             const ids = filtered.map(a => a.id);
             const eventId = `vc_${campKey}_${Date.now()}`;
-            if ((window as any).fbq) {
-              (window as any).fbq('track', 'ViewContent', {
-                content_ids: ids, content_type: 'product', content_name: `Campanha ${campKey}`,
-              }, { eventID: eventId });
-            }
-            if ((window as any).ttq) {
-              (window as any).ttq.track('ViewContent', { content_id: ids[0], event_id: eventId });
-            }
+            trackPixel('ViewContent', {
+              content_ids: ids,
+              content_type: 'product',
+              content_category: 'musica_digital',
+              content_name: `Campanha ${campKey}`,
+              contents: ids.map(id => ({ id, quantity: 1 })),
+              num_items: ids.length,
+            }, { eventId })
             sessionStorage.setItem('tc_vc_fired', '1');
           }
         } catch (e) {}

@@ -83,6 +83,9 @@ export default function Modal({
     email: "",
     telefone: "",
   });
+  const [albumsExpanded, setAlbumsExpanded] = useState<Record<string, boolean>>({});
+  const [nameErrors, setNameErrors] = useState<Record<string, string>>({});
+  const [step2Error, setStep2Error] = useState("");
 
   // Álbuns da API
   const [albumsAPI, setAlbumsAPI] = useState<AlbumAPI[]>([]);
@@ -223,47 +226,46 @@ export default function Modal({
         ? (getCombo()?.id ?? "combo")
         : (getAlbumByKey(albumKey)?.id ?? albumKey);
 
+    const currentChild = children.find((c) => c.id === childId);
+    const current = currentChild?.selectedAlbums ?? [];
+    const comboId = getCombo()?.id ?? "combo";
+
+    let newSelected: string[];
+    if (albumKey === "combo") {
+      newSelected = current.includes(comboId) ? [] : [comboId];
+    } else {
+      const withoutCombo = current.filter((a) => a !== comboId);
+      const alreadySelected = withoutCombo.includes(realId);
+      newSelected = alreadySelected
+        ? withoutCombo.filter((a) => a !== realId)
+        : [...withoutCombo, realId];
+    }
+
     setChildren((prev) =>
-      prev.map((c) => {
-        if (c.id !== childId) return c;
-        const current = c.selectedAlbums ?? [];
-        const comboId = getCombo()?.id ?? "combo";
-
-        if (albumKey === "combo") {
-          return {
-            ...c,
-            selectedAlbums: current.includes(comboId) ? [] : [comboId],
-          };
-        }
-
-        const withoutCombo = current.filter((a) => a !== comboId);
-        const alreadySelected = withoutCombo.includes(realId);
-
-        return {
-          ...c,
-          selectedAlbums: alreadySelected
-            ? withoutCombo.filter((a) => a !== realId)
-            : [...withoutCombo, realId],
-        };
-      })
+      prev.map((c) => (c.id === childId ? { ...c, selectedAlbums: newSelected } : c))
     );
+
+    if (newSelected.length > 0) {
+      setAlbumsExpanded((prev) => ({ ...prev, [childId]: false }));
+    }
     setAlbumErrors((prev) => ({ ...prev, [childId]: "" }));
   };
 
   const toggleComboGravado = (childId: string) => {
     const gravacaoIds = getGravacaoIds();
+    const currentChild = children.find((c) => c.id === childId);
+    const selected = currentChild?.selectedAlbums ?? [];
+    const ativo = isComboGravadoSelected(selected);
+    const semGravacao = selected.filter((id) => !gravacaoIds.includes(id));
+    const newSelected = ativo ? semGravacao : [...semGravacao, ...gravacaoIds];
+
     setChildren((prev) =>
-      prev.map((c) => {
-        if (c.id !== childId) return c;
-        const selected = c.selectedAlbums ?? [];
-        const ativo = isComboGravadoSelected(selected);
-        const semGravacao = selected.filter((id) => !gravacaoIds.includes(id));
-        return {
-          ...c,
-          selectedAlbums: ativo ? semGravacao : [...semGravacao, ...gravacaoIds],
-        };
-      })
+      prev.map((c) => (c.id === childId ? { ...c, selectedAlbums: newSelected } : c))
     );
+
+    if (newSelected.length > 0) {
+      setAlbumsExpanded((prev) => ({ ...prev, [childId]: false }));
+    }
     setAlbumErrors((prev) => ({ ...prev, [childId]: "" }));
   };
 
@@ -296,6 +298,9 @@ export default function Modal({
       ]);
       setAlbumErrors({});
       setErrors({ fullName: "", email: "", telefone: "" });
+      setAlbumsExpanded({});
+      setNameErrors({});
+      setStep2Error("");
     } else {
       document.body.style.overflow = "unset";
     }
@@ -357,24 +362,30 @@ export default function Modal({
   const validateStep2 = () => childrenCount > 0;
 
   const validateStep3 = () => {
-    const hasEmpty = children.some((c) => !c.name.trim());
-    if (hasEmpty) {
-      alert("Por favor, preencha o nome de todas as crianças");
+    const newNameErrors: Record<string, string> = {};
+    children.forEach((c) => {
+      if (!c.name.trim()) {
+        newNameErrors[c.id] = "Por favor, informe o nome da criança";
+      }
+    });
+
+    if (Object.keys(newNameErrors).length > 0) {
+      setNameErrors(newNameErrors);
       return false;
     }
 
-    const newErrors: Record<string, string> = {};
+    const newAlbumErrors: Record<string, string> = {};
     children.forEach((c) => {
       if (
         c.albumResult?.found &&
         (!c.selectedAlbums || c.selectedAlbums.length === 0)
       ) {
-        newErrors[c.id] = "Selecione pelo menos um álbum";
+        newAlbumErrors[c.id] = "Selecione pelo menos um álbum";
       }
     });
 
-    if (Object.keys(newErrors).length > 0) {
-      setAlbumErrors(newErrors);
+    if (Object.keys(newAlbumErrors).length > 0) {
+      setAlbumErrors(newAlbumErrors);
       return false;
     }
 
@@ -384,19 +395,24 @@ export default function Modal({
   const handleNext = () => {
     if (step === 1 && validateStep1()) {
       setStep(2);
-    } else if (step === 2 && validateStep2()) {
-      // Inicializa exatamente childrenCount crianças
-      setChildren(
-        Array.from({ length: childrenCount }, (_, i) => ({
+    } else if (step === 2) {
+      if (validateStep2()) {
+        const newChildren = Array.from({ length: childrenCount }, (_, i) => ({
           id: `${Date.now()}-${i}`,
           name: "",
           albumResult: null,
           isSearching: false,
           selectedAlbums: [],
-        }))
-      );
-      setAlbumErrors({});
-      setStep(3);
+        }));
+        setChildren(newChildren);
+        setAlbumsExpanded({});
+        setAlbumErrors({});
+        setNameErrors({});
+        setStep2Error("");
+        setStep(3);
+      } else {
+        setStep2Error("Por favor, selecione a quantidade de crianças para continuar");
+      }
     } else if (step === 3 && validateStep3()) {
       localStorage.setItem(
         "orderData",
@@ -576,6 +592,10 @@ export default function Modal({
                   </p>
                 </div>
               )}
+
+              {step2Error && (
+                <p className="text-red-500 text-sm text-center font-medium">{step2Error}</p>
+              )}
             </div>
           )}
 
@@ -599,18 +619,38 @@ export default function Modal({
                 </div>
               )}
 
-              <div className="space-y-5 max-h-[520px] overflow-y-auto pr-1">
-                {children.map((child, index) => (
-                  <div key={child.id} className="space-y-2">
+              <div className="space-y-0 max-h-[520px] overflow-y-auto pr-1">
+                {children.map((child, index) => {
+                  const selectedAlbums = child.selectedAlbums ?? [];
+                  const hasSelection = selectedAlbums.length > 0;
+                  const isAlbumsOpen = !hasSelection || albumsExpanded[child.id] === true;
+                  const foundCount = child.albumResult?.found ? (child.albumResult.albums?.length ?? 0) : 0;
+                  const subtotal = calcularSubtotal(selectedAlbums, foundCount);
+
+                  return (
+                  <div key={child.id}>
+                    {index > 0 && <hr className="border-gray-200 my-4" />}
+
                     {/* Input nome */}
-                    <div className="flex gap-2 items-center">
+                    <div className="mb-2">
                       <input
                         type="text"
                         placeholder={`Nome da criança ${index + 1} *`}
                         value={child.name}
-                        onChange={(e) => updateChild(child.id, e.target.value)}
-                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none transition-colors"
+                        onChange={(e) => {
+                          updateChild(child.id, e.target.value);
+                          if (nameErrors[child.id])
+                            setNameErrors((prev) => ({ ...prev, [child.id]: "" }));
+                        }}
+                        className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${
+                          nameErrors[child.id]
+                            ? "border-red-500 focus:border-red-500"
+                            : "border-gray-200 focus:border-primary"
+                        }`}
                       />
+                      {nameErrors[child.id] && (
+                        <p className="text-red-500 text-xs mt-1">{nameErrors[child.id]}</p>
+                      )}
                     </div>
 
                     {/* Buscando */}
@@ -621,373 +661,269 @@ export default function Modal({
                       </div>
                     )}
 
-                    {/* Álbuns disponíveis + seleção */}
+                    {/* ── ÁLBUNS ENCONTRADOS ── */}
                     {!child.isSearching && child.albumResult?.found && (
-                      <div className="space-y-2">
-                        <p className="text-xs font-semibold text-gray-600 px-1">
-                          Álbuns disponíveis para{" "}
-                          <span className="text-primary">
-                            {child.albumResult.display_name}
-                          </span>:
-                        </p>
+                      <>
+                        {/* COMPACTO — álbum selecionado */}
+                        {!isAlbumsOpen && (
+                          <button
+                            type="button"
+                            onClick={() => setAlbumsExpanded((prev) => ({ ...prev, [child.id]: true }))}
+                            className="w-full flex items-center gap-3 px-4 py-3 bg-green-50 border-2 border-green-400 rounded-xl hover:bg-green-100 transition-colors"
+                          >
+                            <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                              <Check className="w-3.5 h-3.5 text-white" />
+                            </div>
+                            <span className="flex-1 text-sm font-semibold text-green-800 text-left truncate">
+                              {selectedAlbums.map((id) => getAlbumLabel(id)).join(" + ")}
+                            </span>
+                            <span className="text-sm font-bold text-green-700 flex-shrink-0">
+                              R$ {subtotal.toFixed(2).replace(".", ",")}
+                            </span>
+                            <span className="text-xs text-green-700 flex-shrink-0 border border-green-500 rounded-lg px-2 py-0.5 bg-white">
+                              Alterar ▾
+                            </span>
+                          </button>
+                        )}
 
-                        <div className="space-y-2">
-                          {/* Álbuns individuais */}
-                          {child.albumResult.albums?.map((albumKey) => {
-                            const albumData = getAlbumByKey(albumKey);
-                            const comboId = getCombo()?.id ?? "combo";
-                            const isSelected = (child.selectedAlbums ?? []).includes(albumData?.id ?? albumKey);
-                            const isComboSelected = (child.selectedAlbums ?? []).includes(comboId);
-                            const priceNew = getAlbumPrice(albumKey);
-                            const priceOld = getAlbumPriceOld(albumKey);
+                        {/* EXPANDIDO — todas as opções */}
+                        {isAlbumsOpen && (
+                          <div className="space-y-2">
+                            <p className="text-xs font-semibold text-gray-600 px-1">
+                              Álbuns disponíveis para{" "}
+                              <span className="text-primary">{child.albumResult.display_name}</span>:
+                            </p>
 
-                            return (
-                              <button
-                                key={albumKey}
-                                onClick={() => toggleAlbum(child.id, albumKey)}
-                                disabled={isComboSelected}
-                                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${
-                                  isComboSelected
-                                    ? "border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed"
-                                    : isSelected
-                                    ? "border-primary bg-primary/5"
-                                    : "border-gray-200 hover:border-primary/50 hover:bg-gray-50"
-                                }`}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <div
-                                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                                      isSelected && !isComboSelected
-                                        ? "border-primary bg-primary"
-                                        : "border-gray-300"
-                                    }`}
-                                  >
-                                    {isSelected && !isComboSelected && (
-                                      <Check className="w-3 h-3 text-white" />
-                                    )}
-                                  </div>
-                                  <span className="text-sm font-medium text-left">
-                                    {albumData?.name ?? getAlbumLabel(albumKey)}
-                                  </span>
-                                </div>
-                                <div className="text-right flex-shrink-0 ml-2">
-                                  {priceOld > priceNew && (
-                                    <span className="text-xs text-gray-400 line-through block">
-                                      R$ {priceOld.toFixed(2).replace(".", ",")}
-                                    </span>
-                                  )}
-                                  <span className="text-sm font-bold text-gray-700">
-                                    R$ {priceNew.toFixed(2).replace(".", ",")}
-                                  </span>
-                                </div>
-                              </button>
-                            );
-                          })}
-
-                          {/* Combo — só mostra se tiver 2+ álbuns E tiver combo cadastrado */}
-                          {(child.albumResult.albums?.length ?? 0) >= 2 && combo && (() => {
-                            const comboSelected = (child.selectedAlbums ?? []).includes(combo.id);
-                            return (
-                            <button
-                              onClick={() => toggleAlbum(child.id, "combo")}
-                              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${
-                                comboSelected
-                                  ? "border-green-500 bg-green-50"
-                                  : "border-dashed border-green-400 hover:bg-green-50"
-                              }`}
-                            >
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                                    comboSelected
-                                      ? "border-green-500 bg-green-500"
-                                      : "border-green-400"
-                                  }`}
-                                >
-                                  {comboSelected && (
-                                    <Check className="w-3 h-3 text-white" />
-                                  )}
-                                </div>
-                                <div className="text-left">
-                                  <span className="text-sm font-bold text-green-700 block">
-                                    🎁 {combo.name}
-                                  </span>
-                                  <span className="text-xs text-green-600">
-                                    Melhor custo-benefício!
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="text-right flex-shrink-0 ml-2">
-                                {parseFloat(combo.priceOld) > parseFloat(combo.priceNew) && (
-                                  <span className="text-xs text-green-500 line-through block">
-                                    R$ {parseFloat(combo.priceOld).toFixed(2).replace(".", ",")}
-                                  </span>
-                                )}
-                                <span className="text-sm font-bold text-green-700">
-                                  R$ {parseFloat(combo.priceNew).toFixed(2).replace(".", ",")}
-                                </span>
-                              </div>
-                            </button>
-                            );
-                          })()}
-                        </div>
-
-                        {/* Oferta de gravação para álbuns faltantes */}
-                        {(() => {
-                          const albumsOnly = getAlbumsOnly();
-                          const childAlbumIds = child.albumResult.albums ?? [];
-                          const missing = albumsOnly.filter((a) => !childAlbumIds.includes(a.id));
-                          const gravacaoAlbums = getGravacaoAlbums();
-                          if (missing.length === 0 || gravacaoAlbums.length === 0) return null;
-
-                          const selected = child.selectedAlbums ?? [];
-                          const gravacaoIds = getGravacaoIds();
-
-                          if (missing.length >= 2) {
-                            const comboAtivo = isComboGravadoSelected(selected);
-                            return (
-                              <div className="space-y-1 pt-1">
-                                <p className="text-xs font-semibold text-orange-600 px-1">
-                                  🎙️ Grave os 2 álbuns com o nome de {child.albumResult.display_name ?? child.name}:
-                                </p>
-                                <button
-                                  onClick={() => toggleComboGravado(child.id)}
-                                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${
-                                    comboAtivo
-                                      ? "border-orange-500 bg-orange-50"
-                                      : "border-dashed border-orange-400 hover:bg-orange-50"
-                                  }`}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                                      comboAtivo ? "border-orange-500 bg-orange-500" : "border-orange-400"
-                                    }`}>
-                                      {comboAtivo && <Check className="w-3 h-3 text-white" />}
-                                    </div>
-                                    <div className="text-left">
-                                      <span className="text-sm font-bold text-orange-700 block">🎁 Combo Gravado</span>
-                                      <span className="text-xs text-orange-600">Os 2 álbuns gravados com nome personalizado</span>
-                                    </div>
-                                  </div>
-                                  <span className="text-sm font-bold text-orange-700 ml-2 flex-shrink-0">
-                                    R$ {COMBO_GRAVADO_PRICE_FULL.toFixed(2).replace(".", ",")}
-                                  </span>
-                                </button>
-                              </div>
-                            );
-                          }
-
-                          // 1 álbum faltando — mostra gravação individual (se cadastrada) + opção de combo
-                          const missingIndex = albumsOnly.findIndex((a) => a.id === missing[0].id);
-                          const gravacaoOffer = gravacaoAlbums[missingIndex];
-                          const comboAtivo = isComboGravadoSelected(selected);
-
-                          return (
-                            <div className="space-y-1 pt-1">
-                              <p className="text-xs font-semibold text-orange-600 px-1">
-                                🎙️ Disponível em versão gravada:
-                              </p>
-                              {gravacaoOffer && (() => {
-                                const gravacaoSelected = selected.includes(gravacaoOffer.id);
-                                const priceNew = parseFloat(gravacaoOffer.priceNew);
-                                const priceOld = parseFloat(gravacaoOffer.priceOld ?? "0");
+                            <div className="space-y-2">
+                              {child.albumResult.albums?.map((albumKey) => {
+                                const albumData = getAlbumByKey(albumKey);
+                                const comboId = getCombo()?.id ?? "combo";
+                                const isSelected = selectedAlbums.includes(albumData?.id ?? albumKey);
+                                const isComboSelected = selectedAlbums.includes(comboId);
+                                const priceNew = getAlbumPrice(albumKey);
+                                const priceOld = getAlbumPriceOld(albumKey);
                                 return (
                                   <button
-                                    onClick={() => toggleAlbum(child.id, gravacaoOffer.id)}
+                                    key={albumKey}
+                                    onClick={() => toggleAlbum(child.id, albumKey)}
+                                    disabled={isComboSelected}
                                     className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${
-                                      gravacaoSelected
-                                        ? "border-orange-500 bg-orange-50"
-                                        : "border-dashed border-orange-400 hover:bg-orange-50"
+                                      isComboSelected
+                                        ? "border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed"
+                                        : isSelected
+                                        ? "border-primary bg-primary/5"
+                                        : "border-gray-200 hover:border-primary/50 hover:bg-gray-50"
                                     }`}
                                   >
                                     <div className="flex items-center gap-2">
-                                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                                        gravacaoSelected ? "border-orange-500 bg-orange-500" : "border-orange-400"
-                                      }`}>
-                                        {gravacaoSelected && <Check className="w-3 h-3 text-white" />}
+                                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${isSelected && !isComboSelected ? "border-primary bg-primary" : "border-gray-300"}`}>
+                                        {isSelected && !isComboSelected && <Check className="w-3 h-3 text-white" />}
                                       </div>
-                                      <span className="text-sm font-medium text-left">🎙️ {gravacaoOffer.name}</span>
+                                      <span className="text-sm font-medium text-left">{albumData?.name ?? getAlbumLabel(albumKey)}</span>
                                     </div>
                                     <div className="text-right flex-shrink-0 ml-2">
-                                      {priceOld > priceNew && (
-                                        <span className="text-xs text-gray-400 line-through block">
-                                          R$ {priceOld.toFixed(2).replace(".", ",")}
-                                        </span>
-                                      )}
-                                      <span className="text-sm font-bold text-orange-700">
-                                        R$ {priceNew.toFixed(2).replace(".", ",")}
-                                      </span>
+                                      {priceOld > priceNew && <span className="text-xs text-gray-400 line-through block">R$ {priceOld.toFixed(2).replace(".", ",")}</span>}
+                                      <span className="text-sm font-bold text-gray-700">R$ {priceNew.toFixed(2).replace(".", ",")}</span>
+                                    </div>
+                                  </button>
+                                );
+                              })}
+
+                              {(child.albumResult.albums?.length ?? 0) >= 2 && combo && (() => {
+                                const comboSelected = selectedAlbums.includes(combo.id);
+                                return (
+                                  <button
+                                    onClick={() => toggleAlbum(child.id, "combo")}
+                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${comboSelected ? "border-green-500 bg-green-50" : "border-dashed border-green-400 hover:bg-green-50"}`}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${comboSelected ? "border-green-500 bg-green-500" : "border-green-400"}`}>
+                                        {comboSelected && <Check className="w-3 h-3 text-white" />}
+                                      </div>
+                                      <div className="text-left">
+                                        <span className="text-sm font-bold text-green-700 block">🎁 {combo.name}</span>
+                                        <span className="text-xs text-green-600">Melhor custo-benefício!</span>
+                                      </div>
+                                    </div>
+                                    <div className="text-right flex-shrink-0 ml-2">
+                                      {parseFloat(combo.priceOld) > parseFloat(combo.priceNew) && <span className="text-xs text-green-500 line-through block">R$ {parseFloat(combo.priceOld).toFixed(2).replace(".", ",")}</span>}
+                                      <span className="text-sm font-bold text-green-700">R$ {parseFloat(combo.priceNew).toFixed(2).replace(".", ",")}</span>
                                     </div>
                                   </button>
                                 );
                               })()}
-                              <button
-                                onClick={() => toggleComboGravado(child.id)}
-                                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${
-                                  comboAtivo
-                                    ? "border-orange-500 bg-orange-50"
-                                    : "border-dashed border-orange-400 hover:bg-orange-50"
-                                }`}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                                    comboAtivo ? "border-orange-500 bg-orange-500" : "border-orange-400"
-                                  }`}>
-                                    {comboAtivo && <Check className="w-3 h-3 text-white" />}
-                                  </div>
-                                  <div className="text-left">
-                                    <span className="text-sm font-bold text-orange-700 block">🎁 Combo Gravado</span>
-                                    <span className="text-xs text-orange-600">Os 2 álbuns gravados — melhor custo-benefício!</span>
-                                  </div>
-                                </div>
-                                <span className="text-sm font-bold text-orange-700 ml-2 flex-shrink-0">
-                                  R$ {COMBO_GRAVADO_ONE_MISSING.toFixed(2).replace(".", ",")}
-                                </span>
-                              </button>
                             </div>
-                          );
-                        })()}
 
-                        {/* Erro de seleção */}
-                        {albumErrors[child.id] && (
-                          <p className="text-red-500 text-xs px-1">{albumErrors[child.id]}</p>
+                            {/* Gravação para álbuns faltantes */}
+                            {(() => {
+                              const albumsOnly = getAlbumsOnly();
+                              const childAlbumIds = child.albumResult.albums ?? [];
+                              const missing = albumsOnly.filter((a) => !childAlbumIds.includes(a.id));
+                              const gravacaoAlbums = getGravacaoAlbums();
+                              if (missing.length === 0 || gravacaoAlbums.length === 0) return null;
+                              const gravacaoIds = getGravacaoIds();
+
+                              if (missing.length >= 2) {
+                                const comboAtivo = isComboGravadoSelected(selectedAlbums);
+                                return (
+                                  <div className="space-y-1 pt-1">
+                                    <p className="text-xs font-semibold text-orange-600 px-1">🎙️ Grave os 2 álbuns com o nome de {child.albumResult.display_name ?? child.name}:</p>
+                                    <button onClick={() => toggleComboGravado(child.id)} className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${comboAtivo ? "border-orange-500 bg-orange-50" : "border-dashed border-orange-400 hover:bg-orange-50"}`}>
+                                      <div className="flex items-center gap-2">
+                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${comboAtivo ? "border-orange-500 bg-orange-500" : "border-orange-400"}`}>{comboAtivo && <Check className="w-3 h-3 text-white" />}</div>
+                                        <div className="text-left"><span className="text-sm font-bold text-orange-700 block">🎁 Combo Gravado</span><span className="text-xs text-orange-600">Os 2 álbuns gravados com nome personalizado</span></div>
+                                      </div>
+                                      <span className="text-sm font-bold text-orange-700 ml-2 flex-shrink-0">R$ {COMBO_GRAVADO_PRICE_FULL.toFixed(2).replace(".", ",")}</span>
+                                    </button>
+                                  </div>
+                                );
+                              }
+
+                              const missingIndex = albumsOnly.findIndex((a) => a.id === missing[0].id);
+                              const gravacaoOffer = gravacaoAlbums[missingIndex];
+                              const comboAtivo = isComboGravadoSelected(selectedAlbums);
+                              return (
+                                <div className="space-y-1 pt-1">
+                                  <p className="text-xs font-semibold text-orange-600 px-1">🎙️ Disponível em versão gravada:</p>
+                                  {gravacaoOffer && (() => {
+                                    const gravacaoSelected = selectedAlbums.includes(gravacaoOffer.id);
+                                    const priceNew = parseFloat(gravacaoOffer.priceNew);
+                                    const priceOld = parseFloat(gravacaoOffer.priceOld ?? "0");
+                                    return (
+                                      <button onClick={() => toggleAlbum(child.id, gravacaoOffer.id)} className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${gravacaoSelected ? "border-orange-500 bg-orange-50" : "border-dashed border-orange-400 hover:bg-orange-50"}`}>
+                                        <div className="flex items-center gap-2">
+                                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${gravacaoSelected ? "border-orange-500 bg-orange-500" : "border-orange-400"}`}>{gravacaoSelected && <Check className="w-3 h-3 text-white" />}</div>
+                                          <span className="text-sm font-medium text-left">🎙️ {gravacaoOffer.name}</span>
+                                        </div>
+                                        <div className="text-right flex-shrink-0 ml-2">
+                                          {priceOld > priceNew && <span className="text-xs text-gray-400 line-through block">R$ {priceOld.toFixed(2).replace(".", ",")}</span>}
+                                          <span className="text-sm font-bold text-orange-700">R$ {priceNew.toFixed(2).replace(".", ",")}</span>
+                                        </div>
+                                      </button>
+                                    );
+                                  })()}
+                                  <button onClick={() => toggleComboGravado(child.id)} className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${comboAtivo ? "border-orange-500 bg-orange-50" : "border-dashed border-orange-400 hover:bg-orange-50"}`}>
+                                    <div className="flex items-center gap-2">
+                                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${comboAtivo ? "border-orange-500 bg-orange-500" : "border-orange-400"}`}>{comboAtivo && <Check className="w-3 h-3 text-white" />}</div>
+                                      <div className="text-left"><span className="text-sm font-bold text-orange-700 block">🎁 Combo Gravado</span><span className="text-xs text-orange-600">Os 2 álbuns gravados — melhor custo-benefício!</span></div>
+                                    </div>
+                                    <span className="text-sm font-bold text-orange-700 ml-2 flex-shrink-0">R$ {COMBO_GRAVADO_ONE_MISSING.toFixed(2).replace(".", ",")}</span>
+                                  </button>
+                                </div>
+                              );
+                            })()}
+
+                            {albumErrors[child.id] && (
+                              <p className="text-red-500 text-xs px-1">{albumErrors[child.id]}</p>
+                            )}
+                          </div>
                         )}
-                      </div>
+                      </>
                     )}
 
-                    {/* Nome não encontrado — oferece gravação (mesmo que faltar todos os álbuns) */}
-                    {!child.isSearching &&
-                      child.albumResult &&
-                      !child.albumResult.found &&
-                      child.name.trim().length >= 2 && (() => {
-                        const albumsOnly = getAlbumsOnly();
-                        const gravacaoAlbums = getGravacaoAlbums();
-                        const selected = child.selectedAlbums ?? [];
-
-                        return (
-                          <div className="space-y-2">
+                    {/* ── NOME NÃO ENCONTRADO ── */}
+                    {!child.isSearching && child.albumResult && !child.albumResult.found && child.name.trim().length >= 2 && (() => {
+                      const albumsOnly = getAlbumsOnly();
+                      const gravacaoAlbums = getGravacaoAlbums();
+                      return (
+                        <div className="space-y-2">
+                          {!hasSelection && (
                             <div className="px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
                               <p className="text-xs text-amber-700">
                                 ⚠️ O nome <strong>"{child.name}"</strong> ainda não tem álbum gravado.
                                 {gravacaoAlbums.length === 0 && " Entre em contato para mais informações."}
                               </p>
                             </div>
+                          )}
 
-                            {gravacaoAlbums.length > 0 && albumsOnly.length >= 2 && (() => {
-                              const gravacaoIndividuais = getGravacaoIndividuais();
-                              const comboAtivo = isComboGravadoSelected(selected);
-                              return (
-                                <div className="space-y-1">
-                                  <p className="text-xs font-semibold text-orange-600 px-1">
-                                    🎙️ Grave os álbuns com o nome de <strong>{child.name}</strong>:
-                                  </p>
-                                  {gravacaoIndividuais.map((gravacaoOffer) => {
-                                    const gravacaoSelected = selected.includes(gravacaoOffer.id);
-                                    const priceNew = parseFloat(gravacaoOffer.priceNew);
-                                    const priceOld = parseFloat(gravacaoOffer.priceOld ?? "0");
-                                    return (
-                                      <button
-                                        key={gravacaoOffer.id}
-                                        onClick={() => toggleAlbum(child.id, gravacaoOffer.id)}
-                                        className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${
-                                          gravacaoSelected
-                                            ? "border-orange-500 bg-orange-50"
-                                            : "border-dashed border-orange-400 hover:bg-orange-50"
-                                        }`}
-                                      >
-                                        <div className="flex items-center gap-2">
-                                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                                            gravacaoSelected ? "border-orange-500 bg-orange-500" : "border-orange-400"
-                                          }`}>
-                                            {gravacaoSelected && <Check className="w-3 h-3 text-white" />}
-                                          </div>
-                                          <span className="text-sm font-medium text-left">🎙️ {gravacaoOffer.name}</span>
-                                        </div>
-                                        <div className="text-right flex-shrink-0 ml-2">
-                                          {priceOld > priceNew && (
-                                            <span className="text-xs text-gray-400 line-through block">
-                                              R$ {priceOld.toFixed(2).replace(".", ",")}
-                                            </span>
-                                          )}
-                                          <span className="text-sm font-bold text-orange-700">
-                                            R$ {priceNew.toFixed(2).replace(".", ",")}
-                                          </span>
-                                        </div>
-                                      </button>
-                                    );
-                                  })}
-                                  <button
-                                    onClick={() => toggleComboGravado(child.id)}
-                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${
-                                      comboAtivo
-                                        ? "border-orange-500 bg-orange-50"
-                                        : "border-dashed border-orange-400 hover:bg-orange-50"
-                                    }`}
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                                        comboAtivo ? "border-orange-500 bg-orange-500" : "border-orange-400"
-                                      }`}>
-                                        {comboAtivo && <Check className="w-3 h-3 text-white" />}
-                                      </div>
-                                      <div className="text-left">
-                                        <span className="text-sm font-bold text-orange-700 block">🎁 Combo Gravado</span>
-                                        <span className="text-xs text-orange-600">Os 2 álbuns gravados — melhor custo-benefício!</span>
-                                      </div>
-                                    </div>
-                                    <span className="text-sm font-bold text-orange-700 ml-2 flex-shrink-0">
-                                      R$ {COMBO_GRAVADO_PRICE_FULL.toFixed(2).replace(".", ",")}
-                                    </span>
-                                  </button>
-                                </div>
-                              );
-                            })()}
+                          {/* COMPACTO — gravação selecionada */}
+                          {hasSelection && !isAlbumsOpen && (
+                            <button
+                              type="button"
+                              onClick={() => setAlbumsExpanded((prev) => ({ ...prev, [child.id]: true }))}
+                              className="w-full flex items-center gap-3 px-4 py-3 bg-orange-50 border-2 border-orange-400 rounded-xl hover:bg-orange-100 transition-colors"
+                            >
+                              <div className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                                <Check className="w-3.5 h-3.5 text-white" />
+                              </div>
+                              <span className="flex-1 text-sm font-semibold text-orange-800 text-left truncate">
+                                {selectedAlbums.map((id) => getAlbumLabel(id)).join(" + ")}
+                              </span>
+                              <span className="text-sm font-bold text-orange-700 flex-shrink-0">
+                                R$ {subtotal.toFixed(2).replace(".", ",")}
+                              </span>
+                              <span className="text-xs text-orange-700 flex-shrink-0 border border-orange-500 rounded-lg px-2 py-0.5 bg-white">
+                                Alterar ▾
+                              </span>
+                            </button>
+                          )}
 
-                            {gravacaoAlbums.length > 0 && albumsOnly.length === 1 && (() => {
-                              const gravacaoOffer = gravacaoAlbums[0];
-                              const gravacaoSelected = selected.includes(gravacaoOffer.id);
-                              const priceNew = parseFloat(gravacaoOffer.priceNew);
-                              const priceOld = parseFloat(gravacaoOffer.priceOld);
-                              return (
-                                <div className="space-y-1">
-                                  <p className="text-xs font-semibold text-orange-600 px-1">
-                                    🎙️ Disponível em versão gravada:
-                                  </p>
-                                  <button
-                                    onClick={() => toggleAlbum(child.id, gravacaoOffer.id)}
-                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${
-                                      gravacaoSelected
-                                        ? "border-orange-500 bg-orange-50"
-                                        : "border-dashed border-orange-400 hover:bg-orange-50"
-                                    }`}
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                                        gravacaoSelected ? "border-orange-500 bg-orange-500" : "border-orange-400"
-                                      }`}>
-                                        {gravacaoSelected && <Check className="w-3 h-3 text-white" />}
+                          {/* EXPANDIDO — opções de gravação */}
+                          {isAlbumsOpen && gravacaoAlbums.length > 0 && albumsOnly.length >= 2 && (() => {
+                            const gravacaoIndividuais = getGravacaoIndividuais();
+                            const comboAtivo = isComboGravadoSelected(selectedAlbums);
+                            return (
+                              <div className="space-y-1">
+                                <p className="text-xs font-semibold text-orange-600 px-1">🎙️ Grave os álbuns com o nome de <strong>{child.name}</strong>:</p>
+                                {gravacaoIndividuais.map((gravacaoOffer) => {
+                                  const gravacaoSelected = selectedAlbums.includes(gravacaoOffer.id);
+                                  const priceNew = parseFloat(gravacaoOffer.priceNew);
+                                  const priceOld = parseFloat(gravacaoOffer.priceOld ?? "0");
+                                  return (
+                                    <button key={gravacaoOffer.id} onClick={() => toggleAlbum(child.id, gravacaoOffer.id)} className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${gravacaoSelected ? "border-orange-500 bg-orange-50" : "border-dashed border-orange-400 hover:bg-orange-50"}`}>
+                                      <div className="flex items-center gap-2">
+                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${gravacaoSelected ? "border-orange-500 bg-orange-500" : "border-orange-400"}`}>{gravacaoSelected && <Check className="w-3 h-3 text-white" />}</div>
+                                        <span className="text-sm font-medium text-left">🎙️ {gravacaoOffer.name}</span>
                                       </div>
-                                      <span className="text-sm font-medium">🎙️ {gravacaoOffer.name}</span>
-                                    </div>
-                                    <div className="text-right flex-shrink-0 ml-2">
-                                      {priceOld > priceNew && (
-                                        <span className="text-xs text-gray-400 line-through block">
-                                          R$ {priceOld.toFixed(2).replace(".", ",")}
-                                        </span>
-                                      )}
-                                      <span className="text-sm font-bold text-orange-700">
-                                        R$ {priceNew.toFixed(2).replace(".", ",")}
-                                      </span>
-                                    </div>
-                                  </button>
-                                </div>
-                              );
-                            })()}
-                          </div>
-                        );
-                      })()}
+                                      <div className="text-right flex-shrink-0 ml-2">
+                                        {priceOld > priceNew && <span className="text-xs text-gray-400 line-through block">R$ {priceOld.toFixed(2).replace(".", ",")}</span>}
+                                        <span className="text-sm font-bold text-orange-700">R$ {priceNew.toFixed(2).replace(".", ",")}</span>
+                                      </div>
+                                    </button>
+                                  );
+                                })}
+                                <button onClick={() => toggleComboGravado(child.id)} className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${comboAtivo ? "border-orange-500 bg-orange-50" : "border-dashed border-orange-400 hover:bg-orange-50"}`}>
+                                  <div className="flex items-center gap-2">
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${comboAtivo ? "border-orange-500 bg-orange-500" : "border-orange-400"}`}>{comboAtivo && <Check className="w-3 h-3 text-white" />}</div>
+                                    <div className="text-left"><span className="text-sm font-bold text-orange-700 block">🎁 Combo Gravado</span><span className="text-xs text-orange-600">Os 2 álbuns gravados — melhor custo-benefício!</span></div>
+                                  </div>
+                                  <span className="text-sm font-bold text-orange-700 ml-2 flex-shrink-0">R$ {COMBO_GRAVADO_PRICE_FULL.toFixed(2).replace(".", ",")}</span>
+                                </button>
+                              </div>
+                            );
+                          })()}
+
+                          {isAlbumsOpen && gravacaoAlbums.length > 0 && albumsOnly.length === 1 && (() => {
+                            const gravacaoOffer = gravacaoAlbums[0];
+                            const gravacaoSelected = selectedAlbums.includes(gravacaoOffer.id);
+                            const priceNew = parseFloat(gravacaoOffer.priceNew);
+                            const priceOld = parseFloat(gravacaoOffer.priceOld);
+                            return (
+                              <div className="space-y-1">
+                                <p className="text-xs font-semibold text-orange-600 px-1">🎙️ Disponível em versão gravada:</p>
+                                <button onClick={() => toggleAlbum(child.id, gravacaoOffer.id)} className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${gravacaoSelected ? "border-orange-500 bg-orange-50" : "border-dashed border-orange-400 hover:bg-orange-50"}`}>
+                                  <div className="flex items-center gap-2">
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${gravacaoSelected ? "border-orange-500 bg-orange-500" : "border-orange-400"}`}>{gravacaoSelected && <Check className="w-3 h-3 text-white" />}</div>
+                                    <span className="text-sm font-medium">🎙️ {gravacaoOffer.name}</span>
+                                  </div>
+                                  <div className="text-right flex-shrink-0 ml-2">
+                                    {priceOld > priceNew && <span className="text-xs text-gray-400 line-through block">R$ {priceOld.toFixed(2).replace(".", ",")}</span>}
+                                    <span className="text-sm font-bold text-orange-700">R$ {priceNew.toFixed(2).replace(".", ",")}</span>
+                                  </div>
+                                </button>
+                              </div>
+                            );
+                          })()}
+
+                          {albumErrors[child.id] && (
+                            <p className="text-red-500 text-xs px-1">{albumErrors[child.id]}</p>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
 
@@ -1029,8 +965,7 @@ export default function Modal({
         <div className="sticky bottom-0 border-t border-gray-100 p-6 bg-gray-50 rounded-b-3xl">
           <button
             onClick={handleNext}
-            disabled={step === 2 && childrenCount === 0}
-            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-2xl transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-2xl transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 shadow-lg"
           >
             <span>
               {step === 3
