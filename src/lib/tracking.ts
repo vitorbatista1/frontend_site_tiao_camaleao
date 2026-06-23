@@ -156,45 +156,91 @@ export function trackPixel(
 type CapiInput = Commerce & {
   event_name: string;
   event_id: string;
-  em?: string | null; // email cru (opcional)
-  ph?: string | null; // telefone cru (opcional)
-  fn?: string | null; // primeiro nome (opcional)
-  ln?: string | null; // sobrenome (opcional)
+  em?: string | null;
+  ph?: string | null;
+  fn?: string | null;
+  ln?: string | null;
+  // campos ricos opcionais — se não informados, trackCapi monta automaticamente
+  lead?: { name?: string; email?: string; phone?: string };
+  checkout?: { currency: string; value: number; items: Array<{ id: string; name: string; quantity: number; price: number }> };
+  children?: unknown[];
 };
 
 export function trackCapi(input: CapiInput): void {
   if (!API_URL) return;
   try {
     const t = getTrackingPayload();
+    const normPhone = normalizePhoneBR(input.ph);
+
+    // UTM params da URL atual
+    const urlParams = new URLSearchParams(
+      typeof window !== "undefined" ? window.location.search : ""
+    );
+    const utm: Record<string, string> = {};
+    ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].forEach((k) => {
+      const v = urlParams.get(k);
+      if (v) utm[k] = v;
+    });
+
+    // attribution — detecta fbclid ou utm_source
+    const fbclidParam = urlParams.get("fbclid");
+    let attribution: Record<string, unknown> | undefined;
+    if (fbclidParam || utm.utm_source) {
+      const rawData: Record<string, string> = {};
+      if (fbclidParam) rawData.fbclid = fbclidParam;
+      if (utm.utm_source) rawData.utm_source = utm.utm_source;
+      attribution = {
+        source: fbclidParam ? "meta" : utm.utm_source,
+        reason: fbclidParam ? "fbclid" : "utm_source",
+        decided_at: new Date().toISOString(),
+        raw_data: rawData,
+        via: "url",
+      };
+    }
+
+    // lead — usa o fornecido ou monta a partir dos campos crus
+    const lead = input.lead ?? {
+      name: [input.fn, input.ln].filter(Boolean).join(" ") || undefined,
+      email: input.em ? input.em.trim().toLowerCase() : undefined,
+      phone: normPhone ? "+" + normPhone : undefined,
+    };
+
+    // checkout — usa o fornecido ou monta a partir de value + content_ids
+    const checkout = input.checkout ?? {
+      currency: input.currency ?? "BRL",
+      value: input.value ?? 0,
+      items: [] as Array<{ id: string; name: string; quantity: number; price: number }>,
+    };
+
     const body = {
       event_name: input.event_name,
       event_id: input.event_id,
-      // commerce (custom_data)
+      // lead e checkout no formato rico
+      lead,
+      checkout,
+      content_ids: input.content_ids,
+      contents: input.contents,
+      children: input.children ?? [],
+      // commerce
       value: input.value,
       currency: input.currency,
-      content_ids: input.content_ids,
       content_name: input.content_name,
       content_category: input.content_category,
       content_type: input.content_type,
-      contents: input.contents,
       num_items: input.num_items,
-      // contexto
+      // contexto de rastreio
       fbp: t.fbp,
       fbc: t.fbc,
       user_agent: t.user_agent,
       event_source_url: t.event_source_url,
       referrer: t.referrer,
-      session_id: t.session_id,
-      page_title: t.page_title,
-      viewport_width: t.viewport_width,
-      viewport_height: t.viewport_height,
-      country: "br",
+      session_id: normPhone ?? t.session_id,
       geo: "BR",
-      source_platform: "meta",
-      // PII crua (N8N hasheia) — vai no body, NUNCA no pixel custom_data.
-      // external_id é derivado no N8N a partir do telefone (ph). Sem telefone → sem external_id.
-      em: input.em ?? null,
-      ph: input.ph ?? null,
+      utm: Object.keys(utm).length ? utm : undefined,
+      attribution,
+      // PII crua — backend gera sha256
+      em: input.em ? input.em.trim().toLowerCase() : null,
+      ph: normPhone ?? input.ph ?? null,
       fn: input.fn ?? null,
       ln: input.ln ?? null,
     };

@@ -57,6 +57,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   var albumsExpanded = {};
   var errors = { fullName: "", email: "", telefone: "" };
   var productName = "";
+  var productPrice = 0;
   var isCombo = false;
 
   var COMBO_GRAVADO_PRICE_FULL = 150;
@@ -655,6 +656,8 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     detail = detail || {};
     productName = detail.name || "Cantigas Personalizadas";
     isCombo = !!detail.combo;
+    var _priceRaw = String(detail.price || "0").replace(/[^\d,\.]/g, "").replace(",", ".");
+    productPrice = parseFloat(_priceRaw) || 0;
     step = 1;
     childrenCount = 0;
     customer = { fullName: "", email: "", telefone: "" };
@@ -685,16 +688,14 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   document.getElementById("tc-next-btn").onclick = function(){
     if (step === 1) {
       if (validateStep1()) {
-        var icEventId = "br_ic_" + getSessionId() + "_" + Date.now();
         var icNameParts = (customer.fullName || "").trim().split(/\s+/);
         var icFn = icNameParts[0] || null;
         var icLn = icNameParts.slice(1).join(" ") || null;
-        // [TC-CAPI 2026-06] ADVANCED MATCHING: email/telefone/nome CRUS -> fbevents.js hasheia no browser.
-        // external_id = telefone normalizado (mesmo padrao do N8N). SO seta com telefone; nunca valor fixo.
+        var icPhone = (customer.telefone || "").replace(/\D/g, "");
+        if (icPhone && icPhone.indexOf("55") !== 0) icPhone = "55" + icPhone;
+        // [TC-CAPI 2026-06] Advanced matching — fbevents.js hasheia no browser.
         try {
           if (window.fbq) {
-            var icPhone = (customer.telefone || "").replace(/\D/g, "");
-            if (icPhone && icPhone.indexOf("55") !== 0) icPhone = "55" + icPhone;
             var am = { country: "br" };
             if (customer.email) am.em = customer.email.trim().toLowerCase();
             if (icPhone) { am.ph = icPhone; am.external_id = icPhone; }
@@ -703,50 +704,42 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
             window.fbq("init", "2321147791624359", am);
           }
         } catch (e) {}
-        // [TC-CAPI 2026-06] InitiateCheckout com custom_data rico (SEM PII no params)
-        if (window.fbq) {
-          window.fbq("track", "InitiateCheckout", {
-            content_name: productName,
-            content_category: "musica_digital",
-            content_type: "product",
-            currency: "BRL",
-            page_title: document.title,
-            page_referrer: document.referrer || undefined,
-            source_platform: "meta",
-            event_source: "browser",
-            geo: "BR", country: "br",
-            viewport_width: window.innerWidth,
-            viewport_height: window.innerHeight,
-            session_id: getSessionId(),
-            event_source_url: location.href
-          }, { eventID: icEventId });
-        }
-        if (window.ttq) {
-          window.ttq.track("InitiateCheckout", { content_name: productName, currency: "BRL", event_id: icEventId });
-        }
-        // [TC-CAPI 2026-06] espelho CAPI do InitiateCheckout — inclui em/ph para deduplicação por telefone.
+        // [TC-CAPI 2026-06] Lead — captura de contato (Step 1). InitiateCheckout dispara no Step 3.
+        var _leadEventId = "Lead_" + Date.now();
+        var _leadFbqParams = {
+          content_name: productName, content_category: "musica_digital", content_type: "product",
+          currency: "BRL", geo: "BR", country: "br",
+          page_title: document.title, session_id: getSessionId(), event_source_url: location.href
+        };
+        if (window.fbq) { window.fbq("track", "Lead", _leadFbqParams, { eventID: _leadEventId }); }
+        if (window.ttq) { window.ttq.track("Lead", { content_name: productName, currency: "BRL" }); }
         try {
+          var _lup2 = new URLSearchParams(location.search);
+          var _lutm2 = {};
+          ["utm_source","utm_medium","utm_campaign","utm_term","utm_content"].forEach(function(k){ var v = _lup2.get(k); if (v) _lutm2[k] = v; });
+          var _lfc2 = _lup2.get("fbclid");
+          var _lattr2 = null;
+          if (_lfc2 || _lutm2.utm_source) {
+            var _lrd2 = {};
+            if (_lfc2) _lrd2.fbclid = _lfc2;
+            if (_lutm2.utm_source) _lrd2.utm_source = _lutm2.utm_source;
+            _lattr2 = { source: _lfc2 ? "meta" : _lutm2.utm_source, reason: _lfc2 ? "fbclid" : "utm_source", decided_at: new Date().toISOString(), raw_data: _lrd2, via: "url" };
+          }
           fetch(API + "/api/track", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            keepalive: true,
+            method: "POST", headers: { "Content-Type": "application/json" }, keepalive: true,
             body: JSON.stringify({
-              event_name: "InitiateCheckout",
-              event_id: icEventId,
-              content_name: productName,
-              currency: "BRL",
-              content_category: "musica_digital",
-              content_type: "product",
+              event_name: "Lead", event_id: _leadEventId,
+              lead: { name: (customer.fullName || "").trim() || undefined, email: customer.email ? customer.email.trim().toLowerCase() : undefined, phone: icPhone ? "+" + icPhone : undefined },
+              checkout: { currency: "BRL", value: 0, items: [] },
+              content_ids: [], contents: [], children: [],
               fbp: (document.cookie.match(/(?:^| )_fbp=([^;]+)/) || [])[1] || null,
-              fbc: getFbc(),
-              user_agent: navigator.userAgent,
-              event_source_url: location.href,
-              referrer: document.referrer || null,
-              session_id: getSessionId(),
-              em: customer.email || null,
-              ph: customer.telefone || null,
-              fn: icFn,
-              ln: icLn
+              fbc: getFbc(), user_agent: navigator.userAgent,
+              event_source_url: location.href, referrer: document.referrer || null,
+              session_id: icPhone || getSessionId(), geo: "BR",
+              utm: Object.keys(_lutm2).length ? _lutm2 : undefined,
+              attribution: _lattr2 || undefined,
+              em: customer.email ? customer.email.trim().toLowerCase() : null,
+              ph: icPhone || null, fn: icFn, ln: icLn
             })
           }).catch(function(){});
         } catch (e) {}
@@ -794,6 +787,74 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
           });
           return Object.assign({}, c, { selectedAlbums: cleanSel });
         });
+        // [TC-CAPI 2026-06] InitiateCheckout — Step 3, álbuns selecionados, valor real
+        try {
+          var ic3Phone = (customer.telefone || "").replace(/\D/g, "");
+          if (ic3Phone && ic3Phone.indexOf("55") !== 0) ic3Phone = "55" + ic3Phone;
+          var ic3EventId = "IC_" + Date.now();
+          var ic3Parts = (customer.fullName || "").trim().split(/\s+/);
+          var ic3Fn = ic3Parts[0] || null;
+          var ic3Ln = ic3Parts.slice(1).join(" ") || null;
+          var ic3Total = parseFloat(calcTotal());
+          // monta items reais: álbuns digitais + gravações
+          var ic3Items = [];
+          childrenClean.forEach(function(c) {
+            (c.selectedAlbums || []).forEach(function(albumId) {
+              var a = getAlbumById(albumId);
+              ic3Items.push({ id: albumId, name: a ? a.name : albumId, quantity: 1, price: a ? parseFloat(a.priceNew) : 0 });
+            });
+          });
+          gravacaoItems.forEach(function(g) {
+            ic3Items.push({ id: g.albumId, name: g.name, quantity: 1, price: g.price });
+          });
+          // children no formato do payload N8N
+          var ic3Children = children.map(function(c, idx) {
+            var sel = c.selectedAlbums || [];
+            var foundCount = (c.albumResult && c.albumResult.found) ? (c.albumResult.albums || []).length : 0;
+            return { index: idx + 1, name: (c.albumResult && c.albumResult.display_name) || c.name, product: isComboGravadoSelected(sel) ? "combo" : "album", type: isComboGravadoSelected(sel) ? "gravado" : "digital", price: calcSubtotal(sel, foundCount) };
+          });
+          var ic3Ids = ic3Items.map(function(i) { return i.id; });
+          var ic3Contents = ic3Items.map(function(i) { return { content_id: i.id, quantity: 1, price: i.price, name: i.name }; });
+          // UTM + attribution
+          var ic3Up = new URLSearchParams(location.search);
+          var ic3Utm = {};
+          ["utm_source","utm_medium","utm_campaign","utm_term","utm_content"].forEach(function(k){ var v = ic3Up.get(k); if (v) ic3Utm[k] = v; });
+          var ic3Fc = ic3Up.get("fbclid");
+          var ic3Attr = null;
+          if (ic3Fc || ic3Utm.utm_source) {
+            var ic3Rd = {};
+            if (ic3Fc) ic3Rd.fbclid = ic3Fc;
+            if (ic3Utm.utm_source) ic3Rd.utm_source = ic3Utm.utm_source;
+            ic3Attr = { source: ic3Fc ? "meta" : ic3Utm.utm_source, reason: ic3Fc ? "fbclid" : "utm_source", decided_at: new Date().toISOString(), raw_data: ic3Rd, via: "url" };
+          }
+          // browser pixel
+          if (window.fbq) {
+            window.fbq("track", "InitiateCheckout", {
+              content_name: productName, content_category: "musica_digital", content_type: "product",
+              currency: "BRL", value: ic3Total, num_items: ic3Items.length,
+              content_ids: ic3Ids, geo: "BR", session_id: getSessionId(), event_source_url: location.href
+            }, { eventID: ic3EventId });
+          }
+          if (window.ttq) { window.ttq.track("InitiateCheckout", { content_name: productName, currency: "BRL", value: ic3Total, event_id: ic3EventId }); }
+          // CAPI
+          fetch(API + "/api/track", {
+            method: "POST", headers: { "Content-Type": "application/json" }, keepalive: true,
+            body: JSON.stringify({
+              event_name: "InitiateCheckout", event_id: ic3EventId,
+              lead: { name: (customer.fullName || "").trim() || undefined, email: customer.email ? customer.email.trim().toLowerCase() : undefined, phone: ic3Phone ? "+" + ic3Phone : undefined },
+              checkout: { currency: "BRL", value: ic3Total, items: ic3Items },
+              content_ids: ic3Ids, contents: ic3Contents, children: ic3Children,
+              fbp: (document.cookie.match(/(?:^| )_fbp=([^;]+)/) || [])[1] || null,
+              fbc: getFbc(), user_agent: navigator.userAgent,
+              event_source_url: location.href, referrer: document.referrer || null,
+              session_id: ic3Phone || getSessionId(), geo: "BR",
+              utm: Object.keys(ic3Utm).length ? ic3Utm : undefined,
+              attribution: ic3Attr || undefined,
+              em: customer.email ? customer.email.trim().toLowerCase() : null,
+              ph: ic3Phone || null, fn: ic3Fn, ln: ic3Ln
+            })
+          }).catch(function(){});
+        } catch (e) {}
         localStorage.setItem("orderData", JSON.stringify({
           customerData: customer, children: childrenClean, albumsAPI: albumsAPI,
           productName: productName, total: calcTotal(), isCombo: isCombo,

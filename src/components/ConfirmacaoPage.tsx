@@ -1,8 +1,14 @@
 // [TC-CAPI 2026-06]
-import { trackPixel } from '../lib/tracking.ts';
+import { trackPixel, trackCapi, normalizePhoneBR } from '../lib/tracking.ts';
 import { useEffect, useState } from 'react';
 import { CheckCircle, Music, Heart, Lock } from './Icons.tsx';
 import cabecaAlta from '../assets/images/Cabeça-Alta-RGB.png';
+
+interface GravacaoItem {
+  albumId: string;
+  name: string;
+  price: number;
+}
 
 interface OrderData {
   customerData: {
@@ -16,6 +22,7 @@ interface OrderData {
     selectedAlbums?: string[];
     albumResult?: { display_name?: string };
   }>;
+  gravacaoItems?: GravacaoItem[];
   productName: string;
   total: string;
 }
@@ -46,8 +53,25 @@ export default function ConfirmacaoPage() {
         if (!alreadyFired) {
           // [TC-CAPI 2026-06] Purchase com advanced matching reaplicado nesta página + custom_data rico.
           const value = parseFloat(parsed?.total || lastOrder?.amount || '0');
-          const childIds = (parsed?.children ?? []).map((c: any) => c.name);
           const cd = parsed?.customerData || lastOrder?.customerData || {};
+
+          // Build real content_ids from album IDs + gravacaoItems
+          const allItems: Array<{ id: string; quantity: number; item_price: number }> = [];
+          (parsed?.children ?? []).forEach((c: any) => {
+            (c.selectedAlbums ?? []).forEach((albumId: string) => {
+              allItems.push({ id: albumId, quantity: 1, item_price: 0 });
+            });
+          });
+          (parsed?.gravacaoItems ?? []).forEach((g: any) => {
+            allItems.push({ id: g.albumId ?? g.name, quantity: 1, item_price: Number(g.price ?? 0) });
+          });
+          // fallback: child names if no album IDs found
+          const childIds = allItems.length > 0
+            ? allItems.map(i => i.id)
+            : (parsed?.children ?? []).map((c: any) => c.name);
+          const purchaseEventId = `Purchase_BWS_${orderId}`;
+          const nameParts = (cd.fullName ?? '').trim().split(/\s+/);
+          // browser pixel
           trackPixel('Purchase', {
             value, currency: 'BRL',
             content_ids: childIds,
@@ -56,12 +80,31 @@ export default function ConfirmacaoPage() {
             content_type: 'product',
             num_items: childIds.length || 1,
           }, {
-            eventId: `purchase_${orderId}`,
+            eventId: purchaseEventId,
             user: { email: cd.email ?? null, phone: cd.telefone ?? null, fullName: cd.fullName ?? null },
           });
           if ((window as any).ttq) {
-            (window as any).ttq.track('CompletePayment', { value, currency: 'BRL', event_id: `purchase_${orderId}` });
+            (window as any).ttq.track('CompletePayment', { value, currency: 'BRL', event_id: purchaseEventId });
           }
+          // CAPI — espelho server-side (não depende do webhook MP)
+          const capiContents = allItems.length > 0
+            ? allItems
+            : childIds.map((id: string) => ({ id, quantity: 1, item_price: value / (childIds.length || 1) }));
+          trackCapi({
+            event_name: 'Purchase',
+            event_id: purchaseEventId,
+            value,
+            currency: 'BRL',
+            content_ids: childIds.length ? childIds : undefined,
+            contents: capiContents.length ? capiContents : undefined,
+            content_category: 'musica_digital',
+            content_type: 'product',
+            num_items: childIds.length || 1,
+            em: cd.email ?? null,
+            ph: cd.telefone ?? null,
+            fn: nameParts[0] ?? null,
+            ln: nameParts.slice(1).join(' ') || null,
+          });
           sessionStorage.setItem(`tc_purchase_fired_${orderId}`, '1');
         }
       }
