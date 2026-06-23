@@ -134,6 +134,18 @@ export type Commerce = {
   num_items?: number;
 };
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Configuração central de eventos — edite aqui para mudar pixel E CAPI juntos.
+// Cada chave é o event_name exato que vai para fbq/ttq e para o backend.
+// ═══════════════════════════════════════════════════════════════════════════
+export const PIXEL_EVENTS: Record<string, Partial<Commerce>> = {
+  Lead:             { currency: "BRL", value: 0,  content_category: "lead",          content_type: "product" },
+  InitiateCheckout: { currency: "BRL",             content_category: "checkout",       content_type: "product" },
+  AddPaymentInfo:   { currency: "BRL",             content_category: "musica_digital", content_type: "product" },
+  Purchase:         { currency: "BRL",             content_category: "musica_digital", content_type: "product" },
+  ViewContent:      { currency: "BRL",             content_category: "catalogo",       content_type: "product" },
+};
+
 // [TC-CAPI 2026-06] dispara o PIXEL enriquecido (advanced matching + commerce + contexto).
 // REGRA: PII vai SÓ pelo setUserData (opts.user). Nunca dentro de `params`/custom_data.
 export function trackPixel(
@@ -255,22 +267,31 @@ export function trackCapi(input: CapiInput): void {
   }
 }
 
-/** [TC-CAPI 2026-06] Dispara pixel (enriquecido) E CAPI com o MESMO event_id → deduplica. */
+// ═══════════════════════════════════════════════════════════════════════════
+// Ponto de entrada principal — usa os defaults de PIXEL_EVENTS e garante que
+// pixel e CAPI recebem os mesmos campos de commerce.
+// Purchase NÃO vai para CAPI aqui: a conversão confirmada chega pelo webhook
+// do Mercado Pago → backend → RabbitMQ → N8N.
+// ═══════════════════════════════════════════════════════════════════════════
 export function trackBoth(
   event: string,
   capi: CapiInput,
   user?: { email?: string | null; phone?: string | null; fullName?: string | null },
 ): void {
+  const defaults = PIXEL_EVENTS[event] ?? {};
+  const merged: CapiInput = { ...defaults, ...capi };
+
   const commerce: Commerce = {
-    value: capi.value,
-    currency: capi.currency,
-    content_ids: capi.content_ids,
-    content_name: capi.content_name,
-    content_category: capi.content_category,
-    content_type: capi.content_type,
-    contents: capi.contents,
-    num_items: capi.num_items,
+    value: merged.value,
+    currency: merged.currency,
+    content_ids: merged.content_ids,
+    content_name: merged.content_name,
+    content_category: merged.content_category,
+    content_type: merged.content_type,
+    contents: merged.contents,
+    num_items: merged.num_items,
   };
-  trackPixel(event, commerce, { eventId: capi.event_id, user });
-  trackCapi(capi);
+
+  trackPixel(event, commerce, { eventId: merged.event_id, user });
+  trackCapi(merged);
 }

@@ -1,5 +1,5 @@
 // [TC-CAPI 2026-06]
-import { trackPixel, trackCapi, normalizePhoneBR } from '../lib/tracking.ts';
+import { trackBoth, normalizePhoneBR } from '../lib/tracking.ts';
 import { useEffect, useState } from 'react';
 import { CheckCircle, Music, Heart, Lock } from './Icons.tsx';
 import cabecaAlta from '../assets/images/Cabeça-Alta-RGB.png';
@@ -51,11 +51,10 @@ export default function ConfirmacaoPage() {
       if (currentStatus === 'approved' && orderId) {
         const alreadyFired = sessionStorage.getItem(`tc_purchase_fired_${orderId}`);
         if (!alreadyFired) {
-          // [TC-CAPI 2026-06] Purchase com advanced matching reaplicado nesta página + custom_data rico.
+          // [TC-CAPI 2026-06] Purchase browser-pixel apenas — CAPI chega pelo webhook MP.
           const value = parseFloat(parsed?.total || lastOrder?.amount || '0');
           const cd = parsed?.customerData || lastOrder?.customerData || {};
 
-          // Build real content_ids from album IDs + gravacaoItems
           const allItems: Array<{ id: string; quantity: number; item_price: number }> = [];
           (parsed?.children ?? []).forEach((c: any) => {
             (c.selectedAlbums ?? []).forEach((albumId: string) => {
@@ -65,46 +64,28 @@ export default function ConfirmacaoPage() {
           (parsed?.gravacaoItems ?? []).forEach((g: any) => {
             allItems.push({ id: g.albumId ?? g.name, quantity: 1, item_price: Number(g.price ?? 0) });
           });
-          // fallback: child names if no album IDs found
           const childIds = allItems.length > 0
             ? allItems.map(i => i.id)
             : (parsed?.children ?? []).map((c: any) => c.name);
           const purchaseEventId = `Purchase_BWS_${orderId}`;
           const nameParts = (cd.fullName ?? '').trim().split(/\s+/);
-          // browser pixel
-          trackPixel('Purchase', {
-            value, currency: 'BRL',
-            content_ids: childIds,
-            contents: childIds.map((id: string) => ({ id, quantity: 1 })),
-            content_category: 'musica_digital',
-            content_type: 'product',
-            num_items: childIds.length || 1,
-          }, {
-            eventId: purchaseEventId,
-            user: { email: cd.email ?? null, phone: cd.telefone ?? null, fullName: cd.fullName ?? null },
-          });
-          if ((window as any).ttq) {
-            (window as any).ttq.track('CompletePayment', { value, currency: 'BRL', event_id: purchaseEventId });
-          }
-          // CAPI — espelho server-side (não depende do webhook MP)
-          const capiContents = allItems.length > 0
-            ? allItems
-            : childIds.map((id: string) => ({ id, quantity: 1, item_price: value / (childIds.length || 1) }));
-          trackCapi({
+
+          // trackBoth: pixel (fbq/ttq) dispara; CAPI bloqueado para Purchase.
+          trackBoth('Purchase', {
             event_name: 'Purchase',
             event_id: purchaseEventId,
             value,
-            currency: 'BRL',
             content_ids: childIds.length ? childIds : undefined,
-            contents: capiContents.length ? capiContents : undefined,
-            content_category: 'musica_digital',
-            content_type: 'product',
+            contents: allItems.length
+              ? allItems
+              : childIds.map((id: string) => ({ id, quantity: 1, item_price: value / (childIds.length || 1) })),
             num_items: childIds.length || 1,
             em: cd.email ?? null,
             ph: cd.telefone ?? null,
             fn: nameParts[0] ?? null,
             ln: nameParts.slice(1).join(' ') || null,
-          });
+          }, { email: cd.email ?? null, phone: cd.telefone ?? null, fullName: cd.fullName ?? null });
+
           sessionStorage.setItem(`tc_purchase_fired_${orderId}`, '1');
         }
       }
