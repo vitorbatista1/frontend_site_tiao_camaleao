@@ -105,7 +105,7 @@ export default function CardForm({
     };
   }, []);
 
-  // Polling de status após PIX gerado
+  // Polling de status após PIX geradoaaaa
   useEffect(() => {
     if (!pixData || pixExpired) return;
 
