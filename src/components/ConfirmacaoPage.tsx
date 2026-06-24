@@ -49,7 +49,7 @@ export default function ConfirmacaoPage() {
       const orderId = lastOrder?.order_id || queryOrderId;
 
       if (currentStatus === 'approved' && orderId) {
-        const alreadyFired = sessionStorage.getItem(`tc_purchase_fired_${orderId}`);
+        const alreadyFired = localStorage.getItem(`tc_purchase_fired_${orderId}`);
         if (!alreadyFired) {
           // [TC-CAPI 2026-06] Purchase browser-pixel apenas — CAPI chega pelo webhook MP.
           const value = parseFloat(parsed?.total || lastOrder?.amount || '0');
@@ -86,7 +86,7 @@ export default function ConfirmacaoPage() {
             ln: nameParts.slice(1).join(' ') || null,
           }, { email: cd.email ?? null, phone: cd.telefone ?? null, fullName: cd.fullName ?? null });
 
-          sessionStorage.setItem(`tc_purchase_fired_${orderId}`, '1');
+          localStorage.setItem(`tc_purchase_fired_${orderId}`, '1');
         }
       }
     } catch (e) {}

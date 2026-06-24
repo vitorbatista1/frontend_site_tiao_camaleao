@@ -293,5 +293,8 @@ export function trackBoth(
   };
 
   trackPixel(event, commerce, { eventId: merged.event_id, user });
-  trackCapi(merged);
+  // Purchase CAPI comes exclusively from the MP webhook → pixel.publisher.ts
+  if (event !== 'Purchase') {
+    trackCapi(merged);
+  }
 }
