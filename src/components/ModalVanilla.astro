@@ -725,6 +725,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
             if (_lutm2.utm_source) _lrd2.utm_source = _lutm2.utm_source;
             _lattr2 = { source: _lfc2 ? "meta" : _lutm2.utm_source, reason: _lfc2 ? "fbclid" : "utm_source", decided_at: new Date().toISOString(), raw_data: _lrd2, via: "url" };
           }
+          console.log("[Lead] fbq ok, enviando CAPI | event_id=" + _leadEventId);
           fetch(API + "/api/track", {
             method: "POST", headers: { "Content-Type": "application/json" }, keepalive: true,
             body: JSON.stringify({
@@ -741,8 +742,8 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
               em: customer.email ? customer.email.trim().toLowerCase() : null,
               ph: icPhone || null, fn: icFn, ln: icLn
             })
-          }).catch(function(){});
-        } catch (e) {}
+          }).catch(function(err){ console.error("[Lead] fetch CAPI falhou:", err); });
+        } catch (e) { console.error("[Lead] erro no bloco Lead:", e); }
         goStep(2);
       }
     } else if (step === 2) {
@@ -828,15 +829,20 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
             ic3Attr = { source: ic3Fc ? "meta" : ic3Utm.utm_source, reason: ic3Fc ? "fbclid" : "utm_source", decided_at: new Date().toISOString(), raw_data: ic3Rd, via: "url" };
           }
           // browser pixel
+          console.log("[IC] chegou no fbq | window.fbq=" + (typeof window.fbq) + " | total=" + ic3Total + " | items=" + ic3Items.length);
           if (window.fbq) {
             window.fbq("track", "InitiateCheckout", {
               content_name: productName, content_category: "musica_digital", content_type: "product",
               currency: "BRL", value: ic3Total, num_items: ic3Items.length,
               content_ids: ic3Ids, geo: "BR", session_id: getSessionId(), event_source_url: location.href
             }, { eventID: ic3EventId });
+            console.log("[IC] fbq.track disparado | event_id=" + ic3EventId);
+          } else {
+            console.warn("[IC] window.fbq não definido — pixel não disparou");
           }
           if (window.ttq) { window.ttq.track("InitiateCheckout", { content_name: productName, currency: "BRL", value: ic3Total, event_id: ic3EventId }); }
           // CAPI
+          console.log("[IC] fbq ok, enviando CAPI | event_id=" + ic3EventId + " | total=" + ic3Total);
           fetch(API + "/api/track", {
             method: "POST", headers: { "Content-Type": "application/json" }, keepalive: true,
             body: JSON.stringify({
@@ -853,8 +859,8 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
               em: customer.email ? customer.email.trim().toLowerCase() : null,
               ph: ic3Phone || null, fn: ic3Fn, ln: ic3Ln
             })
-          }).catch(function(){});
-        } catch (e) {}
+          }).catch(function(err){ console.error("[IC] fetch CAPI falhou:", err); });
+        } catch (e) { console.error("[IC] erro no bloco InitiateCheckout:", e); }
         localStorage.setItem("orderData", JSON.stringify({
           customerData: customer, children: childrenClean, albumsAPI: albumsAPI,
           productName: productName, total: calcTotal(), isCombo: isCombo,
