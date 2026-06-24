@@ -109,8 +109,6 @@ export default function ConfirmacaoPage() {
         <div className="mb-4 flex justify-center">
           {isPending ? (
             <span className="text-6xl">⏳</span>
-          ) : method === 'pix' ? (
-            <span className="text-6xl">🎉</span>
           ) : (
             <img src={cabecaAlta.src} alt="Tião Camaleão" className="h-32 w-auto object-contain" />
           )}
