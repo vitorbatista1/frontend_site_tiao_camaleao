@@ -56,6 +56,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   var albumErrors = {};
   var albumsExpanded = {};
   var errors = { fullName: "", email: "", telefone: "" };
+  var emailCheckState = "idle"; // idle | checking | valid | invalid
   var productName = "";
   var productPrice = 0;
   var isCombo = false;
@@ -201,6 +202,58 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     updateNextBtn();
   }
 
+  // ── Validação de domínio de e-mail ───────────────────────────────────────────
+  function doEmailCheck(emailVal) {
+    if (emailCheckState === "checking") return;
+    emailCheckState = "checking";
+    fetch(API + "/api/validate-email", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: emailVal })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      emailCheckState = data.valid ? "valid" : "invalid";
+      if (!data.valid) errors.email = "E-mail inválido ou domínio inexistente";
+      else errors.email = "";
+      updateEmailUI();
+    })
+    .catch(function(){
+      emailCheckState = "valid"; // fail open em erro de rede
+      errors.email = "";
+      updateEmailUI();
+    });
+  }
+
+  function updateEmailUI() {
+    var emailInput = document.getElementById("tc-email");
+    if (!emailInput) return;
+    var wrapper = emailInput.parentElement;
+    // Atualiza borda
+    var bc = errors.email ? "border-red-500" :
+             emailCheckState === "checking" ? "border-yellow-400" :
+             "border-green-600 focus:border-green-700";
+    emailInput.className = "w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors bg-green-50 " + bc;
+    // Remove mensagem anterior
+    var prev = wrapper.querySelector(".tc-email-msg");
+    if (prev) prev.remove();
+    // Adiciona nova mensagem
+    var msgEl = document.createElement("p");
+    msgEl.className = "text-xs mt-1 tc-email-msg";
+    if (errors.email) {
+      msgEl.classList.add("text-red-500");
+      msgEl.textContent = errors.email;
+      wrapper.appendChild(msgEl);
+    } else if (emailCheckState === "checking") {
+      msgEl.classList.add("text-yellow-600");
+      msgEl.textContent = "Verificando e-mail...";
+      wrapper.appendChild(msgEl);
+    } else if (emailCheckState === "valid" && customer.email) {
+      msgEl.classList.add("text-green-600");
+      msgEl.textContent = "✓ E-mail verificado";
+      wrapper.appendChild(msgEl);
+    }
+  }
+
   // ── Step 1 ────────────────────────────────────────────────────────────────────
   function renderStep1() {
     function field(id, type, label, ph, val, err) {
@@ -211,10 +264,24 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
         (err ? "border-red-500" : "border-green-600 focus:border-green-700") + '" />' +
         (err ? '<p class="text-red-500 text-xs mt-1">'+esc(err)+'</p>' : '') + '</div>';
     }
+    var emailStatusHtml = "";
+    if (!errors.email) {
+      if (emailCheckState === "checking") emailStatusHtml = '<p class="text-yellow-600 text-xs mt-1 tc-email-msg">Verificando e-mail...</p>';
+      else if (emailCheckState === "valid" && customer.email) emailStatusHtml = '<p class="text-green-600 text-xs mt-1 tc-email-msg">✓ E-mail verificado</p>';
+    }
+    var emailBorder = errors.email ? "border-red-500" :
+                      emailCheckState === "checking" ? "border-yellow-400" :
+                      "border-green-600 focus:border-green-700";
+    var emailFieldHtml = '<div>' +
+      '<label for="tc-email" class="block text-[22px] font-semibold text-black mb-1">E-mail <span class="text-red-500">*</span></label>' +
+      '<input id="tc-email" type="email" placeholder="Digite seu melhor e-mail" value="'+esc(customer.email)+'"' +
+      ' class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors bg-green-50 '+emailBorder+'" />' +
+      (errors.email ? '<p class="text-red-500 text-xs mt-1 tc-email-msg">'+esc(errors.email)+'</p>' : emailStatusHtml) +
+    '</div>';
     $body().innerHTML =
       '<div class="space-y-4 pt-4"><div class="space-y-3">' +
         field("tc-name",  "text",  "Nome completo", "Digite seu nome completo",       customer.fullName,  errors.fullName) +
-        field("tc-email", "email", "E-mail", "Digite seu melhor e-mail",   customer.email,     errors.email) +
+        emailFieldHtml +
         field("tc-phone", "text",  "WhatsApp", "(DDD) 9XXXX-XXXX",   customer.telefone,  errors.telefone) +
       '</div><div class="bg-amber-50 rounded-xl p-3 border border-amber-200">' +
         '<p class="text-xs text-amber-800"><strong>Campos obrigatórios:</strong> Nome completo, E-mail e Telefone</p>' +
@@ -226,7 +293,15 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     });
     document.getElementById("tc-email").addEventListener("input", function(e){
       customer.email = e.target.value;
+      emailCheckState = "idle";
       if (errors.email) { errors.email = ""; renderStep1(); }
+    });
+    document.getElementById("tc-email").addEventListener("blur", function(e){
+      var val = e.target.value.trim();
+      if (val && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) && emailCheckState === "idle") {
+        doEmailCheck(val);
+        updateEmailUI();
+      }
     });
     document.getElementById("tc-phone").addEventListener("input", function(e){
       var input = e.target;
@@ -606,6 +681,9 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     else if (customer.fullName.trim().length < 3) { e.fullName = "Nome deve ter pelo menos 3 caracteres"; ok = false; }
     if (!customer.email.trim()) { e.email = "E-mail é obrigatório"; ok = false; }
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) { e.email = "E-mail inválido"; ok = false; }
+    else if (emailCheckState === "invalid") { e.email = "E-mail inválido ou domínio inexistente"; ok = false; }
+    else if (emailCheckState === "checking") { e.email = "Verificando e-mail, aguarde..."; ok = false; }
+    else if (emailCheckState === "idle") { doEmailCheck(customer.email.trim()); e.email = "Verificando e-mail..."; ok = false; }
     if (!customer.telefone.trim()) { e.telefone = "Telefone é obrigatório"; ok = false; }
     else if (!/^\(\d{2}\) \d{4,5}-\d{4}$/.test(customer.telefone)) { e.telefone = "Telefone inválido. Use (XX) XXXXX-XXXX"; ok = false; }
     errors = e;
@@ -661,6 +739,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     step = 1;
     childrenCount = 0;
     customer = { fullName: "", email: "", telefone: "" };
+    emailCheckState = "idle";
     children = [];
     albumsAPI = []; albumErrors = {}; albumsExpanded = {}; errors = { fullName: "", email: "", telefone: "" };
     isOpen = true;
