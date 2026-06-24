@@ -500,8 +500,8 @@ export default function PaymentPage() {
       )}
 
       <div className="grid gap-8 lg:grid-cols-2">
-        {/* Coluna esquerda — order bumps + resumo (no mobile vai abaixo do pagamento) */}
-        <div className="space-y-6 order-2 lg:order-1">
+        {/* Coluna esquerda — order bumps + resumo (mobile: 1º) */}
+        <div className="space-y-6 order-1 lg:order-1">
           {/* Order Bumps */}
           {(bumps.length > 0 || albumBumpSuggestions.length > 0) && <div id="order-bumps" className="scroll-mt-4">
             {timeLeft > 0 && (
@@ -752,8 +752,8 @@ export default function PaymentPage() {
           </div>
         </div>
 
-        {/* Coluna direita — Pagamento (no mobile aparece primeiro) */}
-        <div className="space-y-6 order-1 lg:order-2">
+        {/* Coluna direita — Pagamento (mobile: 2º) */}
+        <div className="space-y-6 order-2 lg:order-2">
           <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
             <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 text-white">
               <h2 className="text-2xl font-bold">💳 Pagamento</h2>

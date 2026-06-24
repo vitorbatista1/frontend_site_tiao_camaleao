@@ -91,8 +91,9 @@ export default function CardForm({
         setPaymentMethod('pix');
         startTimer(secondsLeft);
       } else {
+        // PIX expirado antes de carregar a página — limpa silenciosamente,
+        // não mostra tela de "expirado"; usuário gera um novo naturalmente.
         clearPixStorage();
-        setPixExpired(true);
       }
     }
   }, []);
@@ -278,21 +279,6 @@ export default function CardForm({
 
   return (
     <div className="space-y-4">
-      {/* Dados do Cliente */}
-      <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
-        <h4 className="font-semibold text-gray-700 mb-2">📋 Dados do Cliente</h4>
-        <div className="space-y-1 text-sm">
-          <p>
-            <span className="text-gray-500">Nome:</span>{" "}
-            <strong>{customerName || "Não informado"}</strong>
-          </p>
-          <p>
-            <span className="text-gray-500">E-mail:</span>{" "}
-            <strong>{sanitizeEmail(email) || "Não informado"}</strong>
-          </p>
-        </div>
-      </div>
-
       {/* Seletor de método */}
       <div className="bg-gray-50 rounded-2xl p-2 flex gap-2">
         <button
