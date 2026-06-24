@@ -139,7 +139,7 @@ export type Commerce = {
 // Cada chave é o event_name exato que vai para fbq/ttq e para o backend.
 // ═══════════════════════════════════════════════════════════════════════════
 export const PIXEL_EVENTS: Record<string, Partial<Commerce>> = {
-  Lead:             { currency: "BRL", value: 0,  content_category: "lead",          content_type: "product" },
+  Lead:             { currency: "BRL", value: 1,                                                              },
   InitiateCheckout: { currency: "BRL",             content_category: "checkout",       content_type: "product" },
   AddPaymentInfo:   { currency: "BRL",             content_category: "musica_digital", content_type: "product" },
   Purchase:         { currency: "BRL",             content_category: "musica_digital", content_type: "product" },
