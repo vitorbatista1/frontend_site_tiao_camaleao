@@ -1,4 +1,7 @@
 ---
+import { Image } from "astro:assets";
+import mackup1Img from "../../public/imagens/mackup1.png";
+import mockup2Img from "../../public/imagens/mockup2.png";
 ---
 
 <section class="ps-section">
@@ -10,7 +13,7 @@
         <span class="ps-badge">NOVO JEITO DE ACESSAR SUAS CANTIGAS</span>
         <h2 class="ps-title">Simples de ouvir<br>Fácil de presentear</h2>
         <div class="ps-phone-mobile">
-          <img src="/imagens/mackup1.png" alt="App Tião Camaleão no celular" width="1920" height="1080" />
+          <Image src={mackup1Img} alt="App Tião Camaleão no celular" widths={[480, 800]} sizes="100vw" width={800} height={533} format="webp" quality={80} loading="lazy" />
         </div>
         <p class="ps-desc">
           Agora as cantigas personalizadas ficam organizadas em uma página exclusiva do Tião
@@ -18,7 +21,7 @@
         </p>
       </div>
       <div class="ps-hero-right">
-        <img src="/imagens/mackup1.png" alt="App Tião Camaleão no celular" class="ps-phone-img" width="1920" height="1080" />
+        <Image src={mackup1Img} alt="App Tião Camaleão no celular" class="ps-phone-img" widths={[480, 800]} sizes="(max-width: 768px) 100vw, 380px" width={800} height={533} format="webp" quality={80} loading="lazy" />
       </div>
     </div>
 
@@ -88,7 +91,7 @@
     <!-- Bottom card -->
     <div class="ps-bottom-card">
       <div class="ps-bottom-img">
-        <img src="/imagens/mockup2.png" alt="Player Tião Camaleão no computador" class="ps-mockup-img" width="1920" height="1080" />
+        <Image src={mockup2Img} alt="Player Tião Camaleão no computador" class="ps-mockup-img" widths={[640, 1000]} sizes="(max-width: 768px) 100vw, 640px" width={1000} height={625} format="webp" quality={80} loading="lazy" />
       </div>
       <div class="ps-bottom-content">
         <h3>Tudo em um só lugar</h3>

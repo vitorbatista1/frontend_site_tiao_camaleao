@@ -121,6 +121,9 @@ const year = new Date().getFullYear();
       type="font/woff2"
       crossorigin
     />
+    <link rel="preconnect" href="https://apisite.tiaocamaleao.com.br" />
+    <link rel="preconnect" href="https://fh-118116076e9a4c2a96a99fbb70bea2a0.ecs.us-west-2.on.aws" crossorigin />
+    <link rel="preconnect" href="https://connect.facebook.net" />
     <PixelHead />
   </head>
   <body>
@@ -200,7 +203,9 @@ const year = new Date().getFullYear();
         </a> -->
 
         <a
-          href="#contato"
+          href="https://wa.me/message/OMLS24WGEGLQP1"
+          target="_blank"
+          rel="noopener noreferrer"
           aria-label="Pedir amostra grátis"
           class="inline-flex items-center gap-3 text-white px-6 sm:px-7 py-[14px] rounded-full shadow-lg transition-transform hover:scale-105 font-bold"
           style="background: #72BC44; font-size: 17px;"
@@ -248,9 +253,11 @@ const year = new Date().getFullYear();
   <Image
     src={kidHeadphones}
     alt="Criança ouvindo cantigas com fone amarelo"
-    width={1920}
-    height={1080}
-    quality={100}
+    widths={[640, 960, 1280]}
+    sizes="(max-width: 768px) 100vw, 50vw"
+    width={1280}
+    height={720}
+    quality={80}
     format="webp"
     class="w-full max-w-none scale-[2.2] md:scale-[1.8] lg:scale-[2.2] origin-center h-auto object-contain"
     loading="lazy"
@@ -310,7 +317,7 @@ const year = new Date().getFullYear();
                       src="https://pub-18a54ea1b0da4af78a932befd1b519d6.r2.dev/videos/video.mp4"
                       class="absolute inset-0 w-full h-full object-cover"
                       playsinline
-                      preload="metadata"
+                      preload="none"
                     ></video>
                     <div
                       id="hero-play-btn"
@@ -350,7 +357,9 @@ const year = new Date().getFullYear();
               Clique no botão abaixo e receba uma cantiga.
             </p>
           <a
-            href="#contato"
+            href="https://wa.me/message/OMLS24WGEGLQP1"
+            target="_blank"
+            rel="noopener noreferrer"
             aria-label="Pedir amostra grátis"
             class="inline-flex items-center gap-3 text-white px-5 sm:px-6 py-3 rounded-full shadow-lg transition-transform hover:scale-105 font-bold mt-4"
             style="background: #72BC44; font-size: 17.6px; padding-top: 0.825rem; padding-bottom: 0.825rem; padding-left: 1.65rem; padding-right: 1.65rem;"
@@ -487,6 +496,8 @@ const year = new Date().getFullYear();
             alt="Depoimento"
             class="w-full h-auto rounded-2xl object-contain"
             loading="lazy"
+            width="800"
+            height="600"
           />
         </div>
 
@@ -502,6 +513,8 @@ const year = new Date().getFullYear();
               alt={`Depoimento ${i + 2}`}
               class="w-full h-auto rounded-xl object-contain"
               loading="lazy"
+              width="800"
+              height="600"
             />
           ))}
         </div>
@@ -814,7 +827,7 @@ const year = new Date().getFullYear();
   <p class="mt-2 text-foreground/80" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 500;">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
   
 <a
-  href="https://wa.me/5537933003534"
+  href="https://wa.me/message/OMLS24WGEGLQP1"
   data-wa-track
   data-wa-text="Olá! Tenho dúvidas sobre as cantigas personalizadas e gostaria de mais informações."
   data-wa-source="faq_duvida"
@@ -877,7 +890,7 @@ const year = new Date().getFullYear();
                   </a>
                 </p>
                 <p class="flex items-center gap-1.5">
-                  <a href="https://wa.me/5537991996545" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                  <a href="https://wa.me/message/OMLS24WGEGLQP1" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
                       <span class="flex-shrink-0">
                         <Image
                           src={whatsappIcon}
@@ -998,7 +1011,7 @@ const year = new Date().getFullYear();
       <div class="wa-ring"></div>
       <div class="wa-ring wa-ring-2"></div>
       <a
-        href="https://wa.me/5537991996545"
+        href="https://wa.me/message/OMLS24WGEGLQP1"
         data-wa-text="Olá! Tenho dúvidas sobre as cantigas personalizadas e gostaria de mais informações."
         data-wa-source="floating_button"
         target="_blank"
