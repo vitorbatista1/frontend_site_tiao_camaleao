@@ -4,27 +4,22 @@ const META_PIXEL_ID = import.meta.env.PUBLIC_META_PIXEL_ID ?? "2321147791624359"
 const TIKTOK_PIXEL_ID = import.meta.env.PUBLIC_TIKTOK_PIXEL_ID ?? "";
 ---
 
-<!-- Meta Pixel -->
+<!-- Meta Pixel: stub leve no <head>, fbevents.js (251 KB) carrega após idle para não bloquear LCP/TBT -->
 <script is:inline define:vars={{ META_PIXEL_ID }}>
-  !function(f,b,e,v,n,t,s)
-  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-  n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];
-  s.parentNode.insertBefore(t,s)}(window, document,'script',
-  'https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', META_PIXEL_ID);
-  // [TC-CAPI 2026-06] PageView com parâmetros de contexto
-  fbq('track', 'PageView', {
-    page_title: document.title,
-    source_platform: 'meta',
-    event_source: 'browser',
-    geo: 'BR',
-    country: 'br',
-    viewport_width: window.innerWidth,
-    viewport_height: window.innerHeight
-  });
+  !function(){
+    var n=window.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!window._fbq)window._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];
+  }();
+  function _fbLoad(){
+    var t=document.createElement('script');t.async=!0;
+    t.src='https://connect.facebook.net/en_US/fbevents.js';
+    document.head.appendChild(t);
+    fbq('init',META_PIXEL_ID);
+    fbq('track','PageView');
+  }
+  'requestIdleCallback' in window
+    ? requestIdleCallback(_fbLoad,{timeout:4000})
+    : window.addEventListener('load',function(){setTimeout(_fbLoad,500)});
 </script>
 <noscript>
   <img height="1" width="1" style="display:none"
