@@ -3,6 +3,7 @@ import { initMercadoPago, CardPayment } from '@mercadopago/sdk-react';
 import { CreditCard, QrCode, Lock } from './Icons.tsx';
 import { getTrackingPayload } from '../lib/tracking.ts';
 
+
 type CardFormProps = {
   step: number;
   amount: string;
@@ -91,8 +92,6 @@ export default function CardForm({
         setPaymentMethod('pix');
         startTimer(secondsLeft);
       } else {
-        // PIX expirado antes de carregar a página — limpa silenciosamente,
-        // não mostra tela de "expirado"; usuário gera um novo naturalmente.
         clearPixStorage();
       }
     }
@@ -105,7 +104,7 @@ export default function CardForm({
     };
   }, []);
 
-  // Polling de status após PIX geradoaaaa
+
   useEffect(() => {
     if (!pixData || pixExpired) return;
 
@@ -312,7 +311,7 @@ export default function CardForm({
         </div>
       )}
 
-      {/* Cartão */}
+      {/* Cartão — loading */}
       {paymentMethod === 'card' && !isSdkInitialized && (
         <div className="flex items-center justify-center py-8 gap-3 text-gray-500">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
@@ -320,6 +319,7 @@ export default function CardForm({
         </div>
       )}
 
+      {/* Cartão — brick */}
       {paymentMethod === 'card' && isSdkInitialized && (
         <CardPayment
           initialization={{
@@ -328,12 +328,13 @@ export default function CardForm({
               email: sanitizeEmail(email),
               firstName: customerName.split(' ')[0] || "",
               lastName: customerName.split(' ').slice(1).join(' ') || "",
-            },
+              ...(cpf ? { identification: { type: 'CPF', number: cpf.replace(/\D/g, '') } } : {}),
+            } as any,
           }}
           onSubmit={handleCardSubmit}
           onError={(error) => console.error('Erro cartão:', error)}
           customization={{
-            paymentMethods: { creditCard: 'all', debitCard: 'all' },
+            paymentMethods: { creditCard: 'all', debitCard: 'all' } as any,
             visual: {
               style: { theme: 'default', borderRadius: '12px', fontSize: '16px' },
             },
