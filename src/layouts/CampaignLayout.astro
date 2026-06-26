@@ -1064,6 +1064,9 @@ const year = new Date().getFullYear();
 
           // [TC-CAPI 2026-06] Lead enriquecido com contexto (sem PII nesta etapa: é clique p/ wa.me)
           if (window.fbq) {
+            var _waTec = window._fbTestEventCode;
+            var _waFbqOpts = { eventID: eventID };
+            if (_waTec) _waFbqOpts.test_event_code = _waTec;
             window.fbq("track", "Lead", {
               content_name: source,
               content_category: "musica_digital",
@@ -1079,7 +1082,7 @@ const year = new Date().getFullYear();
               viewport_height: window.innerHeight,
               session_id: getSessionId(),
               event_source_url: location.href
-            }, { eventID: eventID });
+            }, _waFbqOpts);
           }
           if (window.ttq) {
             window.ttq.track("Contact", { content_name: source, event_id: eventID });

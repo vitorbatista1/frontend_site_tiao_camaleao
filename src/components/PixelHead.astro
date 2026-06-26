@@ -2,19 +2,24 @@
 // [TC-CAPI 2026-06] ID via env (centralizado), com fallback para o dataset unificado
 const META_PIXEL_ID = import.meta.env.PUBLIC_META_PIXEL_ID ?? "2321147791624359";
 const TIKTOK_PIXEL_ID = import.meta.env.PUBLIC_TIKTOK_PIXEL_ID ?? "";
+const META_TEST_EVENT_CODE = import.meta.env.PUBLIC_META_TEST_EVENT_CODE ?? "";
 ---
 
-<!-- Meta Pixel: stub leve no <head>, fbevents.js (251 KB) carrega após idle para não bloquear LCP/TBT -->
-<script is:inline define:vars={{ META_PIXEL_ID }}>
+<!-- Meta Pixel: init imediato (garante que fica primeiro na fila antes de qualquer evento),
+     fbevents.js (251 KB) carrega após idle para não bloquear LCP/TBT -->
+<script is:inline define:vars={{ META_PIXEL_ID, META_TEST_EVENT_CODE }}>
   !function(){
     var n=window.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
     if(!window._fbq)window._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];
   }();
+  // init entra na fila ANTES de qualquer evento de interação do usuário
+  fbq('init', META_PIXEL_ID);
+  // expõe o test_event_code para uso nos eventos de tracking (só preenchido em ambiente de teste)
+  window._fbTestEventCode = META_TEST_EVENT_CODE || null;
   function _fbLoad(){
     var t=document.createElement('script');t.async=!0;
     t.src='https://connect.facebook.net/en_US/fbevents.js';
     document.head.appendChild(t);
-    fbq('init',META_PIXEL_ID);
     fbq('track','PageView');
   }
   'requestIdleCallback' in window

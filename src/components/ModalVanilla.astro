@@ -791,7 +791,12 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
           geo: "BR", country: "br",
           page_title: document.title, session_id: getSessionId(), event_source_url: location.href
         };
-        if (window.fbq) { window.fbq("track", "Lead", _leadFbqParams, { eventID: _leadEventId }); }
+        if (window.fbq) {
+          var _lTec = window._fbTestEventCode;
+          var _lFbqOpts = { eventID: _leadEventId };
+          if (_lTec) _lFbqOpts.test_event_code = _lTec;
+          window.fbq("track", "Lead", _leadFbqParams, _lFbqOpts);
+        }
         if (window.ttq) { window.ttq.track("Lead", { content_name: productName, currency: "BRL" }); }
         try {
           var _lup2 = new URLSearchParams(location.search);
@@ -919,11 +924,14 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
           // browser pixel
           console.log("[IC] chegou no fbq | window.fbq=" + (typeof window.fbq) + " | total=" + ic3Total + " | items=" + ic3Items.length);
           if (window.fbq) {
+            var _icTec = window._fbTestEventCode;
+            var _icFbqOpts = { eventID: ic3EventId };
+            if (_icTec) _icFbqOpts.test_event_code = _icTec;
             window.fbq("track", "InitiateCheckout", {
               content_name: productName, content_category: "musica_digital", content_type: "product",
               currency: "BRL", value: ic3Total, num_items: ic3Items.length,
               content_ids: ic3Ids, geo: "BR", session_id: getSessionId(), event_source_url: location.href
-            }, { eventID: ic3EventId });
+            }, _icFbqOpts);
             console.log("[IC] fbq.track disparado | event_id=" + ic3EventId);
           } else {
             console.warn("[IC] window.fbq não definido — pixel não disparou");

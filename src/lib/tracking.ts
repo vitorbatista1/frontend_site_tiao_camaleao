@@ -106,11 +106,11 @@ export function getTrackingPayload() {
 
 export function fbqTrack(event: string, params?: object, opts?: { eventID?: string }) {
   if (typeof window === "undefined" || !(window as any).fbq) return;
-  if (opts?.eventID) {
-    (window as any).fbq("track", event, params || {}, { eventID: opts.eventID });
-  } else {
-    (window as any).fbq("track", event, params || {});
-  }
+  const testCode = (window as any)._fbTestEventCode;
+  const extraOpts: Record<string, string> = {};
+  if (opts?.eventID) extraOpts.eventID = opts.eventID;
+  if (testCode) extraOpts.test_event_code = testCode;
+  (window as any).fbq("track", event, params || {}, Object.keys(extraOpts).length ? extraOpts : undefined);
 }
 
 export function ttqTrack(event: string, params?: object, opts?: { event_id?: string }) {
