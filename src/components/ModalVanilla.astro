@@ -786,7 +786,6 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
         // [TC-CAPI 2026-06] Lead — captura de contato (Step 1). InitiateCheckout dispara no Step 3.
         var _leadEventId = "Lead_" + Date.now();
         var _leadFbqParams = {
-          content_name: productName, content_category: "musica_digital", content_type: "product",
           currency: "BRL", value: 1,
           geo: "BR", country: "br",
           page_title: document.title, session_id: getSessionId(), event_source_url: location.href
@@ -818,9 +817,6 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
               value: 1, currency: "BRL",
               lead: { name: (customer.fullName || "").trim() || undefined, email: customer.email ? customer.email.trim().toLowerCase() : undefined, phone: icPhone ? "+" + icPhone : undefined },
               children: [],
-              content_name: productName,
-              content_category: "musica_digital",
-              content_type: "product",
               fbp: (document.cookie.match(/(?:^| )_fbp=([^;]+)/) || [])[1] || null,
               fbc: getFbc(), user_agent: navigator.userAgent,
               event_source_url: location.href, referrer: document.referrer || null,

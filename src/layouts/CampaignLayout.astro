@@ -1068,9 +1068,6 @@ const year = new Date().getFullYear();
             var _waFbqOpts = { eventID: eventID };
             if (_waTec) _waFbqOpts.test_event_code = _waTec;
             window.fbq("track", "Lead", {
-              content_name: source,
-              content_category: "musica_digital",
-              content_type: "product",
               currency: "BRL",
               value: 1,
               page_title: document.title,
@@ -1110,9 +1107,6 @@ const year = new Date().getFullYear();
                   value: 1, currency: "BRL",
                   lead: { name: undefined, email: undefined, phone: undefined },
                   children: [],
-                  content_name: source,
-                  content_category: "musica_digital",
-                  content_type: "product",
                   fbp: (document.cookie.match(/(?:^| )_fbp=([^;]+)/) || [])[1] || null,
                   fbc: (document.cookie.match(/(?:^| )_fbc=([^;]+)/) || [])[1] || null,
                   user_agent: navigator.userAgent,
