@@ -1,4 +1,4 @@
-// [TC-CAPI 2026-06]
+// [TC-CAPI 2026-06] - REDESENHADO COM LOGO ANIMADO
 import { trackBoth, normalizePhoneBR } from '../lib/tracking.ts';
 import { useEffect, useState } from 'react';
 import { CheckCircle, Music, Heart, Lock } from './Icons.tsx';
@@ -51,7 +51,6 @@ export default function ConfirmacaoPage() {
       if (currentStatus === 'approved' && orderId) {
         const alreadyFired = localStorage.getItem(`tc_purchase_fired_${orderId}`);
         if (!alreadyFired) {
-          // [TC-CAPI 2026-06] Purchase browser-pixel apenas — CAPI chega pelo webhook MP.
           const value = parseFloat(parsed?.total || lastOrder?.amount || '0');
           const cd = parsed?.customerData || lastOrder?.customerData || {};
 
@@ -70,7 +69,6 @@ export default function ConfirmacaoPage() {
           const purchaseEventId = `Purchase_BWS_${orderId}`;
           const nameParts = (cd.fullName ?? '').trim().split(/\s+/);
 
-          // trackBoth: pixel (fbq/ttq) dispara; CAPI bloqueado para Purchase.
           trackBoth('Purchase', {
             event_name: 'Purchase',
             event_id: purchaseEventId,
@@ -91,7 +89,6 @@ export default function ConfirmacaoPage() {
       }
     } catch (e) {}
 
-    // limpa dados de PIX após confirmação
     localStorage.removeItem('pix_payment_data');
     localStorage.removeItem('pix_payment_expiry');
   }, []);
@@ -99,135 +96,124 @@ export default function ConfirmacaoPage() {
   const isPending = status === 'pending';
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-8">
-      {/* Header de status */}
-      <div className={`rounded-3xl p-8 text-center mb-6 ${
-        isPending
-          ? 'bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-300'
-          : 'bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300'
-      }`}>
-        <div className="mb-4 flex justify-center">
-          {isPending ? (
-            <span className="text-6xl">⏳</span>
-          ) : (
-            <img src={cabecaAlta.src} alt="Tião Camaleão" className="h-32 w-auto object-contain" />
-          )}
-        </div>
-        <h1 className={`text-2xl font-bold mb-2 ${isPending ? 'text-yellow-800' : 'text-green-800'}`}>
-          {isPending ? 'Pagamento em análise' : 'Pedido confirmado!'}
-        </h1>
-        <p className={`text-sm ${isPending ? 'text-yellow-700' : 'text-green-700'}`}>
-          {isPending
-            ? 'Seu pagamento está sendo processado. Você receberá a confirmação por e-mail em breve.'
-            : 'Seu pagamento foi aprovado. Em breve você receberá o acesso ao seu álbum.'}
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
+      <div className="max-w-lg mx-auto px-4 py-8">
+        
 
-      {/* Link de acesso aos produtos — destaque principal */}
-      <div
-        className="block mb-6 rounded-3xl overflow-hidden shadow-xl"
-        style={{ background: 'linear-gradient(135deg, #166534 0%, #16a34a 100%)' }}
-      >
-        <div className="px-6 py-5 text-center text-white">
-          <p className="text-xs font-bold uppercase tracking-widest opacity-80 mb-1">🎵 Seu álbum está pronto!</p>
-          <p className="text-2xl font-extrabold mb-1">Acessar meu álbum agora</p>
-          <p className="text-sm opacity-90 mb-4">
-            Entre com o telefone <strong>{orderData?.customerData.telefone}</strong> para resgatar
+
+        {/* ===== STATUS CARD COM LOGO ANIMADO ===== */}
+        <div className={`rounded-3xl p-8 text-center mb-8 transform transition-all duration-500 ${
+          isPending
+            ? 'bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-300 shadow-lg'
+            : 'bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 border-2 border-emerald-300 shadow-xl'
+        }`}>
+          <div className="mb-4 flex justify-center">
+            {isPending ? (
+              <span className="text-6xl animate-pulse">⏳</span>
+            ) : (
+              <img 
+                src={cabecaAlta.src} 
+                alt="Sucesso" 
+                className="h-24 w-auto object-contain animate-bounce" 
+              />
+            )}
+          </div>
+          <h1 className={`text-3xl font-black mb-3 ${isPending ? 'text-amber-900' : 'text-emerald-900'}`}>
+            {isPending ? 'Pagamento em análise' : 'Pedido confirmado!'}
+          </h1>
+          <p className={`text-base leading-relaxed ${isPending ? 'text-amber-800' : 'text-emerald-800'}`}>
+            {isPending
+              ? 'Seu pagamento está sendo processado. Você receberá a confirmação por e-mail em breve.'
+              : 'Seu pagamento foi aprovado com sucesso! Acesse suas compras agora mesmo.'}
           </p>
+        </div>
+
+        {/* ===== BOTÃO PRINCIPAL - DESTAQUE MÁXIMO ===== */}
+        <div className="mb-8">
           <a
             href="https://meu.tiaocamaleao.com.br/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block bg-white text-green-700 font-extrabold px-8 py-3 rounded-full text-base shadow-lg hover:scale-105 transition-transform"
+            className="group relative block"
+            style={{
+              perspective: '1000px',
+            }}
           >
-            👉 meu.tiaocamaleao.com.br
-          </a>
-        </div>
-      </div>
-
-      {/* Resumo do pedido */}
-      {orderData && (
-        <div className="bg-white rounded-3xl shadow-lg overflow-hidden mb-6">
-          <div className="bg-gradient-to-r from-primary to-secondary p-5 text-white">
-            <h2 className="text-lg font-bold flex items-center gap-2">
-              <Music className="h-5 w-5" />
-              Resumo do pedido
-            </h2>
-          </div>
-
-          <div className="p-5 space-y-4">
-            <div>
-              <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Produto</p>
-              <p className="font-medium text-gray-900">{orderData.productName}</p>
-            </div>
-
-            <div className="border-t pt-4">
-              <p className="text-xs text-gray-500 uppercase font-semibold mb-2">Dados do cliente</p>
-              <div className="space-y-1 text-sm">
-                <p><span className="text-gray-500">Nome:</span> <strong>{orderData.customerData.fullName}</strong></p>
-                <p><span className="text-gray-500">E-mail:</span> <strong>{orderData.customerData.email}</strong></p>
-                <p><span className="text-gray-500">Telefone:</span> <strong>{orderData.customerData.telefone}</strong></p>
+            {/* Efeito de brilho de fundo */}
+            <div className="absolute inset-0 bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 rounded-3xl blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+            
+            {/* Card principal */}
+            <div className="relative bg-gradient-to-br from-green-500 via-emerald-600 to-teal-600 rounded-3xl p-8 shadow-2xl overflow-hidden group-hover:shadow-3xl transition-all duration-300 transform group-hover:scale-105">
+              
+              {/* Padrão de fundo animado */}
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 left-0 w-40 h-40 bg-white rounded-full mix-blend-overlay blur-3xl"></div>
+                <div className="absolute bottom-0 right-0 w-40 h-40 bg-white rounded-full mix-blend-overlay blur-3xl"></div>
               </div>
-            </div>
 
-            {orderData.children.length > 0 && (
-              <div className="border-t pt-4">
-                <p className="text-xs text-gray-500 uppercase font-semibold mb-2 flex items-center gap-1">
-                  <Heart className="h-3 w-3" /> Crianças
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {orderData.children.map((child) => (
-                    <span key={child.id} className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">
-                      {child.albumResult?.display_name ?? child.name}
-                    </span>
-                  ))}
+              <div className="relative z-10">
+                {/* Etiqueta superior */}
+                <div className="inline-block mb-4 px-4 py-2 bg-white bg-opacity-20 rounded-full backdrop-blur-sm">
+                  <p className="text-xs font-bold uppercase tracking-widest text-white">
+                    🎵 Acesso imediato
+                  </p>
                 </div>
-              </div>
-            )}
 
-            <div className="border-t pt-4 flex justify-between items-center">
-              <span className="font-bold text-gray-700">Total pago</span>
-              <span className="text-2xl font-bold text-primary">
-                R$ {parseFloat(orderData.total).toFixed(2).replace('.', ',')}
-              </span>
+                {/* Título principal */}
+                <h2 className="text-4xl font-black text-white mb-2 leading-tight">
+                  Clique aqui para acessar suas compras
+                </h2>
+
+                {/* Descrição */}
+                <p className="text-white text-opacity-90 text-base mb-6 leading-relaxed">
+                  Acesse sua biblioteca de áudios personalizados agora mesmo
+                </p>
+
+                {/* Passo a passo compacto */}
+                <div className="bg-white bg-opacity-15 backdrop-blur-sm rounded-2xl p-4 mb-6 border border-white border-opacity-20">
+                  <p className="text-xs font-bold text-white uppercase mb-3 tracking-wide">3 passos rápidos:</p>
+                  <div className="space-y-2">
+                    {[
+                      { num: '1', text: 'Clique no botão' },
+                      { num: '2', text: `Digite seu telefone` },
+                      { num: '3', text: 'Ouça sua compra!' },
+                    ].map((step) => (
+                      <div key={step.num} className="flex items-center gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-white bg-opacity-30 flex items-center justify-center text-white font-bold text-xs">
+                          {step.num}
+                        </span>
+                        <span className="text-sm text-white text-opacity-90">{step.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* CTA Button */}
+                <button
+                  onClick={() => window.open('https://meu.tiaocamaleao.com.br/', '_blank')}
+                  className="w-full bg-white text-emerald-700 font-black text-lg py-4 px-6 rounded-2xl transition-all duration-300 transform group-hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                >
+                  <span>👉 Acessar minhas compras</span>
+                  <span className="text-xl">→</span>
+                </button>
+
+                {/* URL de referência */}
+                <p className="text-center text-xs text-white text-opacity-75 mt-3 font-medium">
+                  meu.tiaocamaleao.com.br
+                </p>
+              </div>
             </div>
+          </a>
+
+          {/* Aviso de cadastro - fora do botão */}
+          <div className="mt-4 mx-4 p-4 bg-blue-50 border border-blue-200 rounded-2xl">
+            <p className="text-xs font-semibold text-blue-900 mb-1">ℹ️ Primeira vez?</p>
+            <p className="text-xs text-blue-800 leading-relaxed">
+              Será solicitado nome e telefone (leva menos de 1 minuto e é necessário apenas uma vez para a nota fiscal).
+            </p>
           </div>
         </div>
-      )}
 
-      {/* Forma de pagamento */}
-      <div className="bg-gray-50 rounded-2xl p-4 mb-6 flex items-center gap-3">
-        <span className="text-2xl">{method === 'pix' ? '⚡' : '💳'}</span>
-        <div>
-          <p className="font-medium text-gray-800 text-sm">
-            Pago via {method === 'pix' ? 'PIX' : 'Cartão de crédito'}
-          </p>
-          <p className="text-xs text-gray-500">Processado com segurança pelo Mercado Pago</p>
-        </div>
-      </div>
-
-      {/* Próximos passos */}
-      <div className="bg-blue-50 rounded-2xl p-5 border border-blue-200 mb-6">
-        <h3 className="font-bold text-blue-900 mb-3">📬 Próximos passos</h3>
-        <ul className="space-y-2 text-sm text-blue-800">
-          <li className="flex items-start gap-2">
-            <CheckCircle className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-            <span>Você receberá um e-mail de confirmação em <strong>{orderData?.customerData.email}</strong></span>
-          </li>
-          <li className="flex items-start gap-2">
-            <CheckCircle className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-            <span>Seu álbum personalizado será preparado e enviado por e-mail</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <CheckCircle className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-            <span>Em caso de dúvidas, entre em contato pelo nosso suporte</span>
-          </li>
-        </ul>
-      </div>
-
-      <div className="flex items-center justify-center gap-2 text-green-600">
-        <Lock className="h-4 w-4" />
-        <span className="text-sm">Compra 100% segura e protegida</span>
       </div>
     </div>
   );

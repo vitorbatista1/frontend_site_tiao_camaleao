@@ -148,38 +148,71 @@ export const Star = ({ className, size = 24, strokeWidth = 2 }: IconProps) => (
   </svg>
 );
 
-export const QrCode = ({ className = "h-5 w-5" }: IconProps) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+export const QrCode = ({ className = "h-5 w-5", size = 24, strokeWidth = 2 }: IconProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <rect x="2" y="2" width="7" height="7" rx="1"/>
+    <rect x="15" y="2" width="7" height="7" rx="1"/>
+    <rect x="2" y="15" width="7" height="7" rx="1"/>
+    <path d="M9 5h1"/>
+    <path d="M14 5h1"/>
+    <path d="M5 9v1"/>
+    <path d="M19 9v1"/>
+    <path d="M9 14v1"/>
+    <path d="M14 14v1"/>
+    <path d="M14 19h5"/>
+    <path d="M19 14v5"/>
   </svg>
 );
 
-export const CreditCard = ({ className = "h-5 w-5" }: IconProps) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+export const CreditCard = ({ className = "h-5 w-5", size = 24, strokeWidth = 2 }: IconProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <rect x="1" y="4" width="22" height="16" rx="2"/>
+    <path d="M1 10h22"/>
   </svg>
 );
 
-export const Calendar = ({ className = "h-5 w-5" }: IconProps) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+export const Calendar = ({ className = "h-5 w-5", size = 24, strokeWidth = 2 }: IconProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <rect x="3" y="4" width="18" height="18" rx="2"/>
+    <path d="M3 10h18"/>
+    <path d="M8 2v4"/>
+    <path d="M16 2v4"/>
   </svg>
 );
 
-export const Lock = ({ className = "h-5 w-5" }: IconProps) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+export const Lock = ({ className = "h-5 w-5", size = 24, strokeWidth = 2 }: IconProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <rect x="3" y="11" width="18" height="11" rx="2"/>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
   </svg>
 );
 
-export const User = ({ className = "h-5 w-5" }: IconProps) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+export const User = ({ className = "h-5 w-5", size = 24, strokeWidth = 2 }: IconProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
   </svg>
 );
 
-export const HelpCircle = ({ className = "h-5 w-5" }: IconProps) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+export const HelpCircle = ({ className = "h-5 w-5", size = 24, strokeWidth = 2 }: IconProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="12" cy="12" r="10"/>
+    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+    <path d="M12 17h.01"/>
+  </svg>
+);
+
+// ======== ÍCONES FALTANTES PARA A PÁGINA DE CONFIRMAÇÃO ========
+
+export const Sparkles = ({ className, size = 24, strokeWidth = 2 }: IconProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.937A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .962 0L13.5 8.5A2 2 0 0 0 14.937 9.937l6.135 1.582a.5.5 0 0 1 0 .962L14.937 13.5A2 2 0 0 0 13.5 14.937l-1.582 6.135a.5.5 0 0 1-.962 0L9.937 15.5Z"/>
+  </svg>
+);
+
+export const ArrowRight = ({ className, size = 24, strokeWidth = 2 }: IconProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M5 12h14"/>
+    <path d="M12 5l7 7-7 7"/>
   </svg>
 );
