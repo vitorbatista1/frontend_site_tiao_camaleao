@@ -174,6 +174,7 @@ export default function CardForm({
           fullName: customerName,
           cpf: cpf.replace(/\D/g, ""),
           selectedAlbums,
+          amount: numericAmount,
           telefone: telefone || null,
           fbp: tracking.fbp,
           fbc: tracking.fbc,
@@ -321,6 +322,7 @@ export default function CardForm({
 
       {/* Cartão — brick */}
       {paymentMethod === 'card' && isSdkInitialized && (
+        <div className="mp-brick-wrapper">
         <CardPayment
           initialization={{
             amount: numericAmount,
@@ -340,6 +342,7 @@ export default function CardForm({
             },
           }}
         />
+        </div>
       )}
 
       {/* PIX */}

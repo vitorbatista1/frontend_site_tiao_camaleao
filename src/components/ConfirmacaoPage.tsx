@@ -123,6 +123,28 @@ export default function ConfirmacaoPage() {
         </p>
       </div>
 
+      {/* Link de acesso aos produtos — destaque principal */}
+      <div
+        className="block mb-6 rounded-3xl overflow-hidden shadow-xl"
+        style={{ background: 'linear-gradient(135deg, #166534 0%, #16a34a 100%)' }}
+      >
+        <div className="px-6 py-5 text-center text-white">
+          <p className="text-xs font-bold uppercase tracking-widest opacity-80 mb-1">🎵 Seu álbum está pronto!</p>
+          <p className="text-2xl font-extrabold mb-1">Acessar meu álbum agora</p>
+          <p className="text-sm opacity-90 mb-4">
+            Entre com o telefone <strong>{orderData?.customerData.telefone}</strong> para resgatar
+          </p>
+          <a
+            href="https://meu.tiaocamaleao.com.br/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block bg-white text-green-700 font-extrabold px-8 py-3 rounded-full text-base shadow-lg hover:scale-105 transition-transform"
+          >
+            👉 meu.tiaocamaleao.com.br
+          </a>
+        </div>
+      </div>
+
       {/* Resumo do pedido */}
       {orderData && (
         <div className="bg-white rounded-3xl shadow-lg overflow-hidden mb-6">

@@ -1,5 +1,93 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { X, Check, ChevronRight } from "./Icons.tsx";
+
+interface Country {
+  code: string;
+  name: string;
+  dial: string;
+  flag: string;
+}
+
+const COUNTRIES: Country[] = [
+  { code: 'BR', name: 'Brasil', dial: '+55', flag: '🇧🇷' },
+  { code: 'PT', name: 'Portugal', dial: '+351', flag: '🇵🇹' },
+  { code: 'AR', name: 'Argentina', dial: '+54', flag: '🇦🇷' },
+  { code: 'UY', name: 'Uruguai', dial: '+598', flag: '🇺🇾' },
+  { code: 'PY', name: 'Paraguai', dial: '+595', flag: '🇵🇾' },
+  { code: 'BO', name: 'Bolívia', dial: '+591', flag: '🇧🇴' },
+  { code: 'CL', name: 'Chile', dial: '+56', flag: '🇨🇱' },
+  { code: 'PE', name: 'Peru', dial: '+51', flag: '🇵🇪' },
+  { code: 'CO', name: 'Colômbia', dial: '+57', flag: '🇨🇴' },
+  { code: 'VE', name: 'Venezuela', dial: '+58', flag: '🇻🇪' },
+  { code: 'EC', name: 'Equador', dial: '+593', flag: '🇪🇨' },
+  { code: 'GY', name: 'Guiana', dial: '+592', flag: '🇬🇾' },
+  { code: 'SR', name: 'Suriname', dial: '+597', flag: '🇸🇷' },
+  { code: 'US', name: 'Estados Unidos', dial: '+1', flag: '🇺🇸' },
+  { code: 'CA', name: 'Canadá', dial: '+1', flag: '🇨🇦' },
+  { code: 'MX', name: 'México', dial: '+52', flag: '🇲🇽' },
+  { code: 'GT', name: 'Guatemala', dial: '+502', flag: '🇬🇹' },
+  { code: 'HN', name: 'Honduras', dial: '+504', flag: '🇭🇳' },
+  { code: 'SV', name: 'El Salvador', dial: '+503', flag: '🇸🇻' },
+  { code: 'NI', name: 'Nicarágua', dial: '+505', flag: '🇳🇮' },
+  { code: 'CR', name: 'Costa Rica', dial: '+506', flag: '🇨🇷' },
+  { code: 'PA', name: 'Panamá', dial: '+507', flag: '🇵🇦' },
+  { code: 'CU', name: 'Cuba', dial: '+53', flag: '🇨🇺' },
+  { code: 'DO', name: 'Rep. Dominicana', dial: '+1', flag: '🇩🇴' },
+  { code: 'HT', name: 'Haiti', dial: '+509', flag: '🇭🇹' },
+  { code: 'JM', name: 'Jamaica', dial: '+1', flag: '🇯🇲' },
+  { code: 'ES', name: 'Espanha', dial: '+34', flag: '🇪🇸' },
+  { code: 'IT', name: 'Itália', dial: '+39', flag: '🇮🇹' },
+  { code: 'FR', name: 'França', dial: '+33', flag: '🇫🇷' },
+  { code: 'DE', name: 'Alemanha', dial: '+49', flag: '🇩🇪' },
+  { code: 'GB', name: 'Reino Unido', dial: '+44', flag: '🇬🇧' },
+  { code: 'NL', name: 'Países Baixos', dial: '+31', flag: '🇳🇱' },
+  { code: 'BE', name: 'Bélgica', dial: '+32', flag: '🇧🇪' },
+  { code: 'CH', name: 'Suíça', dial: '+41', flag: '🇨🇭' },
+  { code: 'AT', name: 'Áustria', dial: '+43', flag: '🇦🇹' },
+  { code: 'SE', name: 'Suécia', dial: '+46', flag: '🇸🇪' },
+  { code: 'NO', name: 'Noruega', dial: '+47', flag: '🇳🇴' },
+  { code: 'DK', name: 'Dinamarca', dial: '+45', flag: '🇩🇰' },
+  { code: 'FI', name: 'Finlândia', dial: '+358', flag: '🇫🇮' },
+  { code: 'IE', name: 'Irlanda', dial: '+353', flag: '🇮🇪' },
+  { code: 'PL', name: 'Polônia', dial: '+48', flag: '🇵🇱' },
+  { code: 'CZ', name: 'Rep. Tcheca', dial: '+420', flag: '🇨🇿' },
+  { code: 'SK', name: 'Eslováquia', dial: '+421', flag: '🇸🇰' },
+  { code: 'HU', name: 'Hungria', dial: '+36', flag: '🇭🇺' },
+  { code: 'RO', name: 'Romênia', dial: '+40', flag: '🇷🇴' },
+  { code: 'BG', name: 'Bulgária', dial: '+359', flag: '🇧🇬' },
+  { code: 'GR', name: 'Grécia', dial: '+30', flag: '🇬🇷' },
+  { code: 'HR', name: 'Croácia', dial: '+385', flag: '🇭🇷' },
+  { code: 'RS', name: 'Sérvia', dial: '+381', flag: '🇷🇸' },
+  { code: 'UA', name: 'Ucrânia', dial: '+380', flag: '🇺🇦' },
+  { code: 'RU', name: 'Rússia', dial: '+7', flag: '🇷🇺' },
+  { code: 'AO', name: 'Angola', dial: '+244', flag: '🇦🇴' },
+  { code: 'MZ', name: 'Moçambique', dial: '+258', flag: '🇲🇿' },
+  { code: 'CV', name: 'Cabo Verde', dial: '+238', flag: '🇨🇻' },
+  { code: 'ST', name: 'São Tomé e Príncipe', dial: '+239', flag: '🇸🇹' },
+  { code: 'GW', name: 'Guiné-Bissau', dial: '+245', flag: '🇬🇼' },
+  { code: 'ZA', name: 'África do Sul', dial: '+27', flag: '🇿🇦' },
+  { code: 'NG', name: 'Nigéria', dial: '+234', flag: '🇳🇬' },
+  { code: 'KE', name: 'Quênia', dial: '+254', flag: '🇰🇪' },
+  { code: 'EG', name: 'Egito', dial: '+20', flag: '🇪🇬' },
+  { code: 'MA', name: 'Marrocos', dial: '+212', flag: '🇲🇦' },
+  { code: 'JP', name: 'Japão', dial: '+81', flag: '🇯🇵' },
+  { code: 'CN', name: 'China', dial: '+86', flag: '🇨🇳' },
+  { code: 'KR', name: 'Coreia do Sul', dial: '+82', flag: '🇰🇷' },
+  { code: 'IN', name: 'Índia', dial: '+91', flag: '🇮🇳' },
+  { code: 'PK', name: 'Paquistão', dial: '+92', flag: '🇵🇰' },
+  { code: 'ID', name: 'Indonésia', dial: '+62', flag: '🇮🇩' },
+  { code: 'PH', name: 'Filipinas', dial: '+63', flag: '🇵🇭' },
+  { code: 'TH', name: 'Tailândia', dial: '+66', flag: '🇹🇭' },
+  { code: 'VN', name: 'Vietnã', dial: '+84', flag: '🇻🇳' },
+  { code: 'MY', name: 'Malásia', dial: '+60', flag: '🇲🇾' },
+  { code: 'SG', name: 'Singapura', dial: '+65', flag: '🇸🇬' },
+  { code: 'IL', name: 'Israel', dial: '+972', flag: '🇮🇱' },
+  { code: 'TR', name: 'Turquia', dial: '+90', flag: '🇹🇷' },
+  { code: 'SA', name: 'Arábia Saudita', dial: '+966', flag: '🇸🇦' },
+  { code: 'AE', name: 'Emirados Árabes', dial: '+971', flag: '🇦🇪' },
+  { code: 'AU', name: 'Austrália', dial: '+61', flag: '🇦🇺' },
+  { code: 'NZ', name: 'Nova Zelândia', dial: '+64', flag: '🇳🇿' },
+];
 
 interface ModalProps {
   isOpen: boolean;
@@ -68,6 +156,10 @@ export default function Modal({
     email: "",
     telefone: "",
   });
+  const [selectedCountry, setSelectedCountry] = useState<Country>(COUNTRIES[0]);
+  const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState("");
+  const countryDropdownRef = useRef<HTMLDivElement>(null);
   const [children, setChildren] = useState<Child[]>([
     {
       id: Date.now().toString(),
@@ -269,15 +361,25 @@ export default function Modal({
     setAlbumErrors((prev) => ({ ...prev, [childId]: "" }));
   };
 
-  const handlePhoneChange = (value: string) => {
-    let numbers = value.replace(/\D/g, "");
-    if (numbers.length <= 10) {
-      numbers = numbers.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+  const handlePhoneChange = (value: string, country = selectedCountry) => {
+    const digits = value.replace(/\D/g, "");
+    if (country.code === "BR") {
+      const n = digits.slice(0, 11);
+      let fmt: string;
+      if (n.length <= 10) {
+        fmt = n.replace(/^(\d{0,2})(\d{0,4})(\d{0,4})$/, (_, a, b, c) =>
+          c ? `(${a}) ${b}-${c}` : b ? `(${a}) ${b}` : a ? `(${a}` : ""
+        );
+      } else {
+        fmt = n.replace(/^(\d{0,2})(\d{0,5})(\d{0,4})$/, (_, a, b, c) =>
+          c ? `(${a}) ${b}-${c}` : `(${a}) ${b}`
+        );
+      }
+      setCustomerData((prev) => ({ ...prev, telefone: fmt }));
     } else {
-      numbers = numbers.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+      // E.164: max 15 dígitos para qualquer país
+      setCustomerData((prev) => ({ ...prev, telefone: digits.slice(0, 15) }));
     }
-    if (numbers.length > 15) numbers = numbers.slice(0, 15);
-    setCustomerData((prev) => ({ ...prev, telefone: numbers }));
   };
 
 
@@ -286,6 +388,9 @@ export default function Modal({
       document.body.style.overflow = "hidden";
       setStep(1);
       setChildrenCount(0);
+      setSelectedCountry(COUNTRIES[0]);
+      setCountryDropdownOpen(false);
+      setCountrySearch("");
       setCustomerData({ fullName: "", email: "", telefone: "" });
       setChildren([
         {
@@ -312,13 +417,36 @@ export default function Modal({
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
+        if (countryDropdownOpen) { setCountryDropdownOpen(false); return; }
         if (step > 1) setStep(step - 1);
         else onClose();
       }
     };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [isOpen, onClose, step]);
+  }, [isOpen, onClose, step, countryDropdownOpen]);
+
+  useEffect(() => {
+    if (!countryDropdownOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (countryDropdownRef.current && !countryDropdownRef.current.contains(e.target as Node)) {
+        setCountryDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [countryDropdownOpen]);
+
+  const filteredCountries = useMemo(() => {
+    if (!countrySearch.trim()) return COUNTRIES;
+    const q = countrySearch.toLowerCase();
+    return COUNTRIES.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.dial.includes(q) ||
+        c.code.toLowerCase().includes(q)
+    );
+  }, [countrySearch]);
 
   if (!isOpen) return null;
 
@@ -326,7 +454,8 @@ export default function Modal({
 
   const validatePhone = (phone: string) => {
     const n = phone.replace(/\D/g, "");
-    return n.length === 10 || n.length === 11;
+    if (selectedCountry.code === "BR") return n.length === 10 || n.length === 11;
+    return n.length >= 5 && n.length <= 15;
   };
 
   const validateStep1 = () => {
@@ -351,7 +480,9 @@ export default function Modal({
       newErrors.telefone = "Telefone é obrigatório";
       isValid = false;
     } else if (!validatePhone(customerData.telefone)) {
-      newErrors.telefone = "Telefone inválido. Use (XX) XXXXX-XXXX";
+      newErrors.telefone = selectedCountry.code === "BR"
+        ? "Telefone inválido. Use (XX) XXXXX-XXXX"
+        : "Número de telefone inválido";
       isValid = false;
     }
 
@@ -414,10 +545,13 @@ export default function Modal({
         setStep2Error("Por favor, selecione a quantidade de crianças para continuar");
       }
     } else if (step === 3 && validateStep3()) {
+      const telefoneComCodigo = selectedCountry.code === "BR"
+        ? customerData.telefone
+        : `${selectedCountry.dial}${customerData.telefone.replace(/\D/g, "")}`;
       localStorage.setItem(
         "orderData",
         JSON.stringify({
-          customerData,
+          customerData: { ...customerData, telefone: telefoneComCodigo },
           children,
           albumsAPI,
           productName,
@@ -524,20 +658,82 @@ export default function Modal({
                 </div>
 
                 <div>
-                  <input
-                    type="text"
-                    placeholder="(DDD) 9XXXX-XXXX *"
-                    value={customerData.telefone}
-                    onChange={(e) => {
-                      handlePhoneChange(e.target.value);
-                      if (errors.telefone) setErrors((prev) => ({ ...prev, telefone: "" }));
-                    }}
-                    className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${
+                  <div
+                    className={`flex border-2 rounded-xl overflow-visible transition-colors ${
                       errors.telefone
                         ? "border-red-500"
-                        : "border-gray-200 focus:border-primary"
+                        : "border-gray-200 focus-within:border-primary"
                     }`}
-                  />
+                  >
+                    {/* Seletor de país */}
+                    <div className="relative flex-shrink-0" ref={countryDropdownRef}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCountryDropdownOpen((o) => !o);
+                          setCountrySearch("");
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-3 border-r border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors rounded-l-xl text-sm font-medium text-gray-700 whitespace-nowrap h-full"
+                      >
+                        <span className="text-base leading-none">{selectedCountry.flag}</span>
+                        <span className="font-mono text-xs text-gray-600">{selectedCountry.dial}</span>
+                        <span className="text-gray-400 text-[10px]">▾</span>
+                      </button>
+
+                      {countryDropdownOpen && (
+                        <div className="absolute top-full left-0 mt-1 w-72 bg-white border border-gray-200 rounded-xl shadow-2xl z-[60] overflow-hidden">
+                          <div className="p-2 border-b border-gray-100">
+                            <input
+                              type="text"
+                              placeholder="Buscar país ou código..."
+                              value={countrySearch}
+                              onChange={(e) => setCountrySearch(e.target.value)}
+                              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
+                              autoFocus
+                            />
+                          </div>
+                          <div className="max-h-52 overflow-y-auto">
+                            {filteredCountries.length === 0 ? (
+                              <p className="text-center text-xs text-gray-400 py-4">Nenhum país encontrado</p>
+                            ) : filteredCountries.map((country) => (
+                              <button
+                                key={country.code}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedCountry(country);
+                                  setCountryDropdownOpen(false);
+                                  setCountrySearch("");
+                                  setCustomerData((prev) => ({ ...prev, telefone: "" }));
+                                  if (errors.telefone) setErrors((prev) => ({ ...prev, telefone: "" }));
+                                }}
+                                className={`w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-gray-50 transition-colors text-sm ${
+                                  selectedCountry.code === country.code
+                                    ? "bg-primary/5 text-primary font-semibold"
+                                    : "text-gray-700"
+                                }`}
+                              >
+                                <span className="text-base leading-none">{country.flag}</span>
+                                <span className="flex-1 text-left truncate">{country.name}</span>
+                                <span className="text-gray-400 text-xs font-mono flex-shrink-0">{country.dial}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Input do número */}
+                    <input
+                      type="tel"
+                      placeholder={selectedCountry.code === "BR" ? "(DDD) 9XXXX-XXXX *" : "Número *"}
+                      value={customerData.telefone}
+                      onChange={(e) => {
+                        handlePhoneChange(e.target.value);
+                        if (errors.telefone) setErrors((prev) => ({ ...prev, telefone: "" }));
+                      }}
+                      className="flex-1 px-4 py-3 focus:outline-none bg-transparent rounded-r-xl min-w-0 text-sm"
+                    />
+                  </div>
                   {errors.telefone && (
                     <p className="text-red-500 text-xs mt-1">{errors.telefone}</p>
                   )}

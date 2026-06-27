@@ -199,6 +199,12 @@
   min-height: 100dvh;
 }
 
+/* Evita que o brick do Mercado Pago herde min-height: 100dvh em mobile */
+.mp-brick-wrapper section,
+.mp-brick-wrapper section * {
+  min-height: unset !important;
+}
+
 @media (max-width: 767px) {
   section {
     min-height: 100dvh;

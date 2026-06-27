@@ -438,12 +438,25 @@ export default function PaymentPage() {
       name: item.name,
       price: item.price,
     }));
-    const bumpItems = Array.from(selectedAlbumBumps).map(key => {
+    // Album bumps com o preço descontado correto
+    const albumBumpItems = Array.from(selectedAlbumBumps).map(key => {
       const [childName, albumId] = key.split('::');
-      return { albumId, childName };
+      const suggestion = albumBumpSuggestions.find(s => s.childName === childName);
+      const album = suggestion?.albums.find(a => a.id === albumId);
+      const offerPrice = album
+        ? (album.orderBumpDiscount > 0
+            ? album.priceNew * (1 - album.orderBumpDiscount / 100)
+            : album.priceNew)
+        : undefined;
+      return { albumId, childName, price: offerPrice };
     });
-    return [...baseItems, ...gravItems, ...bumpItems];
-  }, [orderData, selectedAlbumBumps]);
+    // Order bumps regulares (sem vínculo com álbum) com preço de oferta
+    const regularBumpItems = selectedBumps.map(bumpId => {
+      const bump = bumps.find(b => b.id === bumpId);
+      return { albumId: bumpId, childName: 'order_bump', name: bump?.title, price: bump?.offerPrice };
+    });
+    return [...baseItems, ...gravItems, ...albumBumpItems, ...regularBumpItems];
+  }, [orderData, selectedAlbumBumps, albumBumpSuggestions, selectedBumps, bumps]);
 
   if (isLoading) {
     return (
@@ -501,7 +514,7 @@ export default function PaymentPage() {
 
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Coluna esquerda — order bumps + resumo (mobile: 2º, desktop: 1º) */}
-        <div className="space-y-6 order-2 lg:order-1">
+        <div className="space-y-6 order-1 lg:order-1">
           {/* Order Bumps */}
           {(bumps.length > 0 || albumBumpSuggestions.length > 0) && <div id="order-bumps" className="scroll-mt-4">
             {timeLeft > 0 && (
@@ -753,7 +766,7 @@ export default function PaymentPage() {
         </div>
 
         {/* Coluna direita — Pagamento (mobile: 1º, desktop: 2º) */}
-        <div className="space-y-6 order-1 lg:order-2">
+        <div className="space-y-6 order-2 lg:order-2">
           <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
             <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 text-white">
               <h2 className="text-2xl font-bold">💳 Pagamento</h2>

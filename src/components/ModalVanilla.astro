@@ -46,10 +46,95 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     return s;
   }
 
+  // ── Países ──────────────────────────────────────────────────────────────────
+  var COUNTRIES = [
+    { code:"BR", name:"Brasil",               dial:"+55",  flag:"🇧🇷" },
+    { code:"PT", name:"Portugal",             dial:"+351", flag:"🇵🇹" },
+    { code:"AR", name:"Argentina",            dial:"+54",  flag:"🇦🇷" },
+    { code:"UY", name:"Uruguai",              dial:"+598", flag:"🇺🇾" },
+    { code:"PY", name:"Paraguai",             dial:"+595", flag:"🇵🇾" },
+    { code:"BO", name:"Bolívia",              dial:"+591", flag:"🇧🇴" },
+    { code:"CL", name:"Chile",                dial:"+56",  flag:"🇨🇱" },
+    { code:"PE", name:"Peru",                 dial:"+51",  flag:"🇵🇪" },
+    { code:"CO", name:"Colômbia",             dial:"+57",  flag:"🇨🇴" },
+    { code:"VE", name:"Venezuela",            dial:"+58",  flag:"🇻🇪" },
+    { code:"EC", name:"Equador",              dial:"+593", flag:"🇪🇨" },
+    { code:"GY", name:"Guiana",               dial:"+592", flag:"🇬🇾" },
+    { code:"SR", name:"Suriname",             dial:"+597", flag:"🇸🇷" },
+    { code:"US", name:"Estados Unidos",       dial:"+1",   flag:"🇺🇸" },
+    { code:"CA", name:"Canadá",               dial:"+1",   flag:"🇨🇦" },
+    { code:"MX", name:"México",               dial:"+52",  flag:"🇲🇽" },
+    { code:"GT", name:"Guatemala",            dial:"+502", flag:"🇬🇹" },
+    { code:"HN", name:"Honduras",             dial:"+504", flag:"🇭🇳" },
+    { code:"SV", name:"El Salvador",          dial:"+503", flag:"🇸🇻" },
+    { code:"NI", name:"Nicarágua",            dial:"+505", flag:"🇳🇮" },
+    { code:"CR", name:"Costa Rica",           dial:"+506", flag:"🇨🇷" },
+    { code:"PA", name:"Panamá",               dial:"+507", flag:"🇵🇦" },
+    { code:"CU", name:"Cuba",                 dial:"+53",  flag:"🇨🇺" },
+    { code:"DO", name:"Rep. Dominicana",      dial:"+1",   flag:"🇩🇴" },
+    { code:"HT", name:"Haiti",                dial:"+509", flag:"🇭🇹" },
+    { code:"JM", name:"Jamaica",              dial:"+1",   flag:"🇯🇲" },
+    { code:"ES", name:"Espanha",              dial:"+34",  flag:"🇪🇸" },
+    { code:"IT", name:"Itália",               dial:"+39",  flag:"🇮🇹" },
+    { code:"FR", name:"França",               dial:"+33",  flag:"🇫🇷" },
+    { code:"DE", name:"Alemanha",             dial:"+49",  flag:"🇩🇪" },
+    { code:"GB", name:"Reino Unido",          dial:"+44",  flag:"🇬🇧" },
+    { code:"NL", name:"Países Baixos",        dial:"+31",  flag:"🇳🇱" },
+    { code:"BE", name:"Bélgica",              dial:"+32",  flag:"🇧🇪" },
+    { code:"CH", name:"Suíça",                dial:"+41",  flag:"🇨🇭" },
+    { code:"AT", name:"Áustria",              dial:"+43",  flag:"🇦🇹" },
+    { code:"SE", name:"Suécia",               dial:"+46",  flag:"🇸🇪" },
+    { code:"NO", name:"Noruega",              dial:"+47",  flag:"🇳🇴" },
+    { code:"DK", name:"Dinamarca",            dial:"+45",  flag:"🇩🇰" },
+    { code:"FI", name:"Finlândia",            dial:"+358", flag:"🇫🇮" },
+    { code:"IE", name:"Irlanda",              dial:"+353", flag:"🇮🇪" },
+    { code:"PL", name:"Polônia",              dial:"+48",  flag:"🇵🇱" },
+    { code:"CZ", name:"Rep. Tcheca",          dial:"+420", flag:"🇨🇿" },
+    { code:"SK", name:"Eslováquia",           dial:"+421", flag:"🇸🇰" },
+    { code:"HU", name:"Hungria",              dial:"+36",  flag:"🇭🇺" },
+    { code:"RO", name:"Romênia",              dial:"+40",  flag:"🇷🇴" },
+    { code:"BG", name:"Bulgária",             dial:"+359", flag:"🇧🇬" },
+    { code:"GR", name:"Grécia",               dial:"+30",  flag:"🇬🇷" },
+    { code:"HR", name:"Croácia",              dial:"+385", flag:"🇭🇷" },
+    { code:"RS", name:"Sérvia",               dial:"+381", flag:"🇷🇸" },
+    { code:"UA", name:"Ucrânia",              dial:"+380", flag:"🇺🇦" },
+    { code:"RU", name:"Rússia",               dial:"+7",   flag:"🇷🇺" },
+    { code:"AO", name:"Angola",               dial:"+244", flag:"🇦🇴" },
+    { code:"MZ", name:"Moçambique",           dial:"+258", flag:"🇲🇿" },
+    { code:"CV", name:"Cabo Verde",           dial:"+238", flag:"🇨🇻" },
+    { code:"ST", name:"São Tomé e Príncipe",  dial:"+239", flag:"🇸🇹" },
+    { code:"GW", name:"Guiné-Bissau",         dial:"+245", flag:"🇬🇼" },
+    { code:"ZA", name:"África do Sul",        dial:"+27",  flag:"🇿🇦" },
+    { code:"NG", name:"Nigéria",              dial:"+234", flag:"🇳🇬" },
+    { code:"KE", name:"Quênia",               dial:"+254", flag:"🇰🇪" },
+    { code:"EG", name:"Egito",                dial:"+20",  flag:"🇪🇬" },
+    { code:"MA", name:"Marrocos",             dial:"+212", flag:"🇲🇦" },
+    { code:"JP", name:"Japão",                dial:"+81",  flag:"🇯🇵" },
+    { code:"CN", name:"China",                dial:"+86",  flag:"🇨🇳" },
+    { code:"KR", name:"Coreia do Sul",        dial:"+82",  flag:"🇰🇷" },
+    { code:"IN", name:"Índia",                dial:"+91",  flag:"🇮🇳" },
+    { code:"PK", name:"Paquistão",            dial:"+92",  flag:"🇵🇰" },
+    { code:"ID", name:"Indonésia",            dial:"+62",  flag:"🇮🇩" },
+    { code:"PH", name:"Filipinas",            dial:"+63",  flag:"🇵🇭" },
+    { code:"TH", name:"Tailândia",            dial:"+66",  flag:"🇹🇭" },
+    { code:"VN", name:"Vietnã",               dial:"+84",  flag:"🇻🇳" },
+    { code:"MY", name:"Malásia",              dial:"+60",  flag:"🇲🇾" },
+    { code:"SG", name:"Singapura",            dial:"+65",  flag:"🇸🇬" },
+    { code:"IL", name:"Israel",               dial:"+972", flag:"🇮🇱" },
+    { code:"TR", name:"Turquia",              dial:"+90",  flag:"🇹🇷" },
+    { code:"SA", name:"Arábia Saudita",       dial:"+966", flag:"🇸🇦" },
+    { code:"AE", name:"Emirados Árabes",      dial:"+971", flag:"🇦🇪" },
+    { code:"AU", name:"Austrália",            dial:"+61",  flag:"🇦🇺" },
+    { code:"NZ", name:"Nova Zelândia",        dial:"+64",  flag:"🇳🇿" },
+  ];
+
   // ── Estado ──────────────────────────────────────────────────────────────────
   var isOpen = false, step = 1;
   var childrenCount = 0;
   var customer = { fullName: "", email: "", telefone: "" };
+  var selectedCountry = COUNTRIES[0]; // Brasil por padrão
+  var countryDropdownOpen = false;
+  var countrySearch = "";
   var children = [];
   var albumsAPI = [];
   var loadingAlbums = false;
@@ -278,11 +363,52 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
       ' class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors bg-green-50 '+emailBorder+'" />' +
       (errors.email ? '<p class="text-red-500 text-xs mt-1 tc-email-msg">'+esc(errors.email)+'</p>' : emailStatusHtml) +
     '</div>';
+    var filteredCountries = countrySearch.trim()
+      ? COUNTRIES.filter(function(c){
+          var q = countrySearch.toLowerCase();
+          return c.name.toLowerCase().indexOf(q) >= 0 || c.dial.indexOf(q) >= 0 || c.code.toLowerCase().indexOf(q) >= 0;
+        })
+      : COUNTRIES;
+    var dropdownItems = filteredCountries.map(function(c){
+      var active = c.code === selectedCountry.code ? ' style="background:#f0fdf4;color:#6ab248;font-weight:600"' : '';
+      return '<button type="button" class="tc-country-item w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 text-sm text-gray-700 transition-colors"'+active+' data-code="'+c.code+'">' +
+        '<span style="font-size:1.1em;line-height:1">'+c.flag+'</span>' +
+        '<span style="flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name)+'</span>' +
+        '<span style="color:#9ca3af;font-size:.75em;font-family:monospace;flex-shrink:0">'+c.dial+'</span>' +
+      '</button>';
+    }).join("");
+    var phoneBorder = errors.telefone ? "border-red-500" : "border-green-600";
+    var phoneFieldHtml =
+      '<div>' +
+        '<label class="block text-[22px] font-semibold text-black mb-1">WhatsApp <span class="text-red-500">*</span></label>' +
+        '<div class="flex border-2 rounded-xl bg-green-50 transition-colors '+phoneBorder+'" style="overflow:visible">' +
+          '<div style="position:relative;flex-shrink:0">' +
+            '<button type="button" id="tc-country-btn" class="flex items-center gap-1 px-3 py-3 border-r border-green-600 bg-green-100 hover:bg-green-200 transition-colors rounded-l-xl text-sm font-medium text-gray-700 whitespace-nowrap h-full" style="border-top-right-radius:0;border-bottom-right-radius:0">' +
+              '<span style="font-size:1.1em;line-height:1">'+selectedCountry.flag+'</span>' +
+              '<span style="font-family:monospace;font-size:.8em;color:#374151">'+selectedCountry.dial+'</span>' +
+              '<span style="color:#9ca3af;font-size:.65em">▾</span>' +
+            '</button>' +
+            (countryDropdownOpen ?
+              '<div id="tc-country-dd" style="position:absolute;top:100%;left:0;margin-top:4px;width:280px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,.15);z-index:999;overflow:hidden">' +
+                '<div style="padding:8px;border-bottom:1px solid #f3f4f6">' +
+                  '<input id="tc-country-search" type="text" placeholder="Buscar país ou código..." value="'+esc(countrySearch)+'" style="width:100%;padding:6px 12px;font-size:.875rem;border:1px solid #e5e7eb;border-radius:8px;outline:none" />' +
+                '</div>' +
+                '<div style="max-height:210px;overflow-y:auto">' +
+                  (dropdownItems || '<p style="text-align:center;font-size:.75rem;color:#9ca3af;padding:12px">Nenhum país encontrado</p>') +
+                '</div>' +
+              '</div>'
+            : '') +
+          '</div>' +
+          '<input id="tc-phone" type="tel" placeholder="'+(selectedCountry.code==="BR" ? "(DDD) 9XXXX-XXXX" : "Somente dígitos")+' *" value="'+esc(customer.telefone)+'" style="flex:1;padding:12px 16px;outline:none;background:transparent;border-radius:0 12px 12px 0;min-width:0;font-size:.875rem" />' +
+        '</div>' +
+        (errors.telefone ? '<p class="text-red-500 text-xs mt-1">'+esc(errors.telefone)+'</p>' : '') +
+      '</div>';
+
     $body().innerHTML =
       '<div class="space-y-4 pt-4"><div class="space-y-3">' +
-        field("tc-name",  "text",  "Nome completo", "Digite seu nome completo",       customer.fullName,  errors.fullName) +
+        field("tc-name",  "text",  "Nome completo", "Digite seu nome completo", customer.fullName, errors.fullName) +
         emailFieldHtml +
-        field("tc-phone", "text",  "WhatsApp", "(DDD) 9XXXX-XXXX",   customer.telefone,  errors.telefone) +
+        phoneFieldHtml +
       '</div><div class="bg-amber-50 rounded-xl p-3 border border-amber-200">' +
         '<p class="text-xs text-amber-800"><strong>Campos obrigatórios:</strong> Nome completo, E-mail e Telefone</p>' +
       '</div></div>';
@@ -303,12 +429,77 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
         updateEmailUI();
       }
     });
+
+    // Botão do seletor de país
+    document.getElementById("tc-country-btn").addEventListener("click", function(){
+      countryDropdownOpen = !countryDropdownOpen;
+      countrySearch = "";
+      renderStep1();
+      if (countryDropdownOpen) {
+        var s = document.getElementById("tc-country-search");
+        if (s) s.focus();
+      }
+    });
+
+    // Busca dentro do dropdown
+    if (countryDropdownOpen) {
+      var searchEl = document.getElementById("tc-country-search");
+      if (searchEl) {
+        searchEl.addEventListener("input", function(e){
+          countrySearch = e.target.value;
+          renderStep1();
+          if (countryDropdownOpen) {
+            var ns = document.getElementById("tc-country-search");
+            if (ns) { ns.focus(); ns.value = countrySearch; ns.setSelectionRange(countrySearch.length, countrySearch.length); }
+          }
+        });
+        searchEl.addEventListener("click", function(e){ e.stopPropagation(); });
+      }
+
+      // Selecionar país
+      var items = document.querySelectorAll(".tc-country-item");
+      items.forEach(function(btn){
+        btn.addEventListener("click", function(){
+          var code = btn.dataset.code;
+          selectedCountry = COUNTRIES.find(function(c){ return c.code === code; }) || COUNTRIES[0];
+          countryDropdownOpen = false;
+          countrySearch = "";
+          customer.telefone = "";
+          if (errors.telefone) errors.telefone = "";
+          renderStep1();
+        });
+      });
+
+      // Fechar ao clicar fora
+      setTimeout(function(){
+        document.addEventListener("mousedown", function closeDd(ev){
+          var dd = document.getElementById("tc-country-dd");
+          var btn2 = document.getElementById("tc-country-btn");
+          if (dd && !dd.contains(ev.target) && btn2 && !btn2.contains(ev.target)) {
+            countryDropdownOpen = false;
+            countrySearch = "";
+            renderStep1();
+          }
+          document.removeEventListener("mousedown", closeDd);
+        });
+      }, 0);
+    }
+
+    // Máscara do telefone
     document.getElementById("tc-phone").addEventListener("input", function(e){
       var input = e.target;
-      var n = input.value.replace(/\D/g, "").slice(0, 11);
-      var fmt = n.length <= 10
-        ? n.replace(/^(\d{0,2})(\d{0,4})(\d{0,4})$/, function(_,a,b,c){ return (a?"("+a:"") + (b?") "+b:"") + (c?"-"+c:""); })
-        : n.replace(/^(\d{0,2})(\d{0,5})(\d{0,4})$/, function(_,a,b,c){ return (a?"("+a:"") + (b?") "+b:"") + (c?"-"+c:""); });
+      var digits = input.value.replace(/\D/g, "");
+      var fmt;
+      if (selectedCountry.code === "BR") {
+        digits = digits.slice(0, 11);
+        fmt = digits.length <= 10
+          ? digits.replace(/^(\d{0,2})(\d{0,4})(\d{0,4})$/, function(_,a,b,c){ return (a?"("+a:"") + (b?") "+b:"") + (c?"-"+c:""); })
+          : digits.replace(/^(\d{0,2})(\d{0,5})(\d{0,4})$/, function(_,a,b,c){ return (a?"("+a:"") + (b?") "+b:"") + (c?"-"+c:""); });
+      } else {
+        // E.164: max 15 dígitos para qualquer país
+        digits = digits.slice(0, 15);
+        fmt = digits;
+      }
       customer.telefone = fmt;
       input.value = fmt;
       if (errors.telefone) { errors.telefone = ""; renderStep1(); }
@@ -685,7 +876,8 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     else if (emailCheckState === "checking") { e.email = "Verificando e-mail, aguarde..."; ok = false; }
     else if (emailCheckState === "idle") { doEmailCheck(customer.email.trim()); e.email = "Verificando e-mail..."; ok = false; }
     if (!customer.telefone.trim()) { e.telefone = "Telefone é obrigatório"; ok = false; }
-    else if (!/^\(\d{2}\) \d{4,5}-\d{4}$/.test(customer.telefone)) { e.telefone = "Telefone inválido. Use (XX) XXXXX-XXXX"; ok = false; }
+    else if (selectedCountry.code === "BR" && !/^\(\d{2}\) \d{4,5}-\d{4}$/.test(customer.telefone)) { e.telefone = "Telefone inválido. Use (XX) XXXXX-XXXX"; ok = false; }
+    else if (selectedCountry.code !== "BR" && customer.telefone.replace(/\D/g,"").length < 5) { e.telefone = "Número de telefone inválido"; ok = false; }
     errors = e;
     if (!ok) renderStep1();
     return ok;
@@ -739,6 +931,9 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     step = 1;
     childrenCount = 0;
     customer = { fullName: "", email: "", telefone: "" };
+    selectedCountry = COUNTRIES[0];
+    countryDropdownOpen = false;
+    countrySearch = "";
     emailCheckState = "idle";
     children = [];
     albumsAPI = []; albumErrors = {}; albumsExpanded = {}; errors = { fullName: "", email: "", telefone: "" };
@@ -958,8 +1153,11 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
             })
           }).catch(function(err){ console.error("[IC] fetch CAPI falhou:", err); });
         } catch (e) { console.error("[IC] erro no bloco InitiateCheckout:", e); }
+        var telefoneComCodigo = selectedCountry.code === "BR"
+          ? customer.telefone
+          : selectedCountry.dial + customer.telefone.replace(/\D/g,"");
         localStorage.setItem("orderData", JSON.stringify({
-          customerData: customer, children: childrenClean, albumsAPI: albumsAPI,
+          customerData: Object.assign({}, customer, { telefone: telefoneComCodigo }), children: childrenClean, albumsAPI: albumsAPI,
           productName: productName, total: calcTotal(), isCombo: isCombo,
           gravacaoItems: gravacaoItems,
           tracking: {
