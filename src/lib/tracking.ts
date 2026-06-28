@@ -130,7 +130,7 @@ export type Commerce = {
   content_name?: string;
   content_category?: string;
   content_type?: string;
-  contents?: Array<{ id: string | number; quantity?: number; item_price?: number }>;
+  contents?: Array<{ id: string | number; quantity?: number; item_price?: number; title?: string; description?: string }>;
   num_items?: number;
 };
 

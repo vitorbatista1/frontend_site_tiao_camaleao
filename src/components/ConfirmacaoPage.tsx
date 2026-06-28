@@ -54,14 +54,25 @@ export default function ConfirmacaoPage() {
           const value = parseFloat(parsed?.total || lastOrder?.amount || '0');
           const cd = parsed?.customerData || lastOrder?.customerData || {};
 
-          const allItems: Array<{ id: string; quantity: number; item_price: number }> = [];
+          const allItems: Array<{ id: string; quantity: number; item_price: number; title?: string; description?: string }> = [];
           (parsed?.children ?? []).forEach((c: any) => {
             (c.selectedAlbums ?? []).forEach((albumId: string) => {
-              allItems.push({ id: albumId, quantity: 1, item_price: 0 });
+              allItems.push({
+                id: albumId,
+                quantity: 1,
+                item_price: 0,
+                title: c.albumResult?.display_name ?? albumId,
+                description: c.name,
+              });
             });
           });
           (parsed?.gravacaoItems ?? []).forEach((g: any) => {
-            allItems.push({ id: g.albumId ?? g.name, quantity: 1, item_price: Number(g.price ?? 0) });
+            allItems.push({
+              id: g.albumId ?? g.name,
+              quantity: 1,
+              item_price: Number(g.price ?? 0),
+              title: g.name,
+            });
           });
           const childIds = allItems.length > 0
             ? allItems.map(i => i.id)

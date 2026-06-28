@@ -426,11 +426,19 @@ export default function PaymentPage() {
   // Monta selectedAlbums para o CardForm: itens do carrinho + gravação + álbuns bumps selecionados
   const selectedAlbumsForPayment = useMemo(() => {
     if (!orderData) return [];
+    const albumsAPIData: Array<{ id: string; name: string; tipo: string; priceNew: string }> =
+      (orderData as any).albumsAPI ?? [];
     const baseItems = orderData.children.flatMap((child) =>
-      (child.selectedAlbums ?? []).map((albumId) => ({
-        albumId,
-        childName: child.albumResult?.display_name ?? child.name,
-      }))
+      (child.selectedAlbums ?? []).map((albumId) => {
+        const albumInfo = albumsAPIData.find((a) => a.id === albumId);
+        const suffix = albumInfo?.tipo === 'GRAVACAO' ? ' - GRAVACAO' : ' - GRAVADO';
+        return {
+          albumId,
+          childName: child.albumResult?.display_name ?? child.name,
+          name: albumInfo ? `${albumInfo.name}${suffix}` : undefined,
+          price: albumInfo ? Number(albumInfo.priceNew) : undefined,
+        };
+      })
     );
     const gravItems = (orderData.gravacaoItems ?? []).map((item) => ({
       albumId: item.albumId,
@@ -692,22 +700,30 @@ export default function PaymentPage() {
                 {/* Álbuns selecionados por criança */}
                 {(orderData.children.some(c => (c.selectedAlbums ?? []).length > 0) || (orderData.gravacaoItems ?? []).length > 0) && (
                   <div className="mt-2 space-y-1">
-                    {orderData.children.map((child) => {
-                      const childDisplay = child.albumResult?.display_name ?? child.name;
-                      const digitalAlbums = child.selectedAlbums ?? [];
-                      const gravItems = (orderData.gravacaoItems ?? []).filter(g => g.childName === childDisplay);
-                      if (!digitalAlbums.length && !gravItems.length) return null;
-                      const allNames = [
-                        ...digitalAlbums.map(id => id),
-                        ...gravItems.map(g => `${g.name} (R$ ${g.price.toFixed(2).replace('.', ',')})`),
-                      ];
-                      return (
-                        <p key={child.id} className="text-xs text-gray-500">
-                          <span className="font-medium">{childDisplay}:</span>{' '}
-                          {allNames.join(', ')}
-                        </p>
-                      );
-                    })}
+                    {(() => {
+                      const albumsAPIData: Array<{ id: string; name: string; tipo: string }> = (orderData as any).albumsAPI ?? [];
+                      return orderData.children.map((child) => {
+                        const childDisplay = child.albumResult?.display_name ?? child.name;
+                        const digitalAlbums = child.selectedAlbums ?? [];
+                        const gravItems = (orderData.gravacaoItems ?? []).filter(g => g.childName === childDisplay);
+                        if (!digitalAlbums.length && !gravItems.length) return null;
+                        const allNames = [
+                          ...digitalAlbums.map(id => {
+                            const info = albumsAPIData.find(a => a.id === id);
+                            if (!info) return id;
+                            const suffix = info.tipo === 'GRAVACAO' ? ' - GRAVACAO' : ' - GRAVADO';
+                            return `${info.name}${suffix}`;
+                          }),
+                          ...gravItems.map(g => `${g.name} (R$ ${g.price.toFixed(2).replace('.', ',')})`),
+                        ];
+                        return (
+                          <p key={child.id} className="text-xs text-gray-500">
+                            <span className="font-medium">{childDisplay}:</span>{' '}
+                            {allNames.join(', ')}
+                          </p>
+                        );
+                      });
+                    })()}
                   </div>
                 )}
                 {orderData.useCustomName && (
