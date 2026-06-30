@@ -454,7 +454,7 @@ const year = new Date().getFullYear();
 </div>
       </section>
 <!-- TESTIMONIALS -->
-<section class="bg-[#00AAFF] pt-28 pb-16 md:pt-10 md:pb-16 px-4 flex flex-col items-center" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
+<section class="section-compact bg-[#00AAFF] pt-28 pb-16 md:pt-10 md:pb-16 px-4 flex flex-col items-center" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
   <div class="text-center mb-8 md:mb-20">
     <h3 class="text-white uppercase tracking-widest mb-2 opacity-90" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 400;">
       Depoimentos
@@ -488,7 +488,7 @@ const year = new Date().getFullYear();
 
     <!-- Carrossel de depoimentos -->
     <div class="w-full overflow-hidden rounded-2xl" id="dep-track-wrapper">
-      <div id="dep-track" class="flex transition-transform duration-500 ease-in-out">
+      <div id="dep-track" class="flex w-full items-start transition-transform duration-500 ease-in-out">
 
         <!-- Slide 1: prioritário sozinho -->
         <div class="w-full flex-shrink-0">
@@ -560,16 +560,35 @@ const year = new Date().getFullYear();
 
     <script>
       const track = document.getElementById('dep-track') as HTMLElement;
+      const wrapper = document.getElementById('dep-track-wrapper') as HTMLElement;
       const total = track ? track.children.length : 0;
       let current = 0;
+
+      function syncHeight() {
+        if (!wrapper || !track) return;
+        const slide = track.children[current] as HTMLElement;
+        if (slide && slide.offsetHeight > 0) {
+          wrapper.style.height = slide.offsetHeight + 'px';
+        }
+      }
 
       function goTo(index: number) {
         current = (index + total) % total;
         track.style.transform = `translateX(-${current * 100}%)`;
+        syncHeight();
       }
 
       document.getElementById('dep-prev')?.addEventListener('click', () => goTo(current - 1));
       document.getElementById('dep-next')?.addEventListener('click', () => goTo(current + 1));
+
+      // Atualiza altura quando imagens carregarem (lazy)
+      track.querySelectorAll('img').forEach((img) => {
+        if (!(img as HTMLImageElement).complete) {
+          img.addEventListener('load', syncHeight);
+        }
+      });
+
+      syncHeight();
     </script>
   </div>
 
