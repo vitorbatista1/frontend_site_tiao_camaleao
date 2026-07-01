@@ -84,6 +84,7 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
             ...a,
             priceOld: Number(a.priceOld),
             priceNew: Number(a.priceNew),
+            orderBumpDiscount: Number(a.orderBumpDiscount) || 0,
             repertorio: a.repertorio ?? [],
           }))
         );
@@ -309,7 +310,7 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
                   <div className="flex gap-1 flex-wrap">
                     {album.isOrderBump && (
                       <span className="text-xs font-semibold px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">
-                        🎁 Order Bump{album.orderBumpDiscount > 0 ? ` -${album.orderBumpDiscount}%` : ''}
+                        🎁 Order Bump{album.orderBumpDiscount > 0 ? ` -R$ ${album.orderBumpDiscount.toFixed(2)}` : ''}
                       </span>
                     )}
                     {album.tipo && (
@@ -547,25 +548,25 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
                 {formData.isOrderBump && (
                   <div className="pl-7 space-y-2">
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Desconto no Order Bump (%)</label>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Desconto no Order Bump (R$)</label>
                       <div className="flex items-center gap-3">
+                        <span className="text-sm text-gray-500">R$</span>
                         <input
                           type="number"
                           name="orderBumpDiscount"
                           value={formData.orderBumpDiscount}
                           onChange={handleInputChange}
                           min={0}
-                          max={100}
-                          step={1}
+                          max={formData.priceNew || undefined}
+                          step={0.01}
                           className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                          placeholder="0"
+                          placeholder="0.00"
                         />
-                        <span className="text-sm text-gray-500">%</span>
                         {formData.orderBumpDiscount > 0 && formData.priceNew > 0 && (
                           <span className="text-sm text-green-700 font-semibold">
                             de R$ {formData.priceNew.toFixed(2)} por{' '}
                             <span className="text-green-600 font-bold">
-                              R$ {(formData.priceNew * (1 - formData.orderBumpDiscount / 100)).toFixed(2)}
+                              R$ {Math.max(0, formData.priceNew - formData.orderBumpDiscount).toFixed(2)}
                             </span>
                           </span>
                         )}

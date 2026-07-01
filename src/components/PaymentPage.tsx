@@ -272,6 +272,7 @@ export default function PaymentPage() {
                     ...a,
                     priceOld: a.priceOld != null ? Number(a.priceOld) : null,
                     priceNew: Number(a.priceNew),
+                    orderBumpDiscount: Number(a.orderBumpDiscount) || 0,
                   })),
                 }))
               );
@@ -314,7 +315,7 @@ export default function PaymentPage() {
       const album = suggestion?.albums.find(a => a.id === albumId);
       if (!album) return total;
       const offerPrice = album.orderBumpDiscount > 0
-        ? album.priceNew * (1 - album.orderBumpDiscount / 100)
+        ? Math.max(0, album.priceNew - album.orderBumpDiscount)
         : album.priceNew;
       return total + offerPrice;
     }, 0);
@@ -332,7 +333,7 @@ export default function PaymentPage() {
       const album = suggestion?.albums.find(a => a.id === albumId);
       if (!album) return total;
       const offerPrice = album.orderBumpDiscount > 0
-        ? album.priceNew * (1 - album.orderBumpDiscount / 100)
+        ? Math.max(0, album.priceNew - album.orderBumpDiscount)
         : album.priceNew;
       const basePrice = album.priceOld ?? album.priceNew;
       return total + (basePrice - offerPrice);
@@ -453,7 +454,7 @@ export default function PaymentPage() {
       const album = suggestion?.albums.find(a => a.id === albumId);
       const offerPrice = album
         ? (album.orderBumpDiscount > 0
-            ? album.priceNew * (1 - album.orderBumpDiscount / 100)
+            ? Math.max(0, album.priceNew - album.orderBumpDiscount)
             : album.priceNew)
         : undefined;
       return { albumId, childName, price: offerPrice };
@@ -578,13 +579,13 @@ export default function PaymentPage() {
                         const key: AlbumBumpKey = `${suggestion.childName}::${album.id}`;
                         const isSelected = selectedAlbumBumps.has(key);
                         const offerPrice = album.orderBumpDiscount > 0
-                          ? album.priceNew * (1 - album.orderBumpDiscount / 100)
+                          ? Math.max(0, album.priceNew - album.orderBumpDiscount)
                           : album.priceNew;
                         const basePrice = album.priceOld ?? album.priceNew;
-                        const savingsPct = album.orderBumpDiscount > 0
+                        const savingsAmount = album.orderBumpDiscount > 0
                           ? album.orderBumpDiscount
                           : album.priceOld
-                            ? Math.round(((album.priceOld - album.priceNew) / album.priceOld) * 100)
+                            ? album.priceOld - album.priceNew
                             : null;
                         return (
                           <div
@@ -596,10 +597,10 @@ export default function PaymentPage() {
                             }`}
                             onClick={() => handleToggleAlbumBump(suggestion.childName, album.id, !isSelected)}
                           >
-                            {savingsPct !== null && (
+                            {savingsAmount !== null && (
                               <div className="absolute -top-3 -right-3 z-10">
                                 <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg">
-                                  🔥 -{savingsPct}% OFF
+                                  🔥 -R$ {savingsAmount.toFixed(2)} OFF
                                 </div>
                               </div>
                             )}
@@ -750,7 +751,7 @@ export default function PaymentPage() {
                       const album = suggestion?.albums.find(a => a.id === albumId);
                       if (!album) return null;
                       const offerPrice = album.orderBumpDiscount > 0
-                        ? album.priceNew * (1 - album.orderBumpDiscount / 100)
+                        ? Math.max(0, album.priceNew - album.orderBumpDiscount)
                         : album.priceNew;
                       return (
                         <div key={key} className="flex justify-between text-sm">

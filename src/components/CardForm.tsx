@@ -324,6 +324,7 @@ export default function CardForm({
       {paymentMethod === 'card' && isSdkInitialized && (
         <div className="mp-brick-wrapper">
         <CardPayment
+          key={numericAmount}
           initialization={{
             amount: numericAmount,
             payer: {
