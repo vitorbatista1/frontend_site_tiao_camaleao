@@ -146,15 +146,22 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   var productPrice = 0;
   var isCombo = false;
 
-  var COMBO_GRAVADO_PRICE_FULL = 150;
-  var COMBO_GRAVADO_ONE_MISSING = 120;
-  var GRAVADO_INDIVIDUAL_UM_FALTANDO = 100;
-  var GRAVADO_INDIVIDUAL_NENHUM = 120;
+  // var COMBO_GRAVADO_PRICE_FULL = 150;
+  // var COMBO_GRAVADO_ONE_MISSING = 120;
+  // var GRAVADO_INDIVIDUAL_UM_FALTANDO = 100;
+  // var GRAVADO_INDIVIDUAL_NENHUM = 120;
+
+  var COMBO_GRAVADO_PRICE_FULL = 0;
+  var COMBO_GRAVADO_ONE_MISSING = 0;
+  var GRAVADO_INDIVIDUAL_UM_FALTANDO = 0;
+  var GRAVADO_INDIVIDUAL_NENHUM = 0;
 
   // ── Helpers de álbum ─────────────────────────────────────────────────────────
   function getAlbumsOnly() { return albumsAPI.filter(function(a){ return a.tipo === "ALBUM"; }); }
   function getCombo() { return albumsAPI.find(function(a){ return a.tipo === "COMBO"; }); }
   function getGravacao() { return albumsAPI.filter(function(a){ return a.tipo === "GRAVACAO"; }); }
+  function getComboGravacao() { return getGravacao()[getAlbumsOnly().length] || null; }
+  function getComboGravacaoName() { var cg = getComboGravacao(); return cg ? cg.name : "Combo Gravação"; }
   function getGravacaoIndividuais() { return getGravacao().slice(0, getAlbumsOnly().length); }
   function getGravacaoIds() { return getGravacao().map(function(a){ return a.id; }); }
   function isComboGravadoSelected(sel) {
@@ -168,7 +175,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   }
   function getAlbumById(id) { return albumsAPI.find(function(a){ return a.id === id; }); }
   function getAlbumLabel(id) {
-    if (id === "personalizado:combo") return "Combo Gravação";
+    if (id === "personalizado:combo") return getComboGravacaoName();
     if (id.startsWith("personalizado:")) {
       var orig = getAlbumById(id.slice(14));
       return orig ? orig.name + " Gravação" : "Gravação";
@@ -182,6 +189,16 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     var a = keyOrId.startsWith("album_") ? getAlbumByKey(keyOrId) : getAlbumById(keyOrId);
     return parseFloat((a && a.priceNew) || "0");
   }
+  function getGravacaoPrice(albumId) {
+    var albumsOnly = getAlbumsOnly();
+    var idx = -1;
+    for (var i = 0; i < albumsOnly.length; i++) {
+      if (albumsOnly[i].id === albumId) { idx = i; break; }
+    }
+    if (idx < 0) return 0;
+    var gravs = getGravacao();
+    return gravs[idx] ? parseFloat(gravs[idx].priceNew || 0) : 0;
+  }
   function priceOldOf(keyOrId) {
     var a = keyOrId.startsWith("album_") ? getAlbumByKey(keyOrId) : getAlbumById(keyOrId);
     return parseFloat((a && a.priceOld) || "0");
@@ -191,10 +208,12 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
       return (foundAlbumsCount >= 1) ? COMBO_GRAVADO_ONE_MISSING : COMBO_GRAVADO_PRICE_FULL;
     }
     var gravIds = getGravacaoIds();
-    var indPrice = foundAlbumsCount >= 1 ? GRAVADO_INDIVIDUAL_UM_FALTANDO : GRAVADO_INDIVIDUAL_NENHUM;
     return sel.reduce(function(s, k) {
-      if (gravIds.indexOf(k) >= 0 || (k.startsWith("personalizado:") && k !== "personalizado:combo")) {
-        return s + indPrice;
+      if (k.startsWith("personalizado:") && k !== "personalizado:combo") {
+        return s + getGravacaoPrice(k.slice(14));
+      }
+      if (gravIds.indexOf(k) >= 0) {
+        return s + priceOf(k);
       }
       return s + priceOf(k);
     }, 0);
@@ -540,7 +559,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
       '<div class="flex items-center gap-2">' +
         '<div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 '+dotCls+'">'+(ativo?CHECK:'')+'</div>' +
         '<div class="text-left">' +
-          '<span class="text-sm font-bold text-orange-700 block">🎁 Combo Gravado</span>' +
+          '<span class="text-sm font-bold text-orange-700 block">🎁 ' + esc(getComboGravacaoName()) + '</span>' +
           '<span class="text-xs text-orange-600">Os 2 álbuns gravados — melhor custo-benefício!</span>' +
         '</div>' +
       '</div>' +
@@ -578,7 +597,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     if (!isExpanded) {
       var foundCount = (child.albumResult && child.albumResult.found) ? (child.albumResult.albums || []).length : 0;
       var sub = calcSubtotal(sel, foundCount);
-      var labels = isComboGravadoSelected(sel) ? ["Combo Gravado"] : sel.map(function(k){ return esc(getAlbumLabel(k)); });
+      var labels = isComboGravadoSelected(sel) ? [getComboGravacaoName()] : sel.map(function(k){ return esc(getAlbumLabel(k)); });
       return '<button type="button" class="tc-alterar w-full flex items-center gap-3 px-4 py-3 bg-green-50 border-2 border-green-400 rounded-xl hover:bg-green-100 transition-colors" data-cid="'+child.id+'">' +
         '<div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">' + CHECK + '</div>' +
         '<span class="flex-1 text-sm font-semibold text-green-800 text-left truncate">' + labels.join(" + ") + '</span>' +
@@ -620,31 +639,37 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     var childAlbumIds = child.albumResult.albums || [];
     var missing = albumsOnly.filter(function(a){ return childAlbumIds.indexOf(a.id) < 0; });
 
-    if (missing.length > 0) {
-      if (missing.length >= 2) {
-        var allGravBtns = missing.map(function(a) {
+    var missingWithGravacao = missing.filter(function(a){ return getGravacaoPrice(a.id) > 0; });
+    if (missingWithGravacao.length > 0) {
+      if (missingWithGravacao.length >= 2) {
+        var allGravBtns = missingWithGravacao.map(function(a) {
           var vKey = "personalizado:" + a.id;
           var gravSel2 = sel.indexOf(vKey) >= 0;
           return albumBtn(child.id, vKey, gravSel2 && !comboGravSel, comboGravSel,
             "🎙️ " + a.name + " Gravação",
-            GRAVADO_INDIVIDUAL_NENHUM,
+            getGravacaoPrice(a.id),
             0,
             "border-orange-500 bg-orange-50", "border-dashed border-orange-400 hover:bg-orange-50",
             "border-orange-500 bg-orange-500", false);
         }).join("");
+        var cgAlbum = getComboGravacao();
+        var comboGravPrice = cgAlbum ? parseFloat(cgAlbum.priceNew || 0) : COMBO_GRAVADO_PRICE_FULL;
         gravSection =
           '<div class="space-y-1 pt-1">' +
             '<p class="text-xs font-semibold text-orange-600 px-1">🎙️ Grave os álbuns com o nome de ' + esc(child.albumResult.display_name || child.name) + ':</p>' +
             allGravBtns +
-            comboGravadoBtn(child.id, comboGravSel, COMBO_GRAVADO_PRICE_FULL) +
+            comboGravadoBtn(child.id, comboGravSel, comboGravPrice) +
           '</div>';
       } else {
-        var mAlbum = missing[0];
+        var mAlbum = missingWithGravacao[0];
         var vKey1 = "personalizado:" + mAlbum.id;
         var gravSel = sel.indexOf(vKey1) >= 0;
+        var mGravPrice = getGravacaoPrice(mAlbum.id);
+        var cgAlbum1 = getComboGravacao();
+        var comboOneMissingPrice = cgAlbum1 ? parseFloat(cgAlbum1.priceNew || 0) : COMBO_GRAVADO_ONE_MISSING;
         var gravBtnHtml = albumBtn(child.id, vKey1, gravSel && !comboGravSel, comboGravSel,
           "🎙️ " + mAlbum.name + " Gravação",
-          GRAVADO_INDIVIDUAL_UM_FALTANDO,
+          mGravPrice,
           0,
           "border-orange-500 bg-orange-50", "border-dashed border-orange-400 hover:bg-orange-50",
           "border-orange-500 bg-orange-500", false);
@@ -652,7 +677,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
           '<div class="space-y-1 pt-1">' +
             '<p class="text-xs font-semibold text-orange-600 px-1">🎙️ Disponíveis para gravação:</p>' +
             gravBtnHtml +
-            comboGravadoBtn(child.id, comboGravSel, COMBO_GRAVADO_ONE_MISSING) +
+            comboGravadoBtn(child.id, comboGravSel, comboOneMissingPrice) +
           '</div>';
       }
     }
@@ -670,7 +695,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
 
     if (!isExpanded) {
       var sub = calcSubtotal(sel, 0);
-      var labels = isComboGravadoSelected(sel) ? ["Combo Gravado"] : sel.map(function(k){ return esc(getAlbumLabel(k)); });
+      var labels = isComboGravadoSelected(sel) ? [getComboGravacaoName()] : sel.map(function(k){ return esc(getAlbumLabel(k)); });
       return '<button type="button" class="tc-alterar w-full flex items-center gap-3 px-4 py-3 bg-orange-50 border-2 border-orange-400 rounded-xl hover:bg-orange-100 transition-colors" data-cid="'+child.id+'">' +
         '<div class="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">' + CHECK + '</div>' +
         '<span class="flex-1 text-sm font-semibold text-orange-800 text-left truncate">' + labels.join(" + ") + '</span>' +
@@ -682,17 +707,20 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     var albumsOnly = getAlbumsOnly();
     var comboGravSel = isComboGravadoSelected(sel);
 
-    var btns = albumsOnly.map(function(a) {
+    var albumsOnlyWithGravacao = albumsOnly.filter(function(a){ return getGravacaoPrice(a.id) > 0; });
+    var btns = albumsOnlyWithGravacao.map(function(a) {
       var vKey = "personalizado:" + a.id;
       var isSel = sel.indexOf(vKey) >= 0;
       return albumBtn(child.id, vKey, isSel && !comboGravSel, comboGravSel,
-        "🎙️ " + a.name + " Gravação", GRAVADO_INDIVIDUAL_NENHUM, 0,
+        "🎙️ " + a.name + " Gravação", getGravacaoPrice(a.id), 0,
         "border-orange-500 bg-orange-50", "border-dashed border-orange-400 hover:bg-orange-50",
         "border-orange-500 bg-orange-500", false);
     }).join("");
 
-    var comboBtn = albumsOnly.length >= 2
-      ? comboGravadoBtn(child.id, comboGravSel, COMBO_GRAVADO_PRICE_FULL)
+    var cgAlbumNF = getComboGravacao();
+    var notFoundComboPrice = cgAlbumNF ? parseFloat(cgAlbumNF.priceNew || 0) : COMBO_GRAVADO_PRICE_FULL;
+    var comboBtn = albumsOnlyWithGravacao.length >= 2
+      ? comboGravadoBtn(child.id, comboGravSel, notFoundComboPrice)
       : "";
 
     return '<div class="space-y-2">' +
@@ -713,7 +741,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
       var foundCount = (c.albumResult && c.albumResult.found) ? (c.albumResult.albums || []).length : 0;
       var sub = calcSubtotal(sel, foundCount);
       var labels = isComboGravadoSelected(sel)
-        ? ["Combo Gravado"]
+        ? [getComboGravacaoName()]
         : sel.map(function(k){ return esc(getAlbumLabel(k)); });
       return '<div class="flex justify-between text-xs text-gray-600">' +
         '<span>'+esc(c.albumResult&&c.albumResult.display_name||c.name)+' — '+labels.join(" + ")+'</span>' +
@@ -917,7 +945,24 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     loadingAlbums = true;
     fetch(API + "/api/albums")
       .then(function(r){ return r.json(); })
-      .then(function(j){ if (j.success) albumsAPI = j.data; })
+      .then(function(j){
+        if (j.success) {
+          albumsAPI = j.data;
+          var gravs = albumsAPI.filter(function(a){ return a.tipo === "GRAVACAO"; });
+          var albumsOnlyCount = albumsAPI.filter(function(a){ return a.tipo === "ALBUM"; }).length;
+          if (gravs.length > 0) {
+            var p1 = parseFloat(gravs[0].priceNew || 0);
+            GRAVADO_INDIVIDUAL_NENHUM = p1;
+            GRAVADO_INDIVIDUAL_UM_FALTANDO = p1;
+          }
+          var comboGrav = gravs[albumsOnlyCount] || null;
+          if (comboGrav) {
+            var cgPrice = parseFloat(comboGrav.priceNew || 0);
+            COMBO_GRAVADO_PRICE_FULL = cgPrice;
+            COMBO_GRAVADO_ONE_MISSING = cgPrice;
+          }
+        }
+      })
       .catch(function(e){ console.error("Erro ao buscar álbuns:", e); })
       .finally(function(){ loadingAlbums = false; });
   }
@@ -1054,7 +1099,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
               gravacaoItems.push({
                 albumId: "combo_gravacao",
                 childName: displayName,
-                name: "Combo Gravação",
+                name: getComboGravacaoName(),
                 price: foundCount >= 1 ? COMBO_GRAVADO_ONE_MISSING : COMBO_GRAVADO_PRICE_FULL
               });
             } else if (key.startsWith("personalizado:")) {

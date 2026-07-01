@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 interface PaymentItem {
   albumName: string;
@@ -196,9 +196,8 @@ export default function PaymentsManager({ authenticatedFetch }: PaymentsManagerP
             </thead>
             <tbody className="divide-y divide-gray-100">
               {payments.map((p) => (
-                <>
+                <React.Fragment key={p.id}>
                   <tr
-                    key={p.id}
                     className="hover:bg-gray-50 cursor-pointer transition-colors"
                     onClick={() => setExpandedId(expandedId === p.id ? null : p.id)}
                   >
@@ -220,7 +219,7 @@ export default function PaymentsManager({ authenticatedFetch }: PaymentsManagerP
                     </td>
                   </tr>
                   {expandedId === p.id && (
-                    <tr key={`${p.id}-detail`} className="bg-blue-50">
+                    <tr className="bg-blue-50">
                       <td colSpan={6} className="px-4 py-3">
                         <div className="space-y-2">
                           <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-gray-500">
@@ -246,7 +245,7 @@ export default function PaymentsManager({ authenticatedFetch }: PaymentsManagerP
                       </td>
                     </tr>
                   )}
-                </>
+                </React.Fragment>
               ))}
             </tbody>
           </table>
