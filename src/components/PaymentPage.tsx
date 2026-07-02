@@ -48,6 +48,7 @@ interface AlbumOrderBump {
   priceOld: number | null;
   priceNew: number;
   orderBumpDiscount: number;
+  tipo?: string;
 }
 
 interface AlbumBumpSuggestion {
@@ -424,31 +425,46 @@ export default function PaymentPage() {
     return `R$ ${calculateTotalWithBumps.toFixed(2).replace('.', ',')}`;
   }, [calculateTotalWithBumps]);
 
-  // Monta selectedAlbums para o CardForm: itens do carrinho + gravação + álbuns bumps selecionados
+  // Monta selectedAlbums para o CardForm: itens do carrinho + gravação + álbuns bumps selecionados.
+  // Deduplicado por (criança, álbum) — uma mesma seleção não deve virar duas linhas de
+  // pedido com preços diferentes. Sempre propaga o "tipo" real do álbum (em vez de deixar
+  // o backend adivinhar pelo nome), pois é isso que classifica o item como gravado/gravação
+  // no CAPI e no N8N.
   const selectedAlbumsForPayment = useMemo(() => {
     if (!orderData) return [];
     const albumsAPIData: Array<{ id: string; name: string; tipo: string; priceNew: string }> =
       (orderData as any).albumsAPI ?? [];
-    const baseItems = orderData.children.flatMap((child) =>
-      (child.selectedAlbums ?? []).map((albumId) => {
+
+    const byKey = new Map<string, { albumId: string; childName: string; name?: string; price?: number; tipo?: string }>();
+
+    orderData.children.forEach((child) => {
+      (child.selectedAlbums ?? []).forEach((albumId) => {
         const albumInfo = albumsAPIData.find((a) => a.id === albumId);
         const suffix = albumInfo?.tipo === 'GRAVACAO' ? ' - GRAVACAO' : ' - GRAVADO';
-        return {
+        const childName = child.albumResult?.display_name ?? child.name;
+        byKey.set(`${childName}::${albumId}`, {
           albumId,
-          childName: child.albumResult?.display_name ?? child.name,
+          childName,
           name: albumInfo ? `${albumInfo.name}${suffix}` : undefined,
           price: albumInfo ? Number(albumInfo.priceNew) : undefined,
-        };
-      })
-    );
-    const gravItems = (orderData.gravacaoItems ?? []).map((item) => ({
-      albumId: item.albumId,
-      childName: item.childName,
-      name: item.name,
-      price: item.price,
-    }));
-    // Album bumps com o preço descontado correto
-    const albumBumpItems = Array.from(selectedAlbumBumps).map(key => {
+          tipo: albumInfo?.tipo,
+        });
+      });
+    });
+
+    (orderData.gravacaoItems ?? []).forEach((item) => {
+      byKey.set(`${item.childName}::${item.albumId}`, {
+        albumId: item.albumId,
+        childName: item.childName,
+        name: item.name,
+        price: item.price,
+        tipo: 'GRAVACAO',
+      });
+    });
+
+    // Album bumps com o preço descontado correto — sobrescreve o item base/gravação
+    // da mesma (criança, álbum) em vez de duplicar a linha do pedido.
+    Array.from(selectedAlbumBumps).forEach((key) => {
       const [childName, albumId] = key.split('::');
       const suggestion = albumBumpSuggestions.find(s => s.childName === childName);
       const album = suggestion?.albums.find(a => a.id === albumId);
@@ -457,14 +473,22 @@ export default function PaymentPage() {
             ? Math.max(0, album.priceNew - album.orderBumpDiscount)
             : album.priceNew)
         : undefined;
-      return { albumId, childName, price: offerPrice };
+      byKey.set(`${childName}::${albumId}`, {
+        albumId,
+        childName,
+        name: album?.name,
+        price: offerPrice,
+        tipo: album?.tipo,
+      });
     });
+
     // Order bumps regulares (sem vínculo com álbum) com preço de oferta
     const regularBumpItems = selectedBumps.map(bumpId => {
       const bump = bumps.find(b => b.id === bumpId);
       return { albumId: bumpId, childName: 'order_bump', name: bump?.title, price: bump?.offerPrice };
     });
-    return [...baseItems, ...gravItems, ...albumBumpItems, ...regularBumpItems];
+
+    return [...byKey.values(), ...regularBumpItems];
   }, [orderData, selectedAlbumBumps, albumBumpSuggestions, selectedBumps, bumps]);
 
   if (isLoading) {
