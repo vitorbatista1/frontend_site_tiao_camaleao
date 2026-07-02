@@ -37,7 +37,6 @@ interface Props {
 }
 
 const { campaignId } = Astro.props;
-const TC_API_URL = import.meta.env.PUBLIC_API_URL ?? "";
 const [
   hero_sm,
   hero_md,
@@ -439,9 +438,6 @@ const year = new Date().getFullYear();
   <a
     href="#produtos"
     class="btn-red-rounded"
-    data-buy
-    data-buy-name="Cantigas Personalizadas"
-    data-buy-price="R$ 47,00"
   >
     QUERO COMPRAR
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -592,15 +588,13 @@ const year = new Date().getFullYear();
     </script>
   </div>
 
-  <button
+  <a
+    href="#produtos"
     class="mt-10 btn-red-rounded"
-    data-buy
-    data-buy-name="Cantigas Personalizadas"
-    data-buy-price="R$ 47,00"
   >
     EU TAMBÉM QUERO
     <ShoppingCart size={20} />
-  </button>
+  </a>
 </section>
           <section class="bg-white pt-12 pb-12 md:pt-28 md:pb-16 font-sans overflow-hidden" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
             <div class="container flex flex-col md:flex-row items-center justify-center gap-0">
@@ -1086,88 +1080,16 @@ const year = new Date().getFullYear();
       });
     </script>
 
-    <script define:vars={{ TC_API_URL }}>
+    <script>
       (function () {
-        function getSessionId() {
-          var s = sessionStorage.getItem("tc_session");
-          if (!s) { s = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())); sessionStorage.setItem("tc_session", s); }
-          return s;
-        }
         document.addEventListener("click", function (e) {
           var a = e.target.closest && e.target.closest("a[data-wa-track]");
           if (!a) return;
           e.preventDefault();
 
           var baseText = a.dataset.waText || "Olá!";
-          var source = a.dataset.waSource || "whatsapp_click";
-          var eventID = "br_lead_" + getSessionId() + "_" + Date.now();
-
-          // [TC-CAPI 2026-06] Lead enriquecido com contexto (sem PII nesta etapa: é clique p/ wa.me)
-          if (window.fbq) {
-            var _waTec = window._fbTestEventCode;
-            var _waFbqOpts = { eventID: eventID };
-            if (_waTec) _waFbqOpts.test_event_code = _waTec;
-            window.fbq("track", "Lead", {
-              currency: "BRL",
-              value: 1,
-              page_title: document.title,
-              page_referrer: document.referrer || undefined,
-              source_platform: "meta",
-              event_source: "browser",
-              geo: "BR", country: "br",
-              viewport_width: window.innerWidth,
-              viewport_height: window.innerHeight,
-              session_id: getSessionId(),
-              event_source_url: location.href
-            }, _waFbqOpts);
-          }
-          if (window.ttq) {
-            window.ttq.track("Contact", { content_name: source, event_id: eventID });
-          }
-          // [TC-CAPI 2026-06] espelho CAPI do Lead (mesmo event_id → deduplica).
-          // sendBeacon garante entrega mesmo após navegação para wa.me.
-          try {
-            if (TC_API_URL) {
-              var _lup = new URLSearchParams(location.search);
-              var _lutm = {};
-              ["utm_source","utm_medium","utm_campaign","utm_term","utm_content"].forEach(function(k){ var v = _lup.get(k); if (v) _lutm[k] = v; });
-              var _lfbclid = _lup.get("fbclid");
-              var _lattr = null;
-              if (_lfbclid || _lutm.utm_source) {
-                var _lrd = {};
-                if (_lfbclid) _lrd.fbclid = _lfbclid;
-                if (_lutm.utm_source) _lrd.utm_source = _lutm.utm_source;
-                _lattr = { source: _lfbclid ? "meta" : _lutm.utm_source, reason: _lfbclid ? "fbclid" : "utm_source", decided_at: new Date().toISOString(), raw_data: _lrd, via: "url" };
-              }
-              navigator.sendBeacon(
-                TC_API_URL + "/api/track",
-                new Blob([JSON.stringify({
-                  event_name: "Lead",
-                  event_id: eventID,
-                  value: 1, currency: "BRL",
-                  lead: { name: undefined, email: undefined, phone: undefined },
-                  children: [],
-                  fbp: (document.cookie.match(/(?:^| )_fbp=([^;]+)/) || [])[1] || null,
-                  fbc: (document.cookie.match(/(?:^| )_fbc=([^;]+)/) || [])[1] || null,
-                  user_agent: navigator.userAgent,
-                  event_source_url: location.href,
-                  referrer: document.referrer || null,
-                  page_title: document.title || null,
-                  page_referrer: document.referrer || null,
-                  source_platform: "meta",
-                  viewport_width: window.innerWidth,
-                  viewport_height: window.innerHeight,
-                  session_id: getSessionId(),
-                  geo: "BR",
-                  utm: Object.keys(_lutm).length ? _lutm : undefined,
-                  attribution: _lattr || undefined
-                })], { type: "application/json" })
-              );
-            }
-          } catch (e) {}
-
           var url = a.href.split("?")[0] + "?text=" + encodeURIComponent(baseText);
-          setTimeout(function () { window.open(url, "_blank", "noopener"); }, 150);
+          window.open(url, "_blank", "noopener");
         });
       })();
     </script>

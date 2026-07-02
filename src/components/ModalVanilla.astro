@@ -1096,8 +1096,9 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
           var cleanSel = [];
           sel.forEach(function(key) {
             if (key === "personalizado:combo") {
+              var cgAlbumSel = getComboGravacao();
               gravacaoItems.push({
-                albumId: "combo_gravacao",
+                albumId: cgAlbumSel ? cgAlbumSel.id : "combo_gravacao",
                 childName: displayName,
                 name: getComboGravacaoName(),
                 price: foundCount >= 1 ? COMBO_GRAVADO_ONE_MISSING : COMBO_GRAVADO_PRICE_FULL
