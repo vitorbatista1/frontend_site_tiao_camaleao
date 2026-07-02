@@ -12,7 +12,7 @@ type CardFormProps = {
   customerName?: string;
   telefone?: string;
   cpf?: string;
-  selectedAlbums?: { albumId: string; childName: string; name?: string; price?: number; tipo?: string }[];
+  selectedAlbums?: { albumId: string; childName: string; name?: string; price?: number; tipo?: string; misto?: boolean }[];
 };
 
 interface PixData {
@@ -68,6 +68,17 @@ export default function CardForm({
 
   const cleanAmount = amount.replace('R$ ', '').replace(',', '.').trim();
   const numericAmount = parseFloat(cleanAmount);
+
+  // O brick de cartão remonta (via key) quando o total muda, pra recalcular
+  // parcelas. Mas se o total mudar várias vezes rápido (usuário alternando
+  // order bumps), cada mudança derruba os iframes de Secure Fields no meio da
+  // configuração — daí o erro "fields_setup_failed_after_3_tries". Só remonta
+  // depois que o total parar de mudar por um instante.
+  const [stableAmount, setStableAmount] = useState(numericAmount);
+  useEffect(() => {
+    const timeout = setTimeout(() => setStableAmount(numericAmount), 600);
+    return () => clearTimeout(timeout);
+  }, [numericAmount]);
 
   useEffect(() => {
     if (step !== 3) return;
@@ -324,9 +335,9 @@ export default function CardForm({
       {paymentMethod === 'card' && isSdkInitialized && (
         <div className="mp-brick-wrapper">
         <CardPayment
-          key={numericAmount}
+          key={stableAmount}
           initialization={{
-            amount: numericAmount,
+            amount: stableAmount,
             payer: {
               email: sanitizeEmail(email),
               firstName: customerName.split(' ')[0] || "",

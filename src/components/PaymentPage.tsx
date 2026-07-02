@@ -21,7 +21,7 @@ interface OrderData {
     id: string;
     name: string;
     selectedAlbums?: string[];
-    albumResult?: { display_name?: string };
+    albumResult?: { display_name?: string; found?: boolean; albums?: string[] };
   }>;
   useCustomName: boolean;
   productName: string;
@@ -435,19 +435,25 @@ export default function PaymentPage() {
     const albumsAPIData: Array<{ id: string; name: string; tipo: string; priceNew: string }> =
       (orderData as any).albumsAPI ?? [];
 
-    const byKey = new Map<string, { albumId: string; childName: string; name?: string; price?: number; tipo?: string }>();
+    const byKey = new Map<string, { albumId: string; childName: string; name?: string; price?: number; tipo?: string; misto?: boolean }>();
 
     orderData.children.forEach((child) => {
+      // Criança que já tinha pelo menos 1 álbum gravado antes desta compra — usado
+      // pra marcar o combo de gravação personalizada como "misto" (metade pronto,
+      // metade novo) em vez de "combo" puro.
+      const foundCount = child.albumResult?.found ? (child.albumResult.albums?.length ?? 0) : 0;
       (child.selectedAlbums ?? []).forEach((albumId) => {
         const albumInfo = albumsAPIData.find((a) => a.id === albumId);
         const suffix = albumInfo?.tipo === 'GRAVACAO' ? ' - GRAVACAO' : ' - GRAVADO';
         const childName = child.albumResult?.display_name ?? child.name;
+        const isComboGravacao = albumInfo?.tipo === 'GRAVACAO' && /combo/i.test(albumInfo.name);
         byKey.set(`${childName}::${albumId}`, {
           albumId,
           childName,
           name: albumInfo ? `${albumInfo.name}${suffix}` : undefined,
           price: albumInfo ? Number(albumInfo.priceNew) : undefined,
           tipo: albumInfo?.tipo,
+          misto: isComboGravacao && foundCount >= 1,
         });
       });
     });
