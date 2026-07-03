@@ -29,6 +29,32 @@ const API_URL = import.meta.env.PUBLIC_API_URL;
 const PIX_STORAGE_KEY = "pix_payment_data";
 const PIX_EXPIRY_KEY = "pix_payment_expiry";
 
+// status_detail que o Mercado Pago devolve pra pagamentos recusados/pendentes
+// de cartão — texto cru tipo "cc_rejected_high_risk" não deve chegar ao cliente.
+const CARD_STATUS_DETAIL_MESSAGES: Record<string, string> = {
+  cc_rejected_bad_filled_card_number: "Número do cartão inválido. Confira e tente novamente.",
+  cc_rejected_bad_filled_date: "Data de validade inválida. Confira e tente novamente.",
+  cc_rejected_bad_filled_security_code: "Código de segurança (CVV) inválido. Confira e tente novamente.",
+  cc_rejected_bad_filled_other: "Dados do cartão inválidos. Confira e tente novamente.",
+  cc_rejected_blacklist: "Cartão recusado pela operadora. Tente outro cartão.",
+  cc_rejected_call_for_authorize: "Seu banco precisa autorizar esse pagamento. Ligue pro seu banco ou tente outro cartão.",
+  cc_rejected_card_disabled: "Cartão desabilitado. Ligue pro seu banco pra ativar ou tente outro cartão.",
+  cc_rejected_card_error: "Não conseguimos processar o pagamento com esse cartão. Tente novamente ou use outro cartão.",
+  cc_rejected_duplicated_payment: "Já existe um pagamento igual em andamento. Aguarde alguns minutos antes de tentar de novo.",
+  cc_rejected_high_risk: "Pagamento recusado por segurança. Tente com outro cartão ou use o PIX.",
+  cc_rejected_insufficient_amount: "Saldo ou limite insuficiente no cartão.",
+  cc_rejected_invalid_installments: "Esse cartão não aceita o número de parcelas escolhido. Tente com menos parcelas.",
+  cc_rejected_max_attempts: "Limite de tentativas atingido. Tente novamente mais tarde ou use outro cartão.",
+  cc_rejected_other_reason: "Pagamento recusado pela operadora. Tente outro cartão ou use o PIX.",
+};
+
+function friendlyCardErrorMessage(statusDetail?: string | null): string {
+  if (statusDetail && CARD_STATUS_DETAIL_MESSAGES[statusDetail]) {
+    return CARD_STATUS_DETAIL_MESSAGES[statusDetail];
+  }
+  return "Pagamento recusado. Verifique os dados do cartão ou tente outro meio de pagamento.";
+}
+
 function sanitizeEmail(email: string): string {
   const markdownMatch = email.match(/\(mailto:([^)]+)\)/);
   if (markdownMatch) return markdownMatch[1].trim();
@@ -259,16 +285,11 @@ export default function CardForm({
     setCardError(null);
     try {
       const tracking = getTrackingPayload();
-      // Device fingerprint gerado pelo SDK MP (window.MP_DEVICE_SESSION_ID) —
-      // sem ele o antifraude do MP não valida a origem da sessão e rejeita
-      // cartões em produção com status_detail cc_rejected_high_risk.
-      const deviceId = (window as any).MP_DEVICE_SESSION_ID;
       const res = await fetch(`${API_URL}/api/payments/process-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...param,
-          deviceId,
           customerName,
           telefone,
           selectedAlbums,
@@ -294,7 +315,7 @@ export default function CardForm({
       } else if (mpStatus === 'in_process' || mpStatus === 'pending') {
         window.location.href = `/confirmacao?method=card&status=pending${orderParam}`;
       } else {
-        throw new Error(json.data?.status_detail || 'Pagamento recusado. Verifique os dados do cartão.');
+        throw new Error(friendlyCardErrorMessage(json.data?.status_detail));
       }
     } catch (err: any) {
       setCardError(err.message || 'Erro ao processar pagamento');
