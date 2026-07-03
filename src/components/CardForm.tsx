@@ -247,11 +247,16 @@ export default function CardForm({
     setCardError(null);
     try {
       const tracking = getTrackingPayload();
+      // Device fingerprint gerado pelo SDK MP (window.MP_DEVICE_SESSION_ID) —
+      // sem ele o antifraude do MP não valida a origem da sessão e rejeita
+      // cartões em produção com status_detail cc_rejected_high_risk.
+      const deviceId = (window as any).MP_DEVICE_SESSION_ID;
       const res = await fetch(`${API_URL}/api/payments/process-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...param,
+          deviceId,
           customerName,
           telefone,
           selectedAlbums,
