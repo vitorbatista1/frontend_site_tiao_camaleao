@@ -240,6 +240,18 @@ export default function CardForm({
     setPixExpired(false);
     setTimeLeft(0);
     if (timerRef.current) clearInterval(timerRef.current);
+    if (pollRef.current) clearInterval(pollRef.current);
+  };
+
+  // Trocar pra aba de cartão com um PIX pendente precisa abandonar esse PIX
+  // (parar polling/timer e limpar localStorage) — senão o polling continua
+  // batendo em segundo plano e, se aquele PIX antigo for aprovado, redireciona
+  // a página sozinho pra /confirmacao no meio do preenchimento do cartão.
+  const handleSelectCard = () => {
+    if (pixData && !pixPaid) {
+      handleNewPix();
+    }
+    setPaymentMethod('card');
   };
 
   const handleCardSubmit = async (param: any) => {
@@ -298,7 +310,7 @@ export default function CardForm({
       {/* Seletor de método */}
       <div className="bg-gray-50 rounded-2xl p-2 flex gap-2">
         <button
-          onClick={() => setPaymentMethod('card')}
+          onClick={handleSelectCard}
           className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-medium transition-all ${
             paymentMethod === 'card'
               ? 'bg-white shadow-md text-primary'
