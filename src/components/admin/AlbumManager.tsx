@@ -12,11 +12,14 @@ interface Album {
   linkImgAlbum: string;
   priceOld: number;
   priceNew: number;
+  priceMistoOld: number;
+  priceMistoNew: number;
   campanha: string;
   tipo: 'ALBUM' | 'COMBO' | 'GRAVACAO';
   repertorio: Faixa[];
   isOrderBump: boolean;
   orderBumpDiscount: number;
+  relatedAlbumId: string | null;
 }
 
 interface AlbumFormData {
@@ -25,11 +28,14 @@ interface AlbumFormData {
   linkImgAlbum: string;
   priceOld: number;
   priceNew: number;
+  priceMistoOld: number;
+  priceMistoNew: number;
   campanha: string;
   tipo: 'ALBUM' | 'COMBO' | 'GRAVACAO';
   repertorio: Faixa[];
   isOrderBump: boolean;
   orderBumpDiscount: number;
+  relatedAlbumId: string;
 }
 
 interface BucketImage {
@@ -43,17 +49,27 @@ interface AlbumManagerProps {
   authenticatedFetch: (url: string, options?: RequestInit) => Promise<Response>;
 }
 
+// Combos "meio pronto, meio novo" às vezes são cadastrados com tipo=GRAVACAO
+// (pra aparecer na aba de gravações) em vez de tipo=COMBO — mesma detecção
+// por nome usada no backend (pixel.publisher.ts / payment.service.ts).
+function isComboAlbum(tipo: string, name: string): boolean {
+  return tipo === 'COMBO' || /\bcombo\b/i.test(name);
+}
+
 const EMPTY_FORM: AlbumFormData = {
   name: '',
   linkAmostra: '',
   linkImgAlbum: '',
   priceOld: 0,
   priceNew: 0,
+  priceMistoOld: 0,
+  priceMistoNew: 0,
   campanha: '',
   tipo: 'ALBUM',
   repertorio: [],
   isOrderBump: false,
   orderBumpDiscount: 0,
+  relatedAlbumId: '',
 };
 
 export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) {
@@ -84,6 +100,8 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
             ...a,
             priceOld: Number(a.priceOld),
             priceNew: Number(a.priceNew),
+            priceMistoOld: Number(a.priceMistoOld) || 0,
+            priceMistoNew: Number(a.priceMistoNew) || 0,
             orderBumpDiscount: Number(a.orderBumpDiscount) || 0,
             repertorio: a.repertorio ?? [],
           }))
@@ -202,11 +220,14 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
       linkImgAlbum: album.linkImgAlbum,
       priceOld: album.priceOld,
       priceNew: album.priceNew,
+      priceMistoOld: album.priceMistoOld ?? 0,
+      priceMistoNew: album.priceMistoNew ?? 0,
       campanha: album.campanha,
       tipo: album.tipo,
       repertorio: album.repertorio,
       isOrderBump: album.isOrderBump ?? false,
       orderBumpDiscount: album.orderBumpDiscount ?? 0,
+      relatedAlbumId: album.relatedAlbumId ?? '',
     });
     setNewTrack('');
     setNewTrackPersonalizada(false);
@@ -233,7 +254,10 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
       const response = await authenticatedFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          relatedAlbumId: formData.relatedAlbumId || null,
+        }),
       });
 
       if (response.ok) {
@@ -472,6 +496,47 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
                     placeholder="29.90" />
                 </div>
               </div>
+
+              {isComboAlbum(formData.tipo, formData.name) && (
+                <div className="border border-purple-200 bg-purple-50 rounded-lg p-3 space-y-1">
+                  <p className="text-xs font-medium text-purple-800 mb-1">
+                    Preço quando a criança já tem álbum gravado (combo misto)
+                  </p>
+                  <p className="text-xs text-purple-600 mb-2">Deixe 0 para usar o preço normal acima.</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Preço Misto Antigo</label>
+                      <input type="number" name="priceMistoOld" value={formData.priceMistoOld} onChange={handleInputChange}
+                        step="0.01" min="0"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="39.90" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Preço Misto Novo</label>
+                      <input type="number" name="priceMistoNew" value={formData.priceMistoNew} onChange={handleInputChange}
+                        step="0.01" min="0"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="19.90" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {formData.tipo === 'GRAVACAO' && !isComboAlbum(formData.tipo, formData.name) && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Álbum relacionado</label>
+                  <select name="relatedAlbumId" value={formData.relatedAlbumId} onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+                    <option value="">Selecione o álbum que esta gravação representa</option>
+                    {albums.filter(a => a.tipo === 'ALBUM').map(a => (
+                      <option key={a.id} value={a.id}>{a.name}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Usado para oferecer esta gravação no order bump quando a criança ainda não tem este álbum.
+                  </p>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Campanha</label>
