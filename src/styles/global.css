@@ -299,3 +299,62 @@
   animation: heartbeat 1.4s ease-in-out infinite;
   transform-origin: center;
 }
+
+
+.pre-venda-box {
+  max-width: 460px; /* antes 520px */
+  transform: translateX(-20px);
+
+  margin: 0 0 0 20px; /* 20px da esquerda */
+
+  background: linear-gradient(
+    180deg,
+    #eefbd2 0%,
+    #e7f7c8 50%,
+    #edfbd4 100%
+  );
+
+  border: 1px solid #bfbfbf;
+  border-radius: 14px;
+  overflow: hidden;
+
+  box-shadow:
+    0 4px 12px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.7);
+}
+
+.pre-venda-top {
+  padding: 18px 16px;
+  text-align: center;
+  color: #5A980F;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 700;
+  border-bottom: 3px solid #5A980F;
+}
+
+.pre-venda-bottom {
+  padding: 16px 16px 20px;
+  text-align: center;
+  color: #5A980F;
+  font-size: 22px;
+  line-height: 1.25;
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  .pre-venda-box {
+    max-width: 90%;
+    margin: 0 0 0 10px;
+  }
+
+  .pre-venda-top {
+    font-size: 18px;
+    padding: 14px 12px;
+  }
+
+  .pre-venda-bottom {
+    font-size: 17px;
+    padding: 12px 12px 16px;
+  }
+}

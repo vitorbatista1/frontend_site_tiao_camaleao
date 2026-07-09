@@ -1,0 +1,1083 @@
+---
+import { Image, getImage } from "astro:assets";
+import "../styles/global.css";
+import FaqAccordion from "../components/FaqAccordion.astro";
+import PlayerSection from "../components/PlayerSection.astro";
+import ModalVanilla from "../components/ModalVanilla.astro";
+import PixelHead from "../components/PixelHead.astro";
+import CampaignProducts from "../components/CampaignProducts.tsx";
+import CampaignCombo from "../components/CampaignCombo.astro";
+import {
+  Music, Heart, Play, Lock, Mail, Phone, Instagram, MessageCircle,
+  Star, ChevronLeft, ChevronRight, ShoppingCart
+} from "../components/Icons.tsx";
+
+import kidHeadphones from "../../public/imagens/kid-headphones2.png";
+import musician from "../../public/imagens/musico1.png";
+import familyCollage from "../../public/imagens/familia.png";
+import studio from "../../public/imagens/studio.png";
+import listMusicas from "../../public/imagens/list_studio.png";
+import criancasHero from "../../public/imagens/criancas_hero.png";
+import logoImg from "../../public/imagens/logo.png";
+import mascoteImg from "../../public/imagens/mascote.png";
+import cantorNomesImg from "../../public/imagens/cantor_nomes2.png";
+import tiaoDuvidaImg from "../../public/imagens/tiao_duvida.png";
+
+import rostoFeliz from "../../public/imagens/benefits/emoji_feliz.png";
+import coracao from "../../public/imagens/benefits/coracao.png";
+import globo from "../../public/imagens/benefits/globo.png";
+import jogoPeca from "../../public/imagens/benefits/jogo_peca.png";
+import nuvemCoracao from "../../public/imagens/benefits/nuvem_coracao.png";
+import nuvems from "../../public/imagens/benefits/nuvems.png";
+
+import whatsappIcon from "../../public/icons/WhatsApp.svg";
+
+interface Props {
+  campaignId: string;
+}
+
+const { campaignId } = Astro.props;
+const [
+  hero_sm,
+  hero_md,
+  hero_lg,
+  hero_xl
+] = await Promise.all([
+  getImage({ src: criancasHero, format: "webp", width: 480,  quality: 75 }),
+  getImage({ src: criancasHero, format: "webp", width: 768,  quality: 75 }),
+  getImage({ src: criancasHero, format: "webp", width: 960,  quality: 80 }),
+  getImage({ src: criancasHero, format: "webp", width: 1440, quality: 80 }),
+]);
+
+const heroSrcset = `
+  ${hero_sm.src} 480w,
+  ${hero_md.src} 768w,
+  ${hero_lg.src} 960w,
+  ${hero_xl.src} 1440w
+`;
+const heroSizes = "(max-width: 768px) 95vw, 55vw";
+
+const benefits = [
+  {
+    icon: rostoFeliz,
+    title: "A criança se reconhece",
+    text: "Quando a criança ouve o próprio nome na música, os olhinhos brilham. Um momento de alegria que você vai querer registrar.",
+  },
+  {
+    icon: globo,
+    title: "Para quem está longe",
+    text: "Uma cantiga com o nome do seu neto que você pode mandar agora pelo WhatsApp. A distância desaparece em minutos. ",
+  },
+  {
+    icon: coracao,
+    title: "Uma lembrança que fica para sempre",
+    text: "Um dia essa criança vai crescer, ouvir essa cantiga… e lembrar do carinho de quem deu esse presente.",
+  },
+  {
+    icon: nuvemCoracao,
+    title: "Um presente diferente de tudo que você já comprou",
+    text: "Brinquedo passa. Roupa deixa de servir. Esse presente não — ele vira memória, afeto e história de família.",
+  },
+  {
+    icon: jogoPeca,
+    title: "Aprender brincando",
+    text: "Enquanto se diverte, a criança aprende a ouvir, esperar e prestar atenção.",
+  },
+  {
+    icon: nuvems,
+    title: "Estimula a fala naturalmente",
+    text: "A música ajuda a criança a reconhecer sons, palavras e a se comunicar melhor. ",
+  },
+];
+
+const year = new Date().getFullYear();
+
+const testimonialImages = [
+  "/imagens/depoimentos/depoimento.jpeg",
+  ...Array.from({ length: 40 }, (_, i) => `/imagens/depoimentos/depoimento${i + 2}.jpeg`),
+];
+const testimonialSlides = Array.from(
+  { length: Math.ceil(testimonialImages.length / 4) },
+  (_, i) => testimonialImages.slice(i * 4, i * 4 + 4)
+);
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>Tião Camaleão – Cantigas com o nome da criança</title>
+    <meta
+      name="description"
+      content="Cantigas infantis personalizadas com o nome da sua criança. Mais de 2.000 nomes gravados em estúdio. Presente único que vira memória de família."
+    />
+    <link
+      rel="preload"
+      as="image"
+      href={hero_md.src}
+      imagesrcset={heroSrcset}
+      imagesizes={heroSizes}
+      type="image/webp"
+      fetchpriority="high"
+    />
+    <link
+      rel="preload"
+      href="/fonts/nunito-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="preconnect" href="https://apisite.tiaocamaleao.com.br" crossorigin />
+    <link rel="dns-prefetch" href="https://connect.facebook.net" />
+    <link rel="preconnect" href="https://fh-118116076e9a4c2a96a99fbb70bea2a0.ecs.us-west-2.on.aws" />
+    <PixelHead />
+  </head>
+  <body>
+    <ModalVanilla />
+
+    <div class="min-h-screen overflow-x-hidden bg-background">
+
+      <!-- TOP STRIP + HERO ocupam 100% da tela -->
+<div class="hero-wrapper" style="display: flex; flex-direction: column;">
+
+<!-- TOP STRIP -->
+
+<div
+  class="text-center uppercase tracking-widest"
+  style="background-color: #FF9900; color: #fff; padding: 20px 0;"
+>
+  <span style="display:inline-flex;vertical-align:middle;margin-right:8px;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
+      <path
+        d="M12 2L1 21h22L12 2z"
+        fill="#FFD54F"
+        stroke="#000"
+        stroke-width="1.6"
+        stroke-linejoin="round"
+      />
+      <rect x="11" y="8" width="2" height="7" rx="1" fill="#000"/>
+      <circle cx="12" cy="18" r="1.2" fill="#000"/>
+      <rect x="5" y="20.3" width="14" height="1.3" rx="0.6" fill="#000"/>
+    </svg>
+  </span>
+
+  <span
+    style="
+      font-size: clamp(19px, 4vw, 28px);
+      font-weight: 700;
+      white-space: nowrap;
+      vertical-align: middle;
+    "
+  >
+    AS VAGAS DESTA PRÉ-VENDA SÃO LIMITADAS.
+  </span>
+
+  <span style="display:inline-flex;vertical-align:middle;margin-left:8px;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
+      <path
+        d="M12 2L1 21h22L12 2z"
+        fill="#FFD54F"
+        stroke="#000"
+        stroke-width="1.6"
+        stroke-linejoin="round"
+      />
+      <rect x="11" y="8" width="2" height="7" rx="1" fill="#000"/>
+      <circle cx="12" cy="18" r="1.2" fill="#000"/>
+      <rect x="5" y="20.3" width="14" height="1.3" rx="0.6" fill="#000"/>
+    </svg>
+  </span>
+</div>
+
+
+<!-- HERO -->
+<header class="hero-header relative bg-white flex flex-col" style="flex: 1;">
+  <!-- Logo centralizada no topo, dentro do hero -->
+  <div class="relative z-10 w-full flex justify-center -mt-8 pb-1 md:-mt-10 md:pb-2">
+    <Image
+      src={logoImg}
+      alt="Tião Camaleão"
+      widths={[160, 256, 320, 512, 640]}
+      sizes="(max-width: 768px) 160px, (max-width: 1024px) 256px, 320px"
+      width={768}
+      height={432}
+      class="w-52 md:w-64 lg:w-80"
+      style="height: auto;"
+    />
+  </div>
+
+  <!-- Texto do hero -->
+  <div class="relative z-10 container flex items-start md:items-center flex-none md:flex-1 pt-1 pb-6 md:py-10">
+    <div class="w-full md:max-w-[55%] text-center md:text-left">
+      <h1
+        class="font-black leading-tight hero-title"
+        style="font-size: clamp(30px, 9vw, 60px); color: #599313; line-height: 1.05;"
+      >
+        O álbum mais pedido finalmente chegou!
+      </h1>
+
+      <div class="pre-venda-box">
+        <div class="pre-venda-top">
+          Pré-venda EXCLUSIVA<br>
+          para clientes Tião Camaleão.
+        </div>
+
+        <div class="pre-venda-bottom">
+          E primeiros nomes ainda garantem<br>
+          gravação sem custo adicional.
+        </div>
+      </div>
+
+      <div class="mt-14 md:mt-10 flex justify-center md:justify-start">
+        <a
+          href="#produtos"
+          class="btn-red-rounded"
+          style="font-size: 22px; font-weight: 600;"
+          data-buy
+          data-buy-name="Cantigas Personalizadas"
+          data-buy-price="R$ 47,00"
+        >
+          QUERO GARANTIR O MEU
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <img
+    src={hero_md.src}
+    srcset={heroSrcset}
+    sizes={heroSizes}
+    alt=""
+    aria-hidden="true"
+    width={1920}
+    height={1080}
+    class="block w-full md:absolute md:w-auto hero-img pointer-events-none select-none"
+    style="bottom: -160px; right: max(-370px, calc((100vw - 1400px) / 2 - 370px));"
+    fetchpriority="high"
+    loading="eager"
+    decoding="async"
+  />
+</header>
+
+</div><!-- fim do wrapper 100dvh -->
+      <!-- GREEN BAND -->
+<section
+  class="relative py-16 md:py-32 overflow-hidden flex flex-col justify-center"
+  style="background-color: #DCF4FF; content-visibility: auto; contain-intrinsic-size: 0 600px;"
+>
+  <div class="container grid items-center gap-4 md:grid-cols-2">
+
+    <!-- TEXTO -->
+    <div class="relative z-10 text-primary-foreground text-center md:text-left">
+      <h2
+        class="leading-tight"
+        aria-label="Ouça como ficou o novo álbum 3"
+        style="font-size: clamp(26px, 6vw, 48px); font-weight: 800; line-height: 1.15; color: #1171D3"
+      >
+        Ouça como ficou<br />o novo álbum 3
+      </h2>
+    </div>
+
+    <!-- IMAGEM -->
+    <div class="relative mx-auto w-full flex justify-center overflow-visible pointer-events-none mt-8 md:mt-0">
+      <Image
+        src={kidHeadphones}
+        alt="Criança ouvindo cantigas com fone amarelo"
+        widths={[640, 960, 1280]}
+        sizes="(max-width: 768px) 100vw, 50vw"
+        width={1280}
+        height={720}
+        quality={80}
+        format="webp"
+        class="w-full max-w-none scale-[2.2] md:scale-[1.8] lg:scale-[2.2] origin-center h-auto object-contain"
+        loading="lazy"
+      />
+    </div>
+
+  </div>
+</section>
+<!-- SAMPLE -->
+      <section id="amostra" class="relative w-full" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
+
+        <!-- Faixa azul escura: título + celular (celular vaza 100px sobre o azul claro) -->
+        <div class="w-full pt-12 pb-10 md:pb-0 md:pt-16" style="background: #00AEEF;">
+          <div class="container max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-stretch md:items-end justify-between gap-3 md:gap-8">
+
+            <!-- Título -->
+            <div class="w-full flex-1 text-center md:text-right text-white pb-2 md:pb-10">
+              <p class="mb-2 uppercase tracking-widest" style="color: #FFFFFF; font-size: clamp(13px, 2.5vw, 18px); font-weight: 400;">
+                Veja a reação quando a
+              </p>
+              <h2 class="leading-tight" style="font-size: clamp(32px, 6vw, 48px); font-weight: 800;" aria-label="Criança ouve o próprio nome na música">
+                Criança ouve o<br />próprio nome<br />na música
+              </h2>
+            </div>
+
+            <!-- Celular: vaza 100px para dentro do azul claro -->
+            <div class="w-full flex-1 flex justify-center md:justify-start relative z-10 md:-mb-[100px]">
+              <div class="relative pt-2 px-2 pb-7 rounded-xl shadow-2xl w-52 md:w-72" style="background: #1D4ED8;">
+                <div class="relative">
+                  <div class="relative overflow-hidden rounded-none bg-black" style="aspect-ratio: 9/16;">
+                    <video
+                      id="hero-video"
+                      src="https://pub-18a54ea1b0da4af78a932befd1b519d6.r2.dev/videos/video.mp4"
+                      class="absolute inset-0 w-full h-full object-cover"
+                      playsinline
+                      preload="none"
+                    ></video>
+                    <div
+                      id="hero-play-btn"
+                      class="absolute inset-0 flex items-center justify-center cursor-pointer"
+                    >
+                      <button
+                        type="button"
+                        aria-label="Reproduzir vídeo"
+                        class="grid h-16 w-16 place-items-center rounded-full shadow-lg transition-transform hover:scale-110"
+                        style="background: #FF3B30;"
+                      >
+                        <Play className="h-8 w-8 fill-white text-white ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                  <div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-10">
+                    <svg class="heartbeat" xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="#FF0000" stroke="#FF0000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 1.5A5.48 5.48 0 0 0 7.5 3C4.47 3 2 5.47 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      <!-- Faixa azul claro: CTA (celular passa por cima) -->
+      <div class="w-full" style="background: #E0F7FF; padding-top: 1.5rem; padding-bottom: 2rem;">
+        <div class="container max-w-6xl mx-auto px-6 flex flex-col md:flex-row gap-4 md:gap-6">
+          <!-- Coluna esquerda: alinhada ao título acima -->
+          <div class="w-full flex-1 text-center md:text-right pt-2 md:pt-0">
+            <h3 style="color: #1D4ED8; font-size: 18.7px; font-weight: 400; white-space: nowrap;" aria-label="Quer ver a reação da sua criança?">
+              Quer ver a reação da <strong style="font-weight: 800;">SUA CRIANÇA?</strong>
+            </h3>
+            <p class="mt-1" style="color: #1D4ED8; font-size: 15.4px; font-weight: 600;">
+              Clique no botão abaixo e receba uma cantiga.
+            </p>
+          <a
+            href="https://wa.me/message/FFKR2R4DDO27M1"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Pedir amostra grátis"
+            class="inline-flex items-center gap-3 text-white px-5 sm:px-6 py-3 rounded-full shadow-lg transition-transform hover:scale-105 font-bold mt-4"
+            style="background: #72BC44; font-size: 17.6px; padding-top: 0.825rem; padding-bottom: 0.825rem; padding-left: 1.65rem; padding-right: 1.65rem;"
+          >
+            PEDIR AMOSTRA GRÁTIS
+
+            <Image
+              src={whatsappIcon}
+              alt="WhatsApp"
+              width={31}
+              height={31}
+              class="h-[31px] w-[31px]"
+            />
+          </a>
+          </div>
+          <!-- Coluna direita: espaço para o celular (mesmo flex-1) -->
+          <div class="flex-1 hidden md:block"></div>
+        </div>
+      </div>
+              <!-- Faixa azul escura abaixo do azul claro -->
+        <div class="w-full py-10" style="background: #00AEEF;"></div>
+
+      </section>
+
+      <!-- BENEFITS -->
+      <!-- <section
+        class="relative py-20"
+        style="background-image: url('/imagens/fundo.png'); background-size: auto; background-repeat: repeat; background-color: #f3f4f6; content-visibility: auto; contain-intrinsic-size: 0 900px;"
+      > -->
+
+      <section
+        class="relative pt-10 pb-20"
+        style="background-color: #ffffff;"
+      >
+      <div class="benefits-bg absolute inset-0 pointer-events-none"></div>
+<div class="container">
+<div class="text-center mb-16">
+  <p class="uppercase tracking-widest" style="color: #9CA3AF; letter-spacing: 0.18em; font-size: clamp(13px, 2.5vw, 18px); font-weight: 700;">
+    Porque as famílias amam
+  </p>
+  <h2 class="mt-2 leading-tight whitespace-nowrap" style="font-size: clamp(28px, 6vw, 65px); font-weight: 800; color: #333;">
+    Muito mais que cantigas
+  </h2>
+</div>
+<div class="grid gap-x-6 gap-y-10 grid-cols-1 md:grid-cols-2 max-w-2xl mx-auto justify-items-center">
+  {
+    benefits.map(({ icon, title, text }) => (
+      <article
+        class="card-pop border-2 rounded-lg transition-all hover:scale-[1.02] relative bg-white w-full max-w-[260px] md:max-w-full px-4 pt-10 pb-4 flex flex-col items-center text-center"
+        style={{ borderColor: "#b8dfa0", boxShadow: "none" }}
+      >
+        <div class="absolute -top-8 left-0 right-0 flex justify-center">
+          <Image
+            src={icon}
+            alt=""
+            width={72}
+            height={72}
+            quality={45}
+            class="h-[72px] w-[72px] object-contain"
+            loading="lazy"
+          />
+        </div>
+
+        <h3 class="text-gray-700 leading-tight mt-2" style="font-size: clamp(16px, 3vw, 22px); font-weight: 800;">
+          {title}
+        </h3>
+
+        <p class="mt-2 text-gray-600 leading-relaxed" style="font-size: 14px; font-weight: 600;">
+          {text}
+        </p>
+      </article>
+    ))
+  }
+</div>
+<div class="flex justify-center mt-12">
+  <a
+    href="#produtos"
+    class="btn-red-rounded"
+  >
+    QUERO COMPRAR
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="21" r="1"></circle>
+      <circle cx="20" cy="21" r="1"></circle>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+    </svg>
+  </a>
+</div>
+</div>
+      </section>
+<!-- TESTIMONIALS -->
+<section class="section-compact bg-[#00AAFF] pt-28 pb-16 md:pt-10 md:pb-16 px-4 flex flex-col items-center" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
+  <div class="text-center mb-8 md:mb-20">
+    <h3 class="text-white uppercase tracking-widest mb-2 opacity-90" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 400;">
+      Depoimentos
+    </h3>
+    <h2 class="text-white" style="font-size: clamp(26px, 6vw, 48px); font-weight: 800;">
+      De quem já viveu esse momento
+    </h2>
+  </div>
+
+  <div
+    class="relative bg-[#1D82F5] rounded-3xl p-8 md:p-12 w-full max-w-4xl min-h-[400px] flex flex-col items-center justify-center"
+  >
+    <div class="absolute -top-16 -left-1 w-36 sm:w-44 md:w-60 lg:w-72 xl:w-96 md:-top-28 md:-left-4 lg:-top-36 lg:-left-16 xl:-top-44 xl:-left-24 z-10">
+      <Image
+        src={mascoteImg}
+        alt="Mascote Camaleão"
+        width={400}
+        height={347}
+        class="w-full h-auto"
+        loading="lazy"
+      />
+    </div>
+
+    <div class="absolute top-2 right-8 flex gap-1">
+      {
+        [0, 1, 2, 3, 4].map((i) => (
+          <Star className="fill-yellow-400 text-yellow-400 w-6 h-6 md:w-8 md:h-8" />
+        ))
+      }
+    </div>
+
+    <!-- Carrossel de depoimentos -->
+    <div class="w-full overflow-hidden rounded-2xl" id="dep-track-wrapper">
+      <div id="dep-track" class="flex w-full items-start transition-transform duration-500 ease-in-out">
+
+        <!-- Slide 1: prioritário sozinho -->
+        <div class="w-full flex-shrink-0">
+          <img
+            src="/imagens/depoimentos/depoimento_prioritario.jpeg"
+            alt="Depoimento"
+            class="w-full h-auto rounded-2xl object-contain"
+            loading="lazy"
+            width="800"
+            height="600"
+          />
+        </div>
+
+        <!-- Slides seguintes: quatro depoimentos por slide -->
+        {testimonialSlides.map((slide, slideIndex) => (
+          <div class="w-full flex-shrink-0 flex flex-col gap-3 pt-10">
+            {slide.map((src, i) => (
+              <img
+                src={src}
+                alt={`Depoimento ${slideIndex * 4 + i + 2}`}
+                class="w-full h-auto rounded-xl object-contain"
+                loading="lazy"
+                width="800"
+                height="600"
+              />
+            ))}
+          </div>
+        ))}
+
+      </div>
+    </div>
+
+    <button
+      id="dep-prev"
+      class="absolute left-3 top-1/2 -translate-y-1/2 text-white hover:scale-110 transition"
+      aria-label="Anterior"
+    >
+      <ChevronLeft size={40} strokeWidth={3} />
+    </button>
+    <button
+      id="dep-next"
+      class="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:scale-110 transition"
+      aria-label="Próximo"
+    >
+      <ChevronRight size={40} strokeWidth={3} />
+    </button>
+
+    <script>
+      const track = document.getElementById('dep-track') as HTMLElement;
+      const wrapper = document.getElementById('dep-track-wrapper') as HTMLElement;
+      const total = track ? track.children.length : 0;
+      let current = 0;
+
+      function syncHeight() {
+        if (!wrapper || !track) return;
+        const slide = track.children[current] as HTMLElement;
+        if (slide && slide.offsetHeight > 0) {
+          wrapper.style.height = slide.offsetHeight + 'px';
+        }
+      }
+
+      function goTo(index: number) {
+        current = (index + total) % total;
+        track.style.transform = `translateX(-${current * 100}%)`;
+        syncHeight();
+      }
+
+      document.getElementById('dep-prev')?.addEventListener('click', () => goTo(current - 1));
+      document.getElementById('dep-next')?.addEventListener('click', () => goTo(current + 1));
+
+      // Atualiza altura quando imagens carregarem (lazy)
+      track.querySelectorAll('img').forEach((img) => {
+        if (!(img as HTMLImageElement).complete) {
+          img.addEventListener('load', syncHeight);
+        }
+      });
+
+      syncHeight();
+    </script>
+  </div>
+
+  <a
+    href="#produtos"
+    class="mt-10 btn-red-rounded"
+  >
+    EU TAMBÉM QUERO
+    <ShoppingCart size={20} />
+  </a>
+</section>
+          <section class="bg-white pt-12 pb-12 md:pt-28 md:pb-16 font-sans overflow-hidden" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
+            <div class="container flex flex-col md:flex-row items-center justify-center gap-0">
+              
+              <div class="z-20 flex flex-col items-center text-center md:items-end md:text-right md:w-1/2 md:pr-4">
+                
+                  <h2 class="leading-[1.1] text-[#4D4D4D]" style="font-size: clamp(36px, 6vw, 58px); font-weight: 800;">
+                    <span class="md:hidden">Já cantamos mais<br />de 2.000 nomes</span>
+                    <span class="hidden md:inline">Já cantamos mais de<br />2.000 nomes</span>
+                  </h2>
+
+                <p class="mt-6 leading-relaxed text-[#666666] max-w-[450px]" style="font-size: 17.5px; font-weight: 600;">
+                    Temos um grande acervo gravado<br />
+                    em estúdio, incluindo nomes<br />
+                    raros, compostos, apelidos e até<br />
+                    nomes estrangeiros
+                </p>
+
+                  <div class="mt-2 inline-block rounded-full bg-[#00AEEF] px-6 py-2 text-white shadow-md">
+                    <p style="font-size: clamp(16px, 3.5vw, 24px); font-weight: 800;">
+                      E se não tiver o nome que eu quero?
+                    </p>
+                  </div>
+
+                <p class="mt-4 text-[#666666] max-w-[420px]" style="font-size: 17.5px; font-weight: 600;">
+                  Sem problema! Nós fazemos a<br />
+                  gravação personalizada do nome sob<br />
+                  encomenda, com entrega em até 7 dias<br />
+                  e um pequeno acréscimo de estúdio.
+                </p>
+                  </div>
+
+              <div class="relative mt-4 md:mt-0 md:w-1/2 flex justify-start md:justify-start">
+
+                <Image
+                  src={cantorNomesImg}
+                  alt="Cantor Personalizado"
+                  width={550}
+                  height={635}
+                  quality={100}
+                  format="png"
+                  class="relative z-10 w-full max-w-[550px] object-contain md:-ml-8 md:-mt-16"
+                  loading="lazy"
+                />
+              </div>
+
+              <div class="md:hidden w-full flex justify-center mt-6">
+                <a href="#produtos" class="btn-red-rounded" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">
+                  QUERO COMPRAR
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                  </svg>
+                </a>
+              </div>
+
+            </div>
+          </section>
+      <!-- PRODUCTS — dynamic per campaign -->
+      <CampaignProducts client:visible campaignId={campaignId} />
+
+      <!-- COMBO — dynamic per campaign -->
+      <CampaignCombo campaignId={campaignId} />
+<!-- MUSICIAN 1 -->
+<section class="relative bg-white pt-16 pb-0 overflow-hidden flex flex-col justify-center" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
+
+  <div class="container flex flex-col md:flex-row items-center gap-0 relative">
+
+    <!-- IMAGEM -->
+    <div class="relative flex-shrink-0 w-full md:w-[620px] flex justify-center items-end md:-mb-20 md:-translate-y-10">
+
+
+
+      <Image
+        src={musician}
+        alt="Bruno Grossi, voz do Tião Camaleão, com sua filha"
+        width={1000}
+        height={1200}
+        quality={100}
+        format="png"
+        class="relative z-10 h-[300px] sm:h-[420px] md:h-[720px] w-auto object-contain object-bottom block"
+        loading="lazy"
+        style="margin-bottom: 0; vertical-align: bottom;"
+      />
+    </div>
+
+    <!-- TEXTO -->
+    <div class="flex-1 md:max-w-[560px] px-4 md:px-0 md:-ml-10 pb-10 md:pb-24">
+
+      <p
+        class="mb-5 uppercase tracking-widest text-right"
+        style="color: #9CA3AF; font-size: clamp(12px, 1.6vw, 13px); font-weight: 400; letter-spacing: 0.18em;"
+      >
+        A diferença está na voz, na intenção e<br />
+        no cuidado em cada detalhe
+      </p>
+
+      <h2
+        class="leading-tight text-right"
+        style="color: #333; font-size: clamp(24px, 6vw, 48px); font-weight: 800; line-height: 1.02; white-space: nowrap;"
+      >
+        Quem dá voz ao Tião é<br />
+        um músico de verdade
+      </h2>
+
+      <p
+        class="mt-7 text-right"
+        style="color: #6B7280; font-size: clamp(17px, 2.8vw, 20px); font-weight: 600; line-height: 1.55;"
+      >
+        A voz do Tião Camaleão é interpretada pelo
+        <strong style="color: #111827; font-weight: 800;">Bruno Grossi</strong>, músico formado em Música Popular
+        pela UFMG, com mais de 20 anos de experiência.
+      </p>
+
+
+    </div>
+
+  </div>
+</section>
+<!-- MUSICIAN 2 -->
+<section
+  class="py-20 overflow-hidden"
+  style="background-color: #8c52ff; content-visibility: auto; contain-intrinsic-size: 0 600px;"
+>
+  <div class="container flex flex-col-reverse items-center gap-8 md:flex-row md:gap-10">
+
+    <!-- TEXTO -->
+    <div class="w-full md:w-[48%]">
+
+      <p
+        class="text-center mx-auto"
+        style="
+          color: #ffffff;
+          font-size: clamp(17px, 3vw, 24px);
+          font-weight: 600;
+          line-height: 1.8;
+        "
+      >
+        Além de músico, ele também é<br />
+        o pai da Malu, e conhece de<br />
+        perto o que encanta uma<br />
+        criança de verdade.
+      </p>
+
+      <p
+        class="mt-8 text-center mx-auto"
+        style="
+          color: #ffffff;
+          font-size: clamp(17px, 3vw, 24px);
+          font-weight: 600;
+          line-height: 1.8;
+        "
+      >
+        Ao longo dos anos, já ensinou<br />
+        música para muitas crianças e<br />
+        desenvolveu um olhar sensível<br />
+        para esse universo.
+      </p>
+
+    </div>
+
+    <!-- IMAGEM -->
+    <div class="relative flex w-full justify-center md:w-[52%]">
+
+      <Image
+        src={familyCollage}
+        alt="Mosaico de famílias e crianças encantadas com as cantigas"
+        width={1200}
+        height={1200}
+        class="w-full max-w-[460px] rounded-[28px] object-cover mx-auto"
+        loading="lazy"
+      />
+
+    </div>
+
+  </div>
+</section>
+
+      <!-- MUSICIAN 3 -->
+      <section class="relative pb-8 md:py-20 overflow-hidden" style="background-color: #ffffff; content-visibility: auto; contain-intrinsic-size: 0 600px;">
+        <div class="container relative flex flex-col md:flex-row items-center md:justify-end gap-2 md:gap-10 md:pt-10 md:translate-x-16">
+          <!-- listMusicas desktop (absolute) -->
+          <Image
+            src={listMusicas}
+            aria-hidden="true"
+            alt=""
+            width={1080}
+            height={1350}
+            class="hidden md:block absolute md:left-[58%] lg:left-[55%] -top-36 w-72 h-auto object-contain pointer-events-none select-none"
+            loading="lazy"
+          />
+          <!-- listMusicas mobile -->
+<div class="md:hidden order-1 w-screen relative -left-4 h-44 overflow-hidden">
+  <Image
+    src={listMusicas}
+    aria-hidden="true"
+    alt=""
+    width={1080}
+    height={1350}
+    class="absolute inset-0 w-full h-full object-cover scale-125 object-[72%_center] pointer-events-none select-none"
+    loading="lazy"
+  />
+</div>
+          <!-- texto (order 2 mobile) -->
+<div class="order-2 md:order-2 w-full md:w-[42%] space-y-3 md:space-y-5 text-foreground mx-auto md:mt-0 md:ml-0 md:translate-x-20">
+  <p
+    class="leading-relaxed text-muted-foreground text-center"
+    style="font-size: clamp(18px, 3.5vw, 24px); font-weight: 800;"
+  >
+    Por isso, cada cantiga não é só<br />
+    uma gravação. É uma interpretação<br />
+    feita com intenção, emoção e<br />
+    qualidade de estúdio.
+  </p>
+
+  <p
+    class="leading-relaxed text-muted-foreground text-center"
+    style="font-size: clamp(18px, 3.5vw, 24px); font-weight: 800;"
+  >
+    Porque no fim… a criança<br />
+    percebe. E é isso que faz esse<br />
+    momento ser tão especial.
+  </p>
+</div>
+          <!-- studio (order 3 mobile = abaixo do texto) -->
+          <div class="order-3 md:order-1 relative w-full md:w-[38%] flex-shrink-0 flex justify-center md:justify-end">
+            <Image
+              src={studio}
+              alt="Estúdio de gravação onde as cantigas são produzidas"
+              width={1100}
+              height={800}
+              class="rounded-3xl shadow-[var(--shadow-card)] w-full max-w-[280px] md:max-w-md"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </section>
+
+    <!-- PLAYER SECTION -->
+    <PlayerSection />
+
+    <!-- FAQ -->
+    <section class="py-20" style="background-color: #6ab248; content-visibility: auto; contain-intrinsic-size: 0 700px;">
+      <div class="container" style="max-width: 820px;">
+        <div class="flex flex-row items-center gap-4 md:flex-row md:justify-between md:items-end">
+          <div class="text-left">
+            <p class="uppercase tracking-widest text-white" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 400;">Tire suas dúvidas</p>
+            <h2 class="mt-1 text-white" style="font-size: clamp(32px, 7vw, 56px); font-weight: 800;">Perguntas frequentes</h2>
+          </div>
+          <div class="-mb-4">
+            <Image src={tiaoDuvidaImg} alt="FAQ" width={320} height={320} class="w-56 md:w-72 lg:w-80 float-slow" loading="lazy" />
+          </div>
+        </div>
+        <div class="mt-12">
+          <FaqAccordion />
+        </div>
+      </div>
+    </section>
+
+<!--BOTAO DE DUVIDA DO FAQ -->
+<section class="bg-[#cae2a6] py-20 text-center section-compact" style="content-visibility: auto; contain-intrinsic-size: 0 300px;">
+  <p style="font-size: clamp(20px, 4vw, 32px); font-weight: 700; color: #333;">AINDA FICOU COM ALGUMA DÚVIDA?</p>
+  <p class="mt-2 text-foreground/80" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 500;">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
+  
+<a
+  href="https://wa.me/message/FFKR2R4DDO27M1"
+  data-wa-track
+  data-wa-text="Olá! Tenho dúvidas sobre as cantigas personalizadas e gostaria de mais informações."
+  data-wa-source="faq_duvida"
+  target="_blank"
+  rel="noopener noreferrer"
+  class="mt-5 inline-flex items-center gap-3 text-white px-6 sm:px-7 py-[14px] rounded-full shadow-lg transition-transform hover:scale-105 font-bold"
+  style="background: #72BC44; font-size: 17px;"
+>
+  PRECISO DE MAIS INFORMAÇÕES
+
+  <Image
+    src={whatsappIcon}
+    alt="WhatsApp"
+    width={32}
+    height={32}
+    class="h-8 w-8"
+  />
+</a>
+</section>
+      <!-- FOOTER -->
+      <footer>
+        <div class="bg-card pt-6 pb-14">
+          <div class="container">
+            <div class="mx-auto flex h-28 md:h-40 w-full max-w-[240px] md:max-w-none md:w-96 items-center justify-center rounded-2xl overflow-hidden">
+              <Image
+                src={logoImg}
+                alt="Logo Tião Camaleão"
+                width={384}
+                height={216}
+                class="h-full w-full object-contain"
+                loading="lazy"
+              />
+            </div>
+            <h3
+              class="mt-2 text-center text-foreground"
+              style={{ fontFamily: "'Nunito Variable', system-ui, sans-serif", fontSize: "25px", fontWeight: 700 , color: "#333" }}
+            >
+              Cantigas feitas com carinho<br />da nossa família para a sua.
+            </h3>
+            <div class="mx-auto mt-6 max-w-3xl flex flex-row items-center gap-0 text-sm text-muted-foreground">
+              <!-- Coluna esquerda: segurança -->
+              <div class="flex-1 space-y-2 pr-4 text-right" style="font-size: 11px;">
+                <p class="flex items-center justify-end gap-1.5">
+                  <Lock className="h-4 w-4 flex-shrink-0 text-accent" />
+                  <span class="font-bold text-foreground">Compra segura</span>
+                </p>
+                <p>Pagamentos via Mercado Pago</p>
+                <p>Entrega digital rápida e segura</p>
+              </div>
+              <!-- Separador azul vertical -->
+              <div class="self-stretch w-[2px] flex-shrink-0" style="background:#3b82f6; border-radius:1px;"></div>
+              <!-- Coluna direita: contatos -->
+              <div class="flex-1 space-y-2 pl-4" style="font-size: 11px; font-weight: 600;">
+                <p class="flex items-center gap-1.5">
+                  <a href="mailto:ivan@tiaocamaleao.com.br" class="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                    <span class="grid h-6 w-6 place-items-center rounded-full bg-secondary text-secondary-foreground flex-shrink-0">
+                      <Mail className="h-3.5 w-3.5" />
+                    </span>
+                    <span class="break-all">ivan@tiaocamaleao.com.br</span>
+                  </a>
+                </p>
+                <p class="flex items-center gap-1.5">
+                  <a href="https://wa.me/message/FFKR2R4DDO27M1" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                      <span class="flex-shrink-0">
+                        <Image
+                          src={whatsappIcon}
+                          alt="WhatsApp"
+                          width={24}
+                          height={24}
+                          class="h-6 w-6"
+                        />
+                      </span>
+                    (37) 99199-6545
+                  </a>
+                </p>
+                <p class="flex items-center gap-1.5">
+                  <a href="https://instagram.com/tiaocamaleao" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                    <span class="grid h-6 w-6 place-items-center rounded-full text-card flex-shrink-0" style={{ background: "linear-gradient(135deg, hsl(330 80% 55%), hsl(28 100% 60%))" }}>
+                      <Instagram className="h-3.5 w-3.5" />
+                    </span>
+                    tiaocamaleao
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="py-8 text-center leading-relaxed"
+          style={{ background: "hsl(var(--secondary))", color: "hsl(0 0% 100%)", fontSize: "12px", fontWeight: 600 }}
+        >
+          <p>© {year} Tião Camaleão – Todos os direitos reservados</p>
+          <p class="mt-3" style="color: #777;">
+            A marca Tião Camaleão é operada pela Agência<br />
+            Futuro Marketing Ltda – CNPJ: 15.727.842/0001-17
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <script is:inline>
+      (function () {
+        var video = document.getElementById('hero-video');
+        var btn = document.getElementById('hero-play-btn');
+        if (video && btn) {
+          btn.addEventListener('click', function () {
+            video.play();
+            btn.style.display = 'none';
+          });
+          video.addEventListener('click', function () {
+            if (!video.paused) {
+              video.pause();
+              btn.style.display = 'flex';
+            }
+          });
+          video.addEventListener('ended', function () {
+            btn.style.display = 'flex';
+          });
+
+          var autoPlayed = false;
+          new IntersectionObserver(function (entries) {
+            var entry = entries[0];
+            if (entry.isIntersecting) {
+              if (!autoPlayed) autoPlayed = true;
+              video.play().then(function () {
+                btn.style.display = 'none';
+              }).catch(function () {});
+            } else if (autoPlayed) {
+              video.pause();
+              btn.style.display = 'flex';
+            }
+          }, { threshold: 0.5 }).observe(video);
+        }
+      })();
+    </script>
+
+    <script is:inline>
+      (function () {
+        var obs = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) {
+              e.target.classList.add('is-visible');
+              obs.unobserve(e.target);
+            }
+          });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-up, .fade-left, .fade-right').forEach(function (el) {
+          obs.observe(el);
+        });
+      })();
+    </script>
+
+    <!-- WhatsApp floating button -->
+    <style>
+      @keyframes wa-ring {
+        0%   { transform: scale(1); opacity: 0.55; }
+        100% { transform: scale(2.4); opacity: 0; }
+      }
+      .wa-wrap { position: fixed; bottom: 20px; right: 20px; z-index: 9999; width: 60px; height: 60px; }
+      .wa-ring {
+        position: absolute; inset: 0;
+        border-radius: 50%;
+        background: #25D366;
+        animation: wa-ring 2.4s ease-out infinite;
+        pointer-events: none;
+      }
+      .wa-ring-2 { animation-delay: 1.2s; }
+      .wa-btn {
+        position: relative; z-index: 1;
+        display: flex; align-items: center; justify-content: center;
+        width: 60px; height: 60px;
+        border-radius: 50%;
+        background: #25D366;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.28);
+        transition: transform 0.2s;
+        text-decoration: none;
+      }
+      .wa-btn:hover { transform: scale(1.12); }
+    </style>
+    <div class="wa-wrap">
+      <div class="wa-ring"></div>
+      <div class="wa-ring wa-ring-2"></div>
+      <a
+        href="https://wa.me/message/FFKR2R4DDO27M1"
+        data-wa-text="Olá! Tenho dúvidas sobre as cantigas personalizadas e gostaria de mais informações."
+        data-wa-source="floating_button"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Falar no WhatsApp"
+        class="wa-btn"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-4.821 4.754a8.132 8.132 0 01-3.984-1.03l-.286-.17-2.96.776.791-2.887-.186-.296a8.14 8.14 0 01-1.247-4.346c0-4.519 3.674-8.19 8.19-8.19a8.19 8.19 0 018.19 8.19c0 4.52-3.674 8.19-8.19 8.19m0-18.054C7.452 1.082 2.591 5.943 2.591 11.956c0 1.92.487 3.793 1.412 5.46L2.4 23l5.688-1.491a9.357 9.357 0 004.515 1.156c6.012 0 10.874-4.861 10.874-10.873 0-2.864-1.115-5.556-3.141-7.581C18.303 2.197 15.612 1.082 12.651 1.082z" />
+        </svg>
+      </a>
+    </div>
+
+    <script is:inline>
+      document.addEventListener("click", function (e) {
+        var t = e.target;
+        if (!(t instanceof Element)) return;
+        var btn = t.closest("[data-buy]");
+        if (!btn) return;
+        e.preventDefault();
+        requestAnimationFrame(function () {
+          window.dispatchEvent(
+            new CustomEvent("open-modal", {
+              detail: {
+                name: btn.dataset.buyName || "Cantigas Personalizadas",
+                price: btn.dataset.buyPrice || "R$ 47,00",
+                combo: btn.hasAttribute("data-buy-combo"),
+              },
+            })
+          );
+        });
+      });
+    </script>
+
+    <script>
+      (function () {
+        document.addEventListener("click", function (e) {
+          var a = e.target.closest && e.target.closest("a[data-wa-track]");
+          if (!a) return;
+          e.preventDefault();
+
+          var baseText = a.dataset.waText || "Olá!";
+          var url = a.href.split("?")[0] + "?text=" + encodeURIComponent(baseText);
+          window.open(url, "_blank", "noopener");
+        });
+      })();
+    </script>
+  </body>
+</html>
