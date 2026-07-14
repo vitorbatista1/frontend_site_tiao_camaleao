@@ -5,17 +5,11 @@ import FaqAccordion from "../components/FaqAccordion.astro";
 import PlayerSection from "../components/pagina2/PlayerSectionPagina2.astro";
 import ModalVanilla from "../components/ModalVanilla.astro";
 import PixelHead from "../components/PixelHead.astro";
-import CampaignProducts from "../components/CampaignProducts.tsx";
-import CampaignCombo from "../components/CampaignCombo.astro";
 import {
-  Music, Heart, Play, Lock, Mail, Phone, Instagram, MessageCircle,
+  Lock, Mail, Instagram,
   Star, ChevronLeft, ChevronRight, ShoppingCart
 } from "../components/Icons.tsx";
 
-import musician from "../../public/imagens/musico1.png";
-import familyCollage from "../../public/imagens/familia.png";
-import studio from "../../public/imagens/studio.png";
-import listMusicas from "../../public/imagens/list_studio.png";
 import criancasHero from "../../public/imagens/campanha2/hero.png";
 import logoImg from "../../public/imagens/logo.png";
 import mascoteImg from "../../public/imagens/mascote.png";
@@ -41,6 +35,8 @@ import tiaoMagico from "../../public/imagens/campanha2/tiao_magico.png"
 import tiaoPintor from "../../public/imagens/campanha2/tiao_pintor.png"
 import tiaoRoceiro from "../../public/imagens/campanha2/tiao_roceiro.png"
 import relogio from "../../public/imagens/campanha2/relogio.png"
+import capa_album3 from "../../public/imagens/campanha2/capa_album3.png"
+import microfone from "../../public/imagens/campanha2/microfone.png"
 
 
 
@@ -1084,122 +1080,123 @@ const testimonialSlides = Array.from(
 
 
 
-
 <!-- TESTIMONIALS -->
-<section class="section-compact bg-[#00AAFF] pt-28 pb-16 md:pt-10 md:pb-16 px-4 flex flex-col items-center" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
-  <div class="text-center mb-8 md:mb-20">
-    <h3 class="text-white uppercase tracking-widest mb-2 opacity-90" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 400;">
-      Depoimentos
-    </h3>
-    <h2 class="text-white" style="font-size: clamp(26px, 6vw, 48px); font-weight: 800;">
-      De quem já viveu esse momento
+<section class="section-compact bg-[white] pt-28 pb-16 md:pt-10 md:pb-16 px-0 flex flex-col items-center" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
+  <div class="text-center mb-8 md:mb-20 px-4">
+    <h2 style="color: #599313; font-size: clamp(26px, 6vw, 48px); font-weight: 800; line-height: 1.1;">
+      Criando lembranças<br />que ficam para sempre
     </h2>
   </div>
-
-  <div
-    class="relative bg-[#1D82F5] rounded-3xl p-8 md:p-12 w-full max-w-4xl min-h-[400px] flex flex-col items-center justify-center"
-  >
-    <div class="absolute -top-16 -left-1 w-36 sm:w-44 md:w-60 lg:w-72 xl:w-96 md:-top-28 md:-left-4 lg:-top-36 lg:-left-16 xl:-top-44 xl:-left-24 z-10">
-      <Image
-        src={mascoteImg}
-        alt="Mascote Camaleão"
-        width={400}
-        height={347}
-        class="w-full h-auto"
-        loading="lazy"
-      />
-    </div>
-
-    <div class="absolute top-2 right-8 flex gap-1">
-      {
-        [0, 1, 2, 3, 4].map((i) => (
-          <Star className="fill-yellow-400 text-yellow-400 w-6 h-6 md:w-8 md:h-8" />
-        ))
-      }
-    </div>
-
-    <!-- Carrossel de depoimentos -->
-    <div class="w-full overflow-hidden rounded-2xl" id="dep-track-wrapper">
-      <div id="dep-track" class="flex w-full items-start transition-transform duration-500 ease-in-out">
-
-        <!-- Slide 1: prioritário sozinho -->
-        <div class="w-full flex-shrink-0">
-          <img
-            src="/imagens/depoimentos/depoimento_prioritario.jpeg"
-            alt="Depoimento"
-            class="w-full h-auto rounded-2xl object-contain"
-            loading="lazy"
-            width="800"
-            height="600"
-          />
-        </div>
-
-        <!-- Slides seguintes: quatro depoimentos por slide -->
-        {testimonialSlides.map((slide, slideIndex) => (
-          <div class="w-full flex-shrink-0 flex flex-col gap-3 pt-10">
-            {slide.map((src, i) => (
-              <img
-                src={src}
-                alt={`Depoimento ${slideIndex * 4 + i + 2}`}
-                class="w-full h-auto rounded-xl object-contain"
-                loading="lazy"
-                width="800"
-                height="600"
-              />
-            ))}
-          </div>
-        ))}
-
+  
+  <!-- Container do fundo azul infinito -->
+  <div class="relative w-full bg-[#EDFDD6] flex justify-center" style="border-radius: 0;">
+    <!-- Container interno com largura máxima para o conteúdo -->
+    <div class="relative w-full max-w-4xl p-8 md:p-12 min-h-[400px] flex flex-col items-center justify-center">
+      
+      <div class="absolute -top-16 -left-1 w-36 sm:w-44 md:w-60 lg:w-72 xl:w-96 md:-top-28 md:-left-4 lg:-top-36 lg:-left-16 xl:-top-44 xl:-left-24 z-10">
+        <Image
+          src={mascoteImg}
+          alt="Mascote Camaleão"
+          width={400}
+          height={347}
+          class="w-full h-auto"
+          loading="lazy"
+        />
       </div>
-    </div>
 
-    <button
-      id="dep-prev"
-      class="absolute left-3 top-1/2 -translate-y-1/2 text-white hover:scale-110 transition"
-      aria-label="Anterior"
-    >
-      <ChevronLeft size={40} strokeWidth={3} />
-    </button>
-    <button
-      id="dep-next"
-      class="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:scale-110 transition"
-      aria-label="Próximo"
-    >
-      <ChevronRight size={40} strokeWidth={3} />
-    </button>
+<div class="absolute top-2 right-8 flex gap-1">
+  {
+    [0, 1, 2, 3, 4].map((i) => (
+      <Star className="fill-yellow-400 text-yellow-400 w-8 h-8 md:w-12 md:h-12" />
+    ))
+  }
+</div>
 
-    <script>
-      const track = document.getElementById('dep-track') as HTMLElement;
-      const wrapper = document.getElementById('dep-track-wrapper') as HTMLElement;
-      const total = track ? track.children.length : 0;
-      let current = 0;
+      <!-- Carrossel de depoimentos -->
+      <div class="w-full overflow-hidden rounded-2xl" id="dep-track-wrapper">
+        <div id="dep-track" class="flex w-full items-start transition-transform duration-500 ease-in-out">
 
-      function syncHeight() {
-        if (!wrapper || !track) return;
-        const slide = track.children[current] as HTMLElement;
-        if (slide && slide.offsetHeight > 0) {
-          wrapper.style.height = slide.offsetHeight + 'px';
+          <!-- Slide 1: prioritário sozinho -->
+          <div class="w-full flex-shrink-0">
+            <img
+              src="/imagens/depoimentos/depoimento_prioritario.jpeg"
+              alt="Depoimento"
+              class="w-full h-auto rounded-2xl object-contain"
+              loading="lazy"
+              width="800"
+              height="600"
+            />
+          </div>
+
+          <!-- Slides seguintes: quatro depoimentos por slide -->
+          {testimonialSlides.map((slide, slideIndex) => (
+            <div class="w-full flex-shrink-0 flex flex-col gap-3 pt-10">
+              {slide.map((src, i) => (
+                <img
+                  src={src}
+                  alt={`Depoimento ${slideIndex * 4 + i + 2}`}
+                  class="w-full h-auto rounded-xl object-contain"
+                  loading="lazy"
+                  width="800"
+                  height="600"
+                />
+              ))}
+            </div>
+          ))}
+
+        </div>
+      </div>
+
+      <button
+        id="dep-prev"
+        class="absolute left-[-40px] md:left-[-60px] top-1/2 -translate-y-1/2 hover:scale-110 transition z-20"
+        aria-label="Anterior"
+        style="color: #599313;"
+      >
+        <ChevronLeft size={64} strokeWidth={3} />
+      </button>
+      <button
+        id="dep-next"
+        class="absolute right-[-40px] md:right-[-60px] top-1/2 -translate-y-1/2 hover:scale-110 transition z-20"
+        aria-label="Próximo"
+        style="color: #599313;"
+      >
+        <ChevronRight size={64} strokeWidth={3} />
+      </button>
+
+      <script>
+        const track = document.getElementById('dep-track') as HTMLElement;
+        const wrapper = document.getElementById('dep-track-wrapper') as HTMLElement;
+        const total = track ? track.children.length : 0;
+        let current = 0;
+
+        function syncHeight() {
+          if (!wrapper || !track) return;
+          const slide = track.children[current] as HTMLElement;
+          if (slide && slide.offsetHeight > 0) {
+            wrapper.style.height = slide.offsetHeight + 'px';
+          }
         }
-      }
 
-      function goTo(index: number) {
-        current = (index + total) % total;
-        track.style.transform = `translateX(-${current * 100}%)`;
+        function goTo(index: number) {
+          current = (index + total) % total;
+          track.style.transform = `translateX(-${current * 100}%)`;
+          syncHeight();
+        }
+
+        document.getElementById('dep-prev')?.addEventListener('click', () => goTo(current - 1));
+        document.getElementById('dep-next')?.addEventListener('click', () => goTo(current + 1));
+
+        // Atualiza altura quando imagens carregarem (lazy)
+        track.querySelectorAll('img').forEach((img) => {
+          if (!(img as HTMLImageElement).complete) {
+            img.addEventListener('load', syncHeight);
+          }
+        });
+
         syncHeight();
-      }
-
-      document.getElementById('dep-prev')?.addEventListener('click', () => goTo(current - 1));
-      document.getElementById('dep-next')?.addEventListener('click', () => goTo(current + 1));
-
-      // Atualiza altura quando imagens carregarem (lazy)
-      track.querySelectorAll('img').forEach((img) => {
-        if (!(img as HTMLImageElement).complete) {
-          img.addEventListener('load', syncHeight);
-        }
-      });
-
-      syncHeight();
-    </script>
+      </script>
+    </div>
   </div>
 
   <a
@@ -1214,13 +1211,120 @@ const testimonialSlides = Array.from(
 
 
 
+
+<section
+  class="relative py-16 md:py-32 overflow-hidden flex flex-col justify-center"
+  style="background-color: #DCF4FF; content-visibility: auto; contain-intrinsic-size: 0 600px;"
+>
+  <div class="container flex flex-col items-center gap-10 md:gap-16">
+
+    <!-- WRAPPER COM MESMA LARGURA DO CARD -->
+    <div class="w-full max-w-3xl flex flex-col items-center sm:items-start gap-10 md:gap-16">
+
+    <div class="relative z-10 text-primary-foreground text-center flex flex-col sm:flex-row items-center justify-start gap-2 sm:gap-0">
+      <img
+        src={microfone.src}
+        alt="Fone de ouvido amarelo"
+        width={360}
+        height={360}
+        class="w-12 h-12 sm:w-16 sm:h-16 md:w-28 md:h-28 lg:w-36 lg:h-36 object-contain flex-shrink-0 sm:-mr-3 md:-mr-6"
+      />
+      <h2
+        class="leading-tight text-center sm:text-left sm:ml-4 md:ml-8"
+        aria-label="Ouça como ficou o novo álbum 3"
+        style="font-size: clamp(24px, 6vw, 60px); font-weight: 800; line-height: 1.15; color: #1171D3"
+      >
+        <span class="block whitespace-nowrap">Só falta gravar o</span>
+        <span class="block whitespace-nowrap">nome da sua criança</span>
+      </h2>
+    </div>
+
+<div class="bg-white rounded-2xl shadow-lg w-full flex flex-col sm:flex-row items-center gap-5 sm:gap-8 p-6 sm:p-10">
+
+  <!-- TEXTO + PLAYER (ESQUERDA) -->
+  <div class="flex-1 min-w-0 flex flex-col items-center sm:items-center text-center sm:text-center justify-center gap-6">
+    <h3
+      class="leading-snug"
+      style="font-size: clamp(20px, 3vw, 30px); font-weight: 800; color: #1171D3;"
+    >
+      QUERO PARTICIPAR DO<br />
+      PRÉ-LANÇAMENTO
+    </h3>
+    
+    <!-- Botão GARANTIR EDIÇÃO ESPECIAL -->
+    <div class="flex justify-center mt-2">
+      <a
+        href="#produtos"
+        class="btn-red-rounded"
+        style="display: inline-flex; align-items: center; gap: 0.75rem; background: #E63946; color: white; font-weight: 700; font-size: 0.95rem; padding: 0.7rem 2.2rem; border-radius: 9999px; text-decoration: none; transition: 0.2s; box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);"
+        onmouseover="this.style.backgroundColor='#c1121f'"
+        onmouseout="this.style.backgroundColor='#E63946'"
+      >
+        GARANTIR EDIÇÃO ESPECIAL
+      </a>
+    </div>
+  </div>
+
+  <!-- IMAGEM DO PRODUTO (DIREITA) -->
+  <div class="flex-shrink-0">
+    <img
+      src={capa_album3.src}
+      alt="Caixa Cantigas Personalizadas 3"
+      width={724}
+      height={890}
+      class="w-40 sm:w-48 md:w-56 lg:w-60 h-auto object-contain"
+    />
+  </div>
+
+</div>
+
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <!-- FAQ -->
-    <section class="py-20" style="background-color: #6ab248; content-visibility: auto; contain-intrinsic-size: 0 700px;">
+    <section class="py-20" style="background-color: #EDFDD6; content-visibility: auto; contain-intrinsic-size: 0 700px;">
       <div class="container" style="max-width: 820px;">
         <div class="flex flex-row items-center gap-4 md:flex-row md:justify-between md:items-end">
           <div class="text-left">
-            <p class="uppercase tracking-widest text-white" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 400;">Tire suas dúvidas</p>
-            <h2 class="mt-1 text-white" style="font-size: clamp(32px, 7vw, 56px); font-weight: 800;">Perguntas frequentes</h2>
+            <h2 class="mt-1" style="color: #599313; font-size: clamp(32px, 7vw, 56px); font-weight: 800;">Perguntas frequentes</h2>
           </div>
           <div class="-mb-4">
             <Image src={tiaoDuvidaImg} alt="FAQ" width={320} height={320} class="w-56 md:w-72 lg:w-80 float-slow" loading="lazy" />
@@ -1233,9 +1337,9 @@ const testimonialSlides = Array.from(
     </section>
 
 <!--BOTAO DE DUVIDA DO FAQ -->
-<section class="bg-[#cae2a6] py-20 text-center section-compact" style="content-visibility: auto; contain-intrinsic-size: 0 300px;">
-  <p style="font-size: clamp(20px, 4vw, 32px); font-weight: 700; color: #333;">AINDA FICOU COM ALGUMA DÚVIDA?</p>
-  <p class="mt-2 text-foreground/80" style="font-size: clamp(13px, 2.5vw, 18px); font-weight: 500;">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
+<section class="bg-[#EDFDD6] py-20 text-center section-compact" style="content-visibility: auto; contain-intrinsic-size: 0 300px;">
+  <p style="font-size: clamp(20px, 4vw, 32px); font-weight: 700; color: #599313;">AINDA FICOU COM ALGUMA DÚVIDA?</p>
+  <p class="mt-2 text-foreground/80" style="color:#599313; font-size: clamp(13px, 2.5vw, 25px); font-weight: 500;">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
   
 <a
   href="https://wa.me/message/FFKR2R4DDO27M1"
@@ -1257,6 +1361,8 @@ const testimonialSlides = Array.from(
     class="h-8 w-8"
   />
 </a>
+
+
 </section>
       <!-- FOOTER -->
       <footer>
@@ -1289,7 +1395,7 @@ const testimonialSlides = Array.from(
                 <p>Entrega digital rápida e segura</p>
               </div>
               <!-- Separador azul vertical -->
-              <div class="self-stretch w-[2px] flex-shrink-0" style="background:#3b82f6; border-radius:1px;"></div>
+              <div class="self-stretch w-[2px] flex-shrink-0" style="background:#DCF4FF; border-radius:1px;"></div>
               <!-- Coluna direita: contatos -->
               <div class="flex-1 space-y-2 pl-4" style="font-size: 11px; font-weight: 600;">
                 <p class="flex items-center gap-1.5">
