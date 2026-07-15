@@ -1,0 +1,138 @@
+---
+import headphonesIcon from "../../../public/imagens/campanha2/headphones.png";
+import productBox from "../../../public/imagens/campanha2/album3.png";
+---
+
+<!-- SECTION OUÇA - RESPONSIVO -->
+<section
+  class="relative py-12 md:py-32 overflow-hidden flex flex-col justify-center"
+  style="background-color: #DCF4FF; content-visibility: auto; contain-intrinsic-size: 0 600px;"
+>
+  <div class="container flex flex-col items-center gap-8 md:gap-16 px-4">
+    <div class="w-full max-w-3xl flex flex-col items-center sm:items-start gap-8 md:gap-16">
+
+      <!-- TEXTO -->
+      <div class="relative z-10 text-primary-foreground text-center flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-0" style="transform: translateY(-20px);">
+<img
+  src={headphonesIcon.src}
+  alt="Fone de ouvido amarelo"
+  width={360}
+  height={360}
+  class="w-56 h-56 sm:w-56 sm:h-56 md:w-48 md:h-48 lg:w-64 lg:h-64 object-contain flex-shrink-0 sm:-mr-2 md:-mr-6"
+/>
+        <h2
+          class="leading-tight text-center sm:text-left"
+          aria-label="Ouça como ficou o novo álbum 3"
+          style="font-size: clamp(40px, 5vw, 60px); font-weight: 800; line-height: 1.15; color: #1171D3; margin-top: -30px;"
+        >
+          <span class="block whitespace-nowrap">Ouça como ficou</span>
+          <span class="block whitespace-nowrap">o novo álbum 3</span>
+        </h2>
+      </div>
+
+      <!-- CARD DE ÁUDIO -->
+      <div class="bg-white rounded-2xl shadow-lg w-full flex flex-col sm:flex-row items-center gap-4 sm:gap-8 p-4 sm:p-6 md:p-10">
+        <!-- IMAGEM DO PRODUTO -->
+        <div class="flex-shrink-0">
+          <img
+            src={productBox.src}
+            alt="Caixa Cantigas Personalizadas 3"
+            width={724}
+            height={890}
+            class="w-52 sm:w-40 md:w-48 lg:w-56 h-auto object-contain"
+          />
+        </div>
+
+        <!-- TEXTO + PLAYER -->
+        <div class="flex-1 min-w-0 flex flex-col items-center sm:items-start text-center sm:text-left justify-center gap-4">
+          <h3
+            class="leading-snug"
+            style="font-size: clamp(20px, 2.5vw, 30px); font-weight: 800; color: #1171D3;"
+          >
+            Clique e ouça trechos das<br />
+            novas cantigas personalizadas<br />
+            do Tião Camaleão
+          </h3>
+
+          <!-- PLAYER -->
+          <button
+            type="button"
+            id="audio-play-btn"
+            class="flex items-center gap-3 group"
+            aria-label="Tocar amostra de áudio"
+          >
+            <span
+              class="flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 transition-transform group-hover:scale-105"
+              style="background-color: #E4132B;"
+            >
+              <svg id="play-icon" width="14" height="14" viewBox="0 0 18 18" fill="white">
+                <path d="M4 2.5v13l12-6.5-12-6.5z" />
+              </svg>
+              <svg id="pause-icon" width="12" height="12" viewBox="0 0 16 16" fill="white" class="hidden">
+                <rect x="3" y="2" width="4" height="12" />
+                <rect x="9" y="2" width="4" height="12" />
+              </svg>
+            </span>
+
+            <span class="flex items-end gap-[3px] h-6" id="waveform">
+              {Array.from({ length: 16 }).map((_, i) => (
+                <span
+                  class="waveform-bar w-[3px] rounded-full bg-gray-900"
+                  style={`height: ${8 + Math.round(Math.sin(i * 0.9) * 7 + 7)}px;`}
+                ></span>
+              ))}
+            </span>
+          </button>
+
+          <audio id="audio-sample" src="/audio/cantigas-preview.mp3" preload="none"></audio>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .waveform-bar {
+    transition: transform 0.2s ease;
+  }
+  #audio-play-btn.playing .waveform-bar {
+    animation: bounce 0.8s ease-in-out infinite;
+  }
+  #audio-play-btn.playing .waveform-bar:nth-child(odd) {
+    animation-delay: 0.15s;
+  }
+  #audio-play-btn.playing .waveform-bar:nth-child(3n) {
+    animation-delay: 0.3s;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: scaleY(0.6); }
+    50% { transform: scaleY(1.3); }
+  }
+</style>
+
+<script>
+  const btn = document.getElementById('audio-play-btn');
+  const audio = document.getElementById('audio-sample') as HTMLAudioElement;
+  const playIcon = document.getElementById('play-icon');
+  const pauseIcon = document.getElementById('pause-icon');
+
+  btn?.addEventListener('click', () => {
+    if (audio.paused) {
+      audio.play();
+      btn.classList.add('playing');
+      playIcon?.classList.add('hidden');
+      pauseIcon?.classList.remove('hidden');
+    } else {
+      audio.pause();
+      btn.classList.remove('playing');
+      playIcon?.classList.remove('hidden');
+      pauseIcon?.classList.add('hidden');
+    }
+  });
+
+  audio?.addEventListener('ended', () => {
+    btn?.classList.remove('playing');
+    playIcon?.classList.remove('hidden');
+    pauseIcon?.classList.add('hidden');
+  });
+</script>

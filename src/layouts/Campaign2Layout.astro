@@ -3,14 +3,20 @@ import { Image, getImage } from "astro:assets";
 import "../styles/global.css";
 import FaqAccordion from "../components/FaqAccordion.astro";
 import PlayerSection from "../components/pagina2/PlayerSectionPagina2.astro";
+import HeroPagina2 from "../components/pagina2/HeroPagina2.astro";
+import OucaSectionPagina2 from "../components/pagina2/OucaSectionPagina2.astro";
+import BenefitsSectionPagina2 from "../components/pagina2/BenefitsSectionPagina2.astro";
+import ConhecaAlbumSectionPagina2 from "../components/pagina2/ConhecaAlbumSectionPagina2.astro";
+import EdicaoEspecialSectionPagina2 from "../components/pagina2/EdicaoEspecialSectionPagina2.astro";
+import SoFaltaGravarSectionPagina2 from "../components/pagina2/SoFaltaGravarSectionPagina2.astro";
 import ModalVanilla from "../components/ModalVanilla.astro";
 import PixelHead from "../components/PixelHead.astro";
+import { getHeroPagina2Image } from "../lib/heroPagina2Image";
 import {
   Lock, Mail, Instagram,
   Star, ChevronLeft, ChevronRight, ShoppingCart
 } from "../components/Icons.tsx";
 
-import criancasHero from "../../public/imagens/campanha2/hero.png";
 import logoImg from "../../public/imagens/logo.png";
 import mascoteImg from "../../public/imagens/mascote.png";
 import cantorNomesImg from "../../public/imagens/cantor_nomes2.png";
@@ -22,21 +28,14 @@ import globo from "../../public/imagens/benefits/globo.png";
 import jogoPeca from "../../public/imagens/benefits/jogo_peca.png";
 import nuvemCoracao from "../../public/imagens/benefits/nuvem_coracao.png";
 import nuvems from "../../public/imagens/benefits/nuvems.png";
-import productBox from "../../public/imagens/campanha2/album3.png";
-
 import whatsappIcon from "../../public/icons/WhatsApp.svg";
 
 
-import headphonesIcon from "../../public/imagens/campanha2/headphones.png"
 import baloes from "../../public/imagens/campanha2/baloes.png"
-import iconeTiao from "../../public/imagens/campanha2/icone_tiao.png"
 
 import tiaoMagico from "../../public/imagens/campanha2/tiao_magico.png"
 import tiaoPintor from "../../public/imagens/campanha2/tiao_pintor.png"
 import tiaoRoceiro from "../../public/imagens/campanha2/tiao_roceiro.png"
-import relogio from "../../public/imagens/campanha2/relogio.png"
-import capa_album3 from "../../public/imagens/campanha2/capa_album3.png"
-import microfone from "../../public/imagens/campanha2/microfone.png"
 
 
 
@@ -46,31 +45,8 @@ interface Props {
 }
 
 const { campaignId } = Astro.props;
-const [
-  hero_sm,
-  hero_md,
-  hero_lg,
-  hero_xl,
-  hero_2xl,
-  hero_4k
-] = await Promise.all([
-  getImage({ src: criancasHero, format: "png", width: 800,   quality: 100 }),
-  getImage({ src: criancasHero, format: "png", width: 1200,  quality: 100 }),
-  getImage({ src: criancasHero, format: "png", width: 1800,  quality: 100 }),
-  getImage({ src: criancasHero, format: "png", width: 2400,  quality: 100 }),
-  getImage({ src: criancasHero, format: "png", width: 3200,  quality: 100 }),
-  getImage({ src: criancasHero, format: "png", width: 4800,  quality: 100 }),
-]);
 
-const heroSrcset = `
-  ${hero_sm.src} 800w,
-  ${hero_md.src} 1200w,
-  ${hero_lg.src} 1800w,
-  ${hero_xl.src} 2400w,
-  ${hero_2xl.src} 3200w,
-  ${hero_4k.src} 4800w
-`;
-const heroSizes = "(max-width: 768px) 95vw, 55vw";
+const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
 
 const benefits = [
   {
@@ -132,7 +108,7 @@ const testimonialSlides = Array.from(
     <link
       rel="preload"
       as="image"
-      href={hero_md.src}
+      href={heroMdSrc}
       imagesrcset={heroSrcset}
       imagesizes={heroSizes}
       type="image/webp"
@@ -155,1220 +131,466 @@ const testimonialSlides = Array.from(
 
     <div class="min-h-screen overflow-x-hidden bg-background">
 
-      <!-- TOP STRIP + HERO ocupam 100% da tela -->
-<div class="hero-wrapper" style="display: flex; flex-direction: column;">
+      <HeroPagina2 />
 
-<!-- TOP STRIP -->
+      <OucaSectionPagina2 />
 
-<div
-  class="text-center uppercase tracking-widest"
-  style="background-color: #FF9900; color: #fff; padding: 20px 0;"
->
-  <span style="display:inline-flex;vertical-align:middle;margin-right:8px;">
-    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
-      <path
-        d="M12 2L1 21h22L12 2z"
-        fill="#FFD54F"
-        stroke="#000"
-        stroke-width="1.6"
-        stroke-linejoin="round"
-      />
-      <rect x="11" y="8" width="2" height="7" rx="1" fill="#000"/>
-      <circle cx="12" cy="18" r="1.2" fill="#000"/>
-      <rect x="5" y="20.3" width="14" height="1.3" rx="0.6" fill="#000"/>
-    </svg>
-  </span>
+      <!-- SAMPLE - RESPONSIVO -->
+      <section id="amostra" class="relative w-full" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
+        <div class="w-full pt-8 pb-8 md:pb-0 md:pt-16" style="background: #EDFDD6;">
+          <div class="container max-w-6xl mx-auto px-4 md:px-6 flex flex-col items-center justify-between gap-3 md:gap-8">
+            
+            <!-- Título -->
+            <div class="w-full max-w-4xl mx-auto text-center pb-2">
+              <h2
+                class="leading-tight text-center"
+                style="font-size: clamp(24px, 4.5vw, 50px); font-weight: 800; color: #599313;"
+                aria-label="Criança ouve o próprio nome na música"
+              >
+                O novo repertório surgiu dos<br />pedidos dos nossos clientes
+              </h2>
+            </div>
+            
+            <!-- Imagem de balões -->
+            <div class="w-full flex justify-center">
+              <img
+                src={baloes.src}
+                alt="Balões decorativos"
+                class="w-full max-w-2xl h-auto object-contain"
+              />
+            </div>
+            
+            <!-- CARD DE ÁUDIO -->
+            <div class="bg-white rounded-2xl shadow-lg w-full max-w-2xl mx-auto flex flex-col items-center gap-4 p-4 sm:p-6">
+              <div class="w-full flex flex-col items-center justify-center gap-3">
+                <h3
+                  class="leading-snug text-center"
+                  style="font-size: clamp(18px , 2vw, 22px); font-weight: 800; color: #599313; max-width: 95%;"
+                >
+                  Durante anos, recebemos muitas mensagens pedindo<br />
+                  novas cantigas. Algumas músicas foram pedidas tantas<br />
+                  vezes... que se tornaram impossíveis não gravar.
+                </h3>
+                
+                <!-- Botão QUERO COMPRAR -->
+                <div class="flex justify-center mt-2">
+                  <a
+                    href="#produtos"
+                    class="btn-red-rounded"
+                    style="display: inline-flex; align-items: center; gap: 0.75rem; background: #E63946; color: white; font-weight: 700; font-size: clamp(14px, 1.5vw, 18px); padding: 0.6rem 1.8rem; border-radius: 9999px; text-decoration: none; transition: 0.2s; box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);"
+                    onmouseover="this.style.backgroundColor='#c1121f'"
+                    onmouseout="this.style.backgroundColor='#E63946'"
+                  >
+                    QUERO COMPRAR
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="9" cy="21" r="1"></circle>
+                      <circle cx="20" cy="21" r="1"></circle>
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div> 
+        </div>
+      </section>
 
-  <span
-    style="
-      font-size: clamp(19px, 4vw, 28px);
-      font-weight: 700;
-      white-space: nowrap;
-      vertical-align: middle;
-    "
-  >
-    AS VAGAS DESTA PRÉ-VENDA SÃO LIMITADAS.
-  </span>
+      <BenefitsSectionPagina2 />
 
-  <span style="display:inline-flex;vertical-align:middle;margin-left:8px;">
-    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
-      <path
-        d="M12 2L1 21h22L12 2z"
-        fill="#FFD54F"
-        stroke="#000"
-        stroke-width="1.6"
-        stroke-linejoin="round"
-      />
-      <rect x="11" y="8" width="2" height="7" rx="1" fill="#000"/>
-      <circle cx="12" cy="18" r="1.2" fill="#000"/>
-      <rect x="5" y="20.3" width="14" height="1.3" rx="0.6" fill="#000"/>
-    </svg>
-  </span>
-</div>
-
-
-<!-- HERO -->
-<header class="hero-header relative bg-white flex flex-col" style="flex: 1;">
-  <!-- Logo centralizada no topo, dentro do hero -->
-  <div class="relative z-10 w-full flex justify-center -mt-8 pb-1 md:-mt-10 md:pb-2">
-    <Image
-      src={logoImg}
-      alt="Tião Camaleão"
-      widths={[160, 256, 320, 512, 640]}
-      sizes="(max-width: 768px) 160px, (max-width: 1024px) 256px, 320px"
-      width={768}
-      height={432}
-      class="w-52 md:w-64 lg:w-80"
-      style="height: auto;"
-    />
-  </div>
-
-  <!-- Texto do hero -->
-  <div class="relative z-10 container flex items-start md:items-center flex-none md:flex-1 pt-1 pb-6 md:py-10">
-    <div class="w-full md:max-w-[55%] text-center md:text-left">
-      <h1
-        class="font-black leading-tight hero-title"
-        style="font-size: clamp(40px, 8vw, 77px); color: #599313; line-height: 1.05; transform: translateY(-40px);"
+      <!-- MÚSICAS AUTORAIS - RESPONSIVO -->
+      <section
+        class="relative pt-8 pb-16 md:pt-10 md:pb-20"
+        style="background-color: #EDFDD6;"
       >
-        <span style="white-space: nowrap;">O álbum mais pedido</span><br /><span style="white-space: nowrap;">finalmente chegou!</span>
-      </h1>
+        <div class="container px-4">
+          <div class="text-center mb-8 md:mb-16">
+            <h2 class="mt-2 leading-tight" style="font-size: clamp(26px, 5vw, 68px); font-weight: 800; color: #599313;">
+              Pela primeira vez um albúm<br> com músicas autorais e inéditas
+            </h2>
+          </div>
 
-      <div class="pre-venda-box">
-        <div class="pre-venda-top">
-          Pré-venda EXCLUSIVA<br>
-          para clientes Tião Camaleão.
+          <!-- 3 CARDS EMPILHADOS -->
+          <div class="w-full flex flex-col gap-4 md:gap-6 max-w-6xl mx-auto">
+
+            <!-- CARD 1 -->
+            <div class="bg-white rounded-[28px] shadow-md overflow-hidden flex flex-col sm:flex-row items-stretch p-0">
+              <div class="flex-shrink-0 w-full sm:w-[280px] md:w-[380px] lg:w-[480px] overflow-hidden">
+                <img
+                  src={tiaoPintor.src}
+                  alt="Tião Camaleão pintando"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div class="flex-1 min-w-0 flex flex-col items-center sm:items-start text-center sm:text-left justify-center gap-3 p-4 sm:p-6 md:p-8">
+                <h3 class="font-extrabold" style="color: #4caf1f; font-size: clamp(1.5rem, 2.5vw, 2.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
+                  As Cores do Tião
+                </h3>
+                <hr class="border-t-2 w-full" style="border-color: #d9e6b8;" />
+                <p style="color: #6aa62f; font-size: clamp(1rem, 1.4vw, 1.5rem); line-height: 1.6; font-family: 'Baloo 2', 'Comic Sans MS', sans-serif;">
+                  Cores, rimas e imaginação se misturam nessa música alegre e encantadora criada especialmente para o universo do Tião Camaleão. Uma cantiga divertida que convida as crianças a cantar, aprender e participar a cada verso.
+                </p>
+                <hr class="border-t-2 w-full" style="border-color: #d9e6b8;" />
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                  <span class="font-bold" style="color: #4caf1f; font-size: clamp(1rem, 1.5vw, 1.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
+                    Clique e ouça
+                  </span>
+
+                  <button
+                    type="button"
+                    class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-transform hover:scale-105"
+                    style="background-color: #e0271f;"
+                    aria-label="Reproduzir áudio"
+                    data-audio-btn
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </button>
+
+                  <div class="flex items-center gap-[3px] h-5 md:h-6" aria-hidden="true">
+                    <span class="w-[3px] rounded" style="height:40%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:70%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:55%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:90%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:60%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:100%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:45%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:75%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:55%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:35%; background:#2b2b2b;"></span>
+                  </div>
+
+                  <audio data-audio-el src="/audio/as-cores-do-tiao.mp3"></audio>
+                </div>
+              </div>
+            </div>
+
+            <!-- CARD 2 -->
+            <div class="bg-white rounded-[28px] shadow-md overflow-hidden flex flex-col sm:flex-row items-stretch p-0">
+              <div class="flex-shrink-0 w-full sm:w-[280px] md:w-[380px] lg:w-[480px] overflow-hidden">
+                <img
+                  src={tiaoMagico.src}
+                  alt="Tião Camaleão no circo"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div class="flex-1 min-w-0 flex flex-col items-center sm:items-start text-center sm:text-left justify-center gap-3 p-4 sm:p-6 md:p-8">
+                <h3 class="font-extrabold" style="color: #4caf1f; font-size: clamp(1.5rem, 2.5vw, 2.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
+                  O Grande Circo
+                </h3>
+                <hr class="border-t-2 w-full" style="border-color: #d9e6b8;" />
+                <p style="color: #6aa62f; font-size: clamp(1rem, 1.4vw, 1.5rem); line-height: 1.6; font-family: 'Baloo 2', 'Comic Sans MS', sans-serif;">
+                  Inspirada no encanto dos grandes circos, essa
+                  cantiga leva a criança para um espetáculo cheio
+                  de personagens, imaginação e aventura. Uma
+                  música envolvente e divertida que transforma o
+                  universo do Tião em um verdadeiro espetáculo
+                  musical.
+                </p>
+                <hr class="border-t-2 w-full" style="border-color: #d9e6b8;" />
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                  <span class="font-bold" style="color: #4caf1f; font-size: clamp(1rem, 1.5vw, 1.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
+                    Clique e ouça
+                  </span>
+
+                  <button
+                    type="button"
+                    class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-transform hover:scale-105"
+                    style="background-color: #e0271f;"
+                    aria-label="Reproduzir áudio"
+                    data-audio-btn
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </button>
+
+                  <div class="flex items-center gap-[3px] h-5 md:h-6" aria-hidden="true">
+                    <span class="w-[3px] rounded" style="height:40%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:70%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:55%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:90%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:60%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:100%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:45%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:75%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:55%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:35%; background:#2b2b2b;"></span>
+                  </div>
+
+                  <audio data-audio-el src="/audio/musica-2.mp3"></audio>
+                </div>
+              </div>
+            </div>
+
+            <!-- CARD 3 -->
+            <div class="bg-white rounded-[28px] shadow-md overflow-hidden flex flex-col sm:flex-row items-stretch p-0">
+              <div class="flex-shrink-0 w-full sm:w-[280px] md:w-[380px] lg:w-[480px] overflow-hidden">
+                <img
+                  src={tiaoRoceiro.src}
+                  alt="Tião Camaleão na fazenda"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div class="flex-1 min-w-0 flex flex-col items-center sm:items-start text-center sm:text-left justify-center gap-3 p-4 sm:p-6 md:p-8">
+                <h3 class="font-extrabold" style="color: #4caf1f; font-size: clamp(1.5rem, 2.5vw, 2.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
+                  Fazendinha
+                </h3>
+                <hr class="border-t-2 w-full" style="border-color: #d9e6b8;" />
+                <p style="color: #6aa62f; font-size: clamp(1rem, 1.4vw, 1.5rem); line-height: 1.6; font-family: 'Baloo 2', 'Comic Sans MS', sans-serif;">
+                  Cheia de ritmo e diversão, essa música traz um
+                  trava-língua contagiante que as crianças vão
+                  adorar repetir e brincar junto. Uma cantiga
+                  alegre que transforma o universo da fazenda
+                  em uma experiência divertida, criativa e
+                  inesquecível.
+                </p>
+                <hr class="border-t-2 w-full" style="border-color: #d9e6b8;" />
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                  <span class="font-bold" style="color: #4caf1f; font-size: clamp(1rem, 1.5vw, 1.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
+                    Clique e ouça
+                  </span>
+
+                  <button
+                    type="button"
+                    class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-transform hover:scale-105"
+                    style="background-color: #e0271f;"
+                    aria-label="Reproduzir áudio"
+                    data-audio-btn
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </button>
+
+                  <div class="flex items-center gap-[3px] h-5 md:h-6" aria-hidden="true">
+                    <span class="w-[3px] rounded" style="height:40%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:70%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:55%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:90%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:60%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:100%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:45%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:75%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:55%; background:#2b2b2b;"></span>
+                    <span class="w-[3px] rounded" style="height:35%; background:#2b2b2b;"></span>
+                  </div>
+
+                  <audio data-audio-el src="/audio/musica-3.mp3"></audio>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="pre-venda-bottom">
-          E primeiros nomes ainda garantem<br>
-          gravação sem custo adicional.
-        </div>
-      </div>
+        <script>
+          // Toca/pausa o áudio ao clicar no botão de play de cada card
+          document.querySelectorAll('[data-audio-btn]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              const card = btn.closest('.bg-white');
+              const audio = card ? card.querySelector('[data-audio-el]') : null;
+              if (!audio) return;
 
-      <div class="mt-14 md:mt-10 flex justify-center md:justify-start">
+              if (audio.paused) {
+                audio.play();
+              } else {
+                audio.pause();
+              }
+            });
+          });
+        </script>
+      </section>
+
+      <ConhecaAlbumSectionPagina2 />
+
+      <EdicaoEspecialSectionPagina2 />
+
+      <!-- PLAYER SECTION -->
+      <PlayerSection />
+
+      <!-- TESTIMONIALS - RESPONSIVO -->
+      <section class="section-compact bg-[white] pt-16 md:pt-10 pb-12 md:pb-16 px-4 flex flex-col items-center" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
+        <div class="text-center mb-8 md:mb-20">
+          <h2 style="color: #599313; font-size: clamp(24px, 5vw, 48px); font-weight: 800; line-height: 1.1;">
+            Criando lembranças<br />que ficam para sempre
+          </h2>
+        </div>
+        
+        <div class="relative w-full bg-[#EDFDD6] flex justify-center" style="border-radius: 0;">
+          <div class="relative w-full max-w-4xl p-6 md:p-8 lg:p-12 min-h-[300px] flex flex-col items-center justify-center">
+            
+            <div class="absolute -top-12 -left-2 w-24 sm:w-28 md:w-44 lg:w-60 xl:w-72 md:-top-20 md:-left-2 lg:-top-28 lg:-left-8 xl:-top-36 xl:-left-16 z-10">
+              <Image
+                src={mascoteImg}
+                alt="Mascote Camaleão"
+                width={400}
+                height={347}
+                class="w-full h-auto"
+                loading="lazy"
+              />
+            </div>
+
+            <div class="absolute top-2 right-4 flex gap-1">
+              {
+                [0, 1, 2, 3, 4].map((i) => (
+                  <Star className="fill-yellow-400 text-yellow-400 w-5 h-5 md:w-10 md:h-10" />
+                ))
+              }
+            </div>
+
+            <!-- Carrossel de depoimentos -->
+            <div class="w-full overflow-hidden rounded-2xl" id="dep-track-wrapper">
+              <div id="dep-track" class="flex w-full items-start transition-transform duration-500 ease-in-out">
+                <div class="w-full flex-shrink-0">
+                  <img
+                    src="/imagens/depoimentos/depoimento_prioritario.jpeg"
+                    alt="Depoimento"
+                    class="w-full h-auto rounded-2xl object-contain"
+                    loading="lazy"
+                    width="800"
+                    height="600"
+                  />
+                </div>
+
+                {testimonialSlides.map((slide, slideIndex) => (
+                  <div class="w-full flex-shrink-0 flex flex-col gap-3 pt-6 md:pt-10">
+                    {slide.map((src, i) => (
+                      <img
+                        src={src}
+                        alt={`Depoimento ${slideIndex * 4 + i + 2}`}
+                        class="w-full h-auto rounded-xl object-contain"
+                        loading="lazy"
+                        width="800"
+                        height="600"
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              id="dep-prev"
+              class="absolute left-[-30px] md:left-[-60px] top-1/2 -translate-y-1/2 hover:scale-110 transition z-20"
+              aria-label="Anterior"
+              style="color: #599313;"
+            >
+              <ChevronLeft size={48} strokeWidth={3} />
+            </button>
+            <button
+              id="dep-next"
+              class="absolute right-[-30px] md:right-[-60px] top-1/2 -translate-y-1/2 hover:scale-110 transition z-20"
+              aria-label="Próximo"
+              style="color: #599313;"
+            >
+              <ChevronRight size={48} strokeWidth={3} />
+            </button>
+
+            <script>
+              const track = document.getElementById('dep-track') as HTMLElement;
+              const wrapper = document.getElementById('dep-track-wrapper') as HTMLElement;
+              const total = track ? track.children.length : 0;
+              let current = 0;
+
+              function syncHeight() {
+                if (!wrapper || !track) return;
+                const slide = track.children[current] as HTMLElement;
+                if (slide && slide.offsetHeight > 0) {
+                  wrapper.style.height = slide.offsetHeight + 'px';
+                }
+              }
+
+              function goTo(index: number) {
+                current = (index + total) % total;
+                track.style.transform = `translateX(-${current * 100}%)`;
+                syncHeight();
+              }
+
+              document.getElementById('dep-prev')?.addEventListener('click', () => goTo(current - 1));
+              document.getElementById('dep-next')?.addEventListener('click', () => goTo(current + 1));
+
+              track.querySelectorAll('img').forEach((img) => {
+                if (!(img as HTMLImageElement).complete) {
+                  img.addEventListener('load', syncHeight);
+                }
+              });
+
+              syncHeight();
+            </script>
+          </div>
+        </div>
+
         <a
           href="#produtos"
-          class="btn-red-rounded"
-          style="font-size: 26px; font-weight: 600; padding: 8px 32px;"
-          data-buy
-          data-buy-name="Cantigas Personalizadas"
-          data-buy-price="R$ 47,00"
+          class="mt-8 md:mt-10 btn-red-rounded"
+          style="font-size: clamp(16px, 2vw, 20px); padding: 8px 24px;"
         >
-          QUERO GARANTIR O MEU
+          EU TAMBÉM QUERO
+          <ShoppingCart size={20} />
         </a>
-      </div>
-    </div>
-  </div>
+      </section>
 
-  <img
-    src={hero_md.src}
-    srcset={heroSrcset}
-    sizes={heroSizes}
-    alt=""
-    aria-hidden="true"
-    width={4800}
-    height={2700}
-    class="block w-full md:absolute md:w-auto hero-img pointer-events-none select-none"
-    style="bottom: -220px; right: max(-370px, calc((100vw - 1400px) / 2 - 370px)); transform: scale(1.25);"
-    fetchpriority="high"
-    loading="eager"
-    decoding="async"
-  />
-</header>
+      <SoFaltaGravarSectionPagina2 />
 
-    </div>
-
-<section
-  class="relative py-16 md:py-32 overflow-hidden flex flex-col justify-center"
-  style="background-color: #DCF4FF; content-visibility: auto; contain-intrinsic-size: 0 600px;"
->
-  <div class="container flex flex-col items-center gap-10 md:gap-16">
-
-    <!-- WRAPPER COM MESMA LARGURA DO CARD -->
-    <div class="w-full max-w-3xl flex flex-col items-center sm:items-start gap-10 md:gap-16">
-
-      <!-- TEXTO -->
-<div class="relative z-10 text-primary-foreground text-center flex flex-col sm:flex-row items-center justify-start gap-2 sm:gap-0">
-  <img
-    src={headphonesIcon.src}
-    alt="Fone de ouvido amarelo"
-    width={360}
-    height={360}
-    class="w-28 h-28 sm:w-36 sm:h-36 md:w-64 md:h-64 lg:w-72 lg:h-72 object-contain flex-shrink-0 sm:-mr-4 md:-mr-8"
-  />
-  <h2
-    class="leading-tight text-center sm:text-left"
-    aria-label="Ouça como ficou o novo álbum 3"
-    style="font-size: clamp(24px, 6vw, 60px); font-weight: 800; line-height: 1.15; color: #1171D3"
-  >
-    <span class="block whitespace-nowrap">Ouça como ficou</span>
-    <span class="block whitespace-nowrap">o novo álbum 3</span>
-  </h2>
-</div>
-
-      <!-- CARD DE ÁUDIO -->
-      <div class="bg-white rounded-2xl shadow-lg w-full flex flex-col sm:flex-row items-center gap-5 sm:gap-8 p-6 sm:p-10">
-
-        <!-- IMAGEM DO PRODUTO -->
-        <div class="flex-shrink-0">
-          <img
-            src={productBox.src}
-            alt="Caixa Cantigas Personalizadas 3"
-            width={724}
-            height={890}
-            class="w-40 sm:w-48 md:w-56 lg:w-60 h-auto object-contain"
-          />
-        </div>
-
-        <!-- TEXTO + PLAYER -->
-        <div class="flex-1 min-w-0 flex flex-col items-center sm:items-start text-center sm:text-left justify-center gap-6">
-          <h3
-            class="leading-snug"
-            style="font-size: clamp(20px, 3vw, 30px); font-weight: 800; color: #1171D3;"
-          >
-            Clique e ouça trechos das<br />
-            novas cantigas personalizadas<br />
-            do Tião Camaleão
-          </h3>
-
-          <!-- PLAYER -->
-          <button
-            type="button"
-            id="audio-play-btn"
-            class="flex items-center gap-3 group"
-            aria-label="Tocar amostra de áudio"
-          >
-            <span
-              class="flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 transition-transform group-hover:scale-105"
-              style="background-color: #E4132B;"
-            >
-              <svg id="play-icon" width="14" height="14" viewBox="0 0 18 18" fill="white">
-                <path d="M4 2.5v13l12-6.5-12-6.5z" />
-              </svg>
-              <svg id="pause-icon" width="12" height="12" viewBox="0 0 16 16" fill="white" class="hidden">
-                <rect x="3" y="2" width="4" height="12" />
-                <rect x="9" y="2" width="4" height="12" />
-              </svg>
-            </span>
-
-            <span class="flex items-end gap-[3px] h-6" id="waveform">
-              {Array.from({ length: 16 }).map((_, i) => (
-                <span
-                  class="waveform-bar w-[3px] rounded-full bg-gray-900"
-                  style={`height: ${8 + Math.round(Math.sin(i * 0.9) * 7 + 7)}px;`}
-                ></span>
-              ))}
-            </span>
-          </button>
-
-          <audio id="audio-sample" src="/audio/cantigas-preview.mp3" preload="none"></audio>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<style>
-  .waveform-bar {
-    transition: transform 0.2s ease;
-  }
-  #audio-play-btn.playing .waveform-bar {
-    animation: bounce 0.8s ease-in-out infinite;
-  }
-  #audio-play-btn.playing .waveform-bar:nth-child(odd) {
-    animation-delay: 0.15s;
-  }
-  #audio-play-btn.playing .waveform-bar:nth-child(3n) {
-    animation-delay: 0.3s;
-  }
-  @keyframes bounce {
-    0%, 100% { transform: scaleY(0.6); }
-    50% { transform: scaleY(1.3); }
-  }
-</style>
-
-<script>
-  const btn = document.getElementById('audio-play-btn');
-  const audio = document.getElementById('audio-sample') as HTMLAudioElement;
-  const playIcon = document.getElementById('play-icon');
-  const pauseIcon = document.getElementById('pause-icon');
-
-  btn?.addEventListener('click', () => {
-    if (audio.paused) {
-      audio.play();
-      btn.classList.add('playing');
-      playIcon?.classList.add('hidden');
-      pauseIcon?.classList.remove('hidden');
-    } else {
-      audio.pause();
-      btn.classList.remove('playing');
-      playIcon?.classList.remove('hidden');
-      pauseIcon?.classList.add('hidden');
-    }
-  });
-
-  audio?.addEventListener('ended', () => {
-    btn?.classList.remove('playing');
-    playIcon?.classList.remove('hidden');
-    pauseIcon?.classList.add('hidden');
-  });
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- SAMPLE -->
-<section id="amostra" class="relative w-full" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
-  <!-- Faixa verde clara de fundo -->
-  <div class="w-full pt-12 pb-10 md:pb-0 md:pt-16" style="background: #EDFDD6;">
-    <div class="container max-w-6xl mx-auto px-6 flex flex-col items-center justify-between gap-3 md:gap-8">
-      
-      <!-- Título -->
-      <div class="w-full max-w-4xl mx-auto text-center pb-2">
-        <h2
-          class="leading-tight text-center"
-          style="font-size: clamp(32px, 5vw, 50px); font-weight: 800; color: #599313;"
-          aria-label="Criança ouve o próprio nome na música"
-        >
-          O novo repertório surgiu dos<br />pedidos dos nossos clientes
-        </h2>
-      </div>
-      
-      <!-- Imagem de balões (exemplo ilustrativo) -->
-      <div class="w-full flex justify-center">
-        <img
-          src={baloes.src}
-          alt="Balões decorativos"
-          class="w-full max-w-2xl h-auto object-contain"
-        />
-      </div>
-      
-      <!-- CARD DE ÁUDIO -->
-      <div class="bg-white rounded-2xl shadow-lg w-full max-w-2xl mx-auto flex flex-col items-center gap-5 p-4 sm:p-6">
-        <!-- Bloco de texto -->
-        <div class="w-full flex flex-col items-center justify-center gap-3">
-          <h3
-            class="leading-snug text-center"
-            style="font-size: clamp(15px, 2.1vw, 22px); font-weight: 800; color: #599313; max-width: 90%;"
-          >
-            Durante anos, recebemos muitas mensagens pedindo<br />
-            novas cantigas. Algumas músicas foram pedidas tantas<br />
-            vezes... que se tornaram impossíveis não gravar.
-          </h3>
-          
-          <!-- Botão QUERO COMPRAR -->
-          <div class="flex justify-center mt-2">
-            <a
-              href="#produtos"
-              class="btn-red-rounded"
-              style="display: inline-flex; align-items: center; gap: 0.75rem; background: #E63946; color: white; font-weight: 700; font-size: 0.95rem; padding: 0.7rem 2.2rem; border-radius: 9999px; text-decoration: none; transition: 0.2s; box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);"
-              onmouseover="this.style.backgroundColor='#c1121f'"
-              onmouseout="this.style.backgroundColor='#E63946'"
-            >
-              QUERO COMPRAR
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="9" cy="21" r="1"></circle>
-                <circle cx="20" cy="21" r="1"></circle>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-              </svg>
-            </a>
-          </div>
-        </div>
-      </div>
-      
-    </div> 
-  </div>
-</section>
-
-
-
-
-<section
-  class="relative pt-10 pb-20"
-  style="background-color: #ffffff;"
->
-
-  <div class="benefits-bg absolute inset-0 pointer-events-none"></div>
-  <div class="container">
-    <div class="text-center mb-16">
-      <div class="w-full flex justify-center">
-        <img
-          src={iconeTiao.src}
-          alt="Balões decorativos"
-          class="w-full max-w-[120px] h-auto object-contain"
-        />
-      </div>
-      <h2 class="mt-2 leading-tight whitespace-nowrap" style="font-size: clamp(28px, 6vw, 65px); font-weight: 800; color: #1171D3;">
-        O álbum mais completo<br> que já fizemos
-      </h2>
-    </div>
-    
-    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
-      
-      <!-- CARD 1 -->
-      <div class="bg-white rounded-2xl shadow-lg flex flex-col items-center p-4 sm:p-5 text-center">
-        <div class="w-full flex flex-col items-center justify-center gap-2">
-          <h3
-            class="leading-snug text-center"
-            style="font-size: clamp(26px, 3.6vw, 38px); font-weight: 800; color: #1171D3;"
-          >
-            100% das cantigas<br />personalizadas
-          </h3>
-          <p
-            class="text-center"
-            style="font-size: clamp(19px, 2.2vw, 24px); font-weight: 400; color: #1171D3; max-width: 90%;"
-          >
-            Dessa vez, todas as músicas<br />cantam o nome da criança.
-          </p>
-        </div>
-      </div>
-      
-      <!-- CARD 2 -->
-      <div class="bg-white rounded-2xl shadow-lg flex flex-col items-center p-12 px-6 sm:p-5 text-center">
-        <div class="w-full flex flex-col items-center justify-center gap-2">
-          <h3
-            class="leading-snug text-center"
-            style="font-size: clamp(26px, 3.6vw, 38px); font-weight: 800; color: #1171D3;"
-          >
-            Clássicos que<br />atravessam gerações
-          </h3>
-          <p
-            class="text-center"
-            style="font-size: clamp(19px, 2.2vw, 24px); font-weight: 400; color: #1171D3; max-width: 90%;"
-          >
-            As cantigas que pais, mães e avós<br />conhecem, agora personalizadas.
-          </p>
-        </div>
-      </div>
-      
-    </div>
-
-    <!-- CARD 3 - EXCLUSIVO DESTA PRÉ-VENDA -->
-    <div class="w-full flex justify-center mt-8 md:mt-12 px-8 sm:px-0">
-      <div class="bg-[#1171D3] rounded-2xl shadow-lg flex flex-col items-center p-20 sm:p-7 text-center max-w-4xl w-full">
-        <div class="w-full flex flex-col items-center justify-center gap-3">
-          <div class="bg-[#FF8C00] rounded-full py-2 px-8 inline-block">
-            <h3
-              class="text-center leading-normal"
-              style="font-size: clamp(22px, 3vw, 34px); font-weight: 800; color: #ffffff;"
-            >
-              EXCLUSIVO DESTA PRÉ-VENDA
-            </h3>
-          </div>
-
-          <h4
-            class="leading-snug text-center"
-            style="font-size: clamp(20px, 2.6vw, 45px); font-weight: 700; color: #ffffff;"
-          >
-            3 músicas autorais inéditas
-          </h4>
-<p
-  class="whitespace-nowrap"
-  style="font-size: clamp(16px, 1.8vw, 35px); font-weight: 400; color: #ffffff;"
->
-  Lançamento de 3 músicas criadas especialmente<br>
-  para o universo do Tião Camaleão.
-</p>
-        </div>
-      </div>
-    </div>
-    
-  </div>
-</section>
-
-
-
-
-
-
-
-
-
-
-<section
-  class="relative pt-10 pb-20"
-  style="background-color: #EDFDD6;"
->
-
-  <div class="container">
-
-    <div class="text-center mb-16">
-      <h2 class="mt-2 leading-tight whitespace-nowrap" style="font-size: clamp(28px, 6vw, 68px); font-weight: 800; color: #599313;">
-        Pela primeira vez um albúm<br> com músicas autorais e inéditas
-      </h2>
-    </div>
-
-    <!-- 3 CARDS EMPILHADOS -->
-    <div class="w-full flex flex-col gap-6 max-w-6xl mx-auto">
-
-      <!-- CARD 1 -->
-      <div class="bg-white rounded-[28px] shadow-md overflow-hidden flex flex-col sm:flex-row items-stretch p-0">
-        <div class="flex-shrink-0 w-full sm:w-[380px] md:w-[420px] lg:w-[480px] overflow-hidden">
-          <img
-            src={tiaoPintor.src}
-            alt="Tião Camaleão pintando"
-            class="w-full h-full object-cover"
-          />
-        </div>
-        <div class="flex-1 min-w-0 flex flex-col items-center sm:items-start text-center sm:text-left justify-center gap-4 p-6 sm:p-8">
-          <h3 class="font-extrabold" style="color: #4caf1f; font-size: clamp(1.8rem, 3vw, 2.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
-            As Cores do Tião
-          </h3>
-          <hr class="border-t-2 w-full" style="border-color: #d9e6b8;" />
-          <p style="color: #6aa62f; font-size: clamp(1.1rem, 1.6vw, 1.5rem); line-height: 1.6; font-family: 'Baloo 2', 'Comic Sans MS', sans-serif;">
-            Cores, rimas e imaginação se misturam nessa música alegre e encantadora criada especialmente para o universo do Tião Camaleão. Uma cantiga divertida que convida as crianças a cantar, aprender e participar a cada verso.
-          </p>
-          <hr class="border-t-2 w-full" style="border-color: #d9e6b8;" />
-          <div class="flex items-center gap-4">
-            <span class="font-bold" style="color: #4caf1f; font-size: clamp(1.2rem, 1.8vw, 1.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
-              Clique e ouça
-            </span>
-
-            <button
-              type="button"
-              class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-              style="background-color: #e0271f;"
-              aria-label="Reproduzir áudio"
-              data-audio-btn
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </button>
-
-            <div class="flex items-center gap-[3px] h-6" aria-hidden="true">
-              <span class="w-[3px] rounded" style="height:40%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:70%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:55%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:90%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:60%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:100%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:45%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:75%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:55%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:35%; background:#2b2b2b;"></span>
+      <!-- FAQ - RESPONSIVO - Versão com alinhamento controlado -->
+      <section class="py-12 md:py-20" style="background-color: #EDFDD6; content-visibility: auto; contain-intrinsic-size: 0 700px;">
+        <div class="container px-4" style="max-width: 820px;">
+          <div class="flex flex-row items-center justify-between gap-2 md:flex-row md:items-end md:justify-between">
+            <div class="text-left flex-1 md:text-left">
+              <h2 class="mt-1" style="color: #599313; font-size: clamp(36px, 9vw, 66px); font-weight: 800; line-height: 1.1;">
+                <span style="display: block;">Perguntas</span>
+                <span style="display: block;">frequentes</span>
+              </h2>
             </div>
-
-            <audio data-audio-el src="/audio/as-cores-do-tiao.mp3"></audio>
-          </div>
-        </div>
-      </div>
-
-      <!-- CARD 2 -->
-      <div class="bg-white rounded-[28px] shadow-md overflow-hidden flex flex-col sm:flex-row items-stretch p-0">
-        <div class="flex-shrink-0 w-full sm:w-[380px] md:w-[420px] lg:w-[480px] overflow-hidden">
-          <img
-            src={tiaoMagico.src}
-            alt="Tião Camaleão no circo"
-            class="w-full h-full object-cover"
-          />
-        </div>
-        <div class="flex-1 min-w-0 flex flex-col items-center sm:items-start text-center sm:text-left justify-center gap-4 p-6 sm:p-8">
-          <h3 class="font-extrabold" style="color: #4caf1f; font-size: clamp(1.8rem, 3vw, 2.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
-            O Grande Circo
-          </h3>
-          <hr class="border-t-2 w-full" style="border-color: #d9e6b8;" />
-          <p style="color: #6aa62f; font-size: clamp(1.1rem, 1.6vw, 1.5rem); line-height: 1.6; font-family: 'Baloo 2', 'Comic Sans MS', sans-serif;">
-            Inspirada no encanto dos grandes circos, essa
-            cantiga leva a criança para um espetáculo cheio
-            de personagens, imaginação e aventura. Uma
-            música envolvente e divertida que transforma o
-            universo do Tião em um verdadeiro espetáculo
-            musical.
-          </p>
-          <hr class="border-t-2 w-full" style="border-color: #d9e6b8;" />
-          <div class="flex items-center gap-4">
-            <span class="font-bold" style="color: #4caf1f; font-size: clamp(1.2rem, 1.8vw, 1.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
-              Clique e ouça
-            </span>
-
-            <button
-              type="button"
-              class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-              style="background-color: #e0271f;"
-              aria-label="Reproduzir áudio"
-              data-audio-btn
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </button>
-
-            <div class="flex items-center gap-[3px] h-6" aria-hidden="true">
-              <span class="w-[3px] rounded" style="height:40%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:70%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:55%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:90%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:60%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:100%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:45%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:75%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:55%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:35%; background:#2b2b2b;"></span>
-            </div>
-
-            <audio data-audio-el src="/audio/musica-2.mp3"></audio>
-          </div>
-        </div>
-      </div>
-
-      <!-- CARD 3 -->
-      <div class="bg-white rounded-[28px] shadow-md overflow-hidden flex flex-col sm:flex-row items-stretch p-0">
-        <div class="flex-shrink-0 w-full sm:w-[380px] md:w-[420px] lg:w-[480px] overflow-hidden">
-          <img
-            src={tiaoRoceiro.src}
-            alt="Tião Camaleão na fazenda"
-            class="w-full h-full object-cover"
-          />
-        </div>
-        <div class="flex-1 min-w-0 flex flex-col items-center sm:items-start text-center sm:text-left justify-center gap-4 p-6 sm:p-8">
-          <h3 class="font-extrabold" style="color: #4caf1f; font-size: clamp(1.8rem, 3vw, 2.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
-            Fazendinha
-          </h3>
-          <hr class="border-t-2 w-full" style="border-color: #d9e6b8;" />
-          <p style="color: #6aa62f; font-size: clamp(1.1rem, 1.6vw, 1.5rem); line-height: 1.6; font-family: 'Baloo 2', 'Comic Sans MS', sans-serif;">
-            Cheia de ritmo e diversão, essa música traz um
-            trava-língua contagiante que as crianças vão
-            adorar repetir e brincar junto. Uma cantiga
-            alegre que transforma o universo da fazenda
-            em uma experiência divertida, criativa e
-            inesquecível.
-          </p>
-          <hr class="border-t-2 w-full" style="border-color: #d9e6b8;" />
-          <div class="flex items-center gap-4">
-            <span class="font-bold" style="color: #4caf1f; font-size: clamp(1.2rem, 1.8vw, 1.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
-              Clique e ouça
-            </span>
-
-            <button
-              type="button"
-              class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-              style="background-color: #e0271f;"
-              aria-label="Reproduzir áudio"
-              data-audio-btn
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </button>
-
-            <div class="flex items-center gap-[3px] h-6" aria-hidden="true">
-              <span class="w-[3px] rounded" style="height:40%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:70%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:55%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:90%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:60%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:100%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:45%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:75%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:55%; background:#2b2b2b;"></span>
-              <span class="w-[3px] rounded" style="height:35%; background:#2b2b2b;"></span>
-            </div>
-
-            <audio data-audio-el src="/audio/musica-3.mp3"></audio>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <script>
-    // Toca/pausa o áudio ao clicar no botão de play de cada card
-    document.querySelectorAll('[data-audio-btn]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const card = btn.closest('.bg-white');
-        const audio = card ? card.querySelector('[data-audio-el]') : null;
-        if (!audio) return;
-
-        if (audio.paused) {
-          audio.play();
-        } else {
-          audio.pause();
-        }
-      });
-    });
-  </script>
-</section>
-
-
-
-<!-- CONHECA O ALBUM 3 -->
-<section id="amostra" class="relative w-full pb-16" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
-  <!-- Faixa branca de fundo -->
-  <div class="w-full pt-12 pb-10 md:pb-0 md:pt-16" style="background: white;">
-    <div class="container max-w-6xl mx-auto px-6 flex flex-col items-center justify-between gap-3 md:gap-8">
-      
-      <!-- Título -->
-      <div class="w-full max-w-4xl mx-auto text-center pb-2">
-        <h2
-          class="leading-tight text-center"
-          style="font-size: clamp(32px, 5vw, 80px); font-weight: 800; color: #1171D3;"
-          aria-label="Criança ouve o próprio nome na música"
-        >
-          Conheça o Álbum 3
-        </h2>
-      </div>
-      
-      <div class="container">
-    
-        <!-- DOIS CARDS LADO A LADO -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
-          
-          <!-- CARD 1 - IMAGEM -->
-          <div class="bg-white rounded-[28px] shadow-md overflow-hidden flex items-center justify-center" style="background-color: #DCF4FF; min-height: 400px;">
-            <img
-              src={productBox.src}
-              alt="Capa do álbum Tião Camaleão"
-              class="w-full h-auto object-contain p-4"
-            />
-          </div>
-          
-          <!-- CARD 2 - LISTA DE MÚSICAS -->
-          <div class="bg-white rounded-[28px] shadow-md p-8 md:p-10 flex flex-col justify-center">
-            
-            <!-- LISTA EM UMA COLUNA COM BOLINHA AZUL E HR ENTRE CADA MÚSICA -->
-            <ul class="flex flex-col gap-0" style="font-family: 'Baloo 2', 'Comic Sans MS', sans-serif;">
-              <li style="color: #1171D3; padding: 6px 0; display: flex; align-items: center; gap: 12px;">
-                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #1171D3; color: white; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; font-weight: 700; flex-shrink: 0;">1</span>
-                <span style="font-size: clamp(1.4rem, 2vw, 1.8rem);">Apresentação</span>
-              </li>
-              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
-              <li style="color: #1171D3; padding: 6px 0; display: flex; align-items: center; gap: 12px;">
-                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #1171D3; color: white; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; font-weight: 700; flex-shrink: 0;">2</span>
-                <span style="font-size: clamp(1.4rem, 2vw, 1.8rem);">Mariana conta</span>
-              </li>
-              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
-              <li style="color: #1171D3; padding: 6px 0; display: flex; align-items: center; gap: 12px;">
-                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #1171D3; color: white; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; font-weight: 700; flex-shrink: 0;">3</span>
-                <span style="font-size: clamp(1.4rem, 2vw, 1.8rem);">Seu Lobato</span>
-              </li>
-              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
-              <li style="color: #1171D3; padding: 6px 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #FF8C00; color: white; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; font-weight: 700; flex-shrink: 0;">4</span>
-                <span style="font-size: clamp(1.4rem, 2vw, 1.8rem);">Fazendinha</span>
-                <span style="display: inline-block; background-color: #FF8C00; color: white; border-radius: 20px; padding: 2px 14px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; margin-left: 4px;">AUTORAL</span>
-              </li>
-              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
-              <li style="color: #1171D3; padding: 6px 0; display: flex; align-items: center; gap: 12px;">
-                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #1171D3; color: white; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; font-weight: 700; flex-shrink: 0;">5</span>
-                <span style="font-size: clamp(1.4rem, 2vw, 1.8rem);">Borboletinha</span>
-              </li>
-              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
-              <li style="color: #1171D3; padding: 6px 0; display: flex; align-items: center; gap: 12px;">
-                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #1171D3; color: white; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; font-weight: 700; flex-shrink: 0;">6</span>
-                <span style="font-size: clamp(1.4rem, 2vw, 1.8rem);">A Canoa Virou</span>
-              </li>
-              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
-              <li style="color: #1171D3; padding: 6px 0; display: flex; align-items: center; gap: 12px;">
-                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #1171D3; color: white; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; font-weight: 700; flex-shrink: 0;">7</span>
-                <span style="font-size: clamp(1.4rem, 2vw, 1.8rem);">Marinheiro Só</span>
-              </li>
-              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
-              <li style="color: #1171D3; padding: 6px 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #FF8C00; color: white; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; font-weight: 700; flex-shrink: 0;">8</span>
-                <span style="font-size: clamp(1.4rem, 2vw, 1.8rem);">As Cores do Tião</span>
-                <span style="display: inline-block; background-color: #FF8C00; color: white; border-radius: 20px; padding: 2px 14px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; margin-left: 4px;">AUTORAL</span>
-              </li>
-              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
-              <li style="color: #1171D3; padding: 6px 0; display: flex; align-items: center; gap: 12px;">
-                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #1171D3; color: white; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; font-weight: 700; flex-shrink: 0;">9</span>
-                <span style="font-size: clamp(1.4rem, 2vw, 1.8rem);">A Loja do Mestre André</span>
-              </li>
-              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
-              <li style="color: #1171D3; padding: 6px 0; display: flex; align-items: center; gap: 12px;">
-                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #1171D3; color: white; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; font-weight: 700; flex-shrink: 0;">10</span>
-                <span style="font-size: clamp(1.4rem, 2vw, 1.8rem);">Se Você está contente</span>
-              </li>
-              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
-              <li style="color: #1171D3; padding: 6px 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #FF8C00; color: white; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; font-weight: 700; flex-shrink: 0;">11</span>
-                <span style="font-size: clamp(1.4rem, 2vw, 1.8rem);">O Grande Circo</span>
-                <span style="display: inline-block; background-color: #FF8C00; color: white; border-radius: 20px; padding: 2px 14px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; margin-left: 4px;">AUTORAL</span>
-              </li>
-            </ul>
-          </div>
-          
-        </div>
-        
-      </div>
-      
-    </div> 
-  </div>
-</section>
-
-
-
-
-
-
-<section
-  class="relative min-h-screen flex items-center justify-center pb-20 mt-16"
-  style="background-color: #FFE8C4;"
->
-
-  <div class="benefits-bg absolute inset-0 pointer-events-none"></div>
-  <div class="container max-w-6xl mx-auto px-6">
-    
-    <!-- Card centralizado com o título sobreposto -->
-    <div class="flex justify-center">
-      <div class="w-full max-w-3xl relative">
-        
-        <!-- Título sobreposto (adesivo) -->
-        <div class="flex justify-center absolute -top-7 left-0 right-0 z-10">
-          <div class="bg-[#FF8C00] py-2 px-8 rounded-full inline-block shadow-lg">
-            <h3
-              class="text-center leading-normal whitespace-nowrap"
-              style="font-size: clamp(18px, 2.5vw, 36px); font-weight: 800; color: #ffffff;"
-            >
-              Edição Especial de Lançamento!
-            </h3>
-          </div>
-        </div>
-        
-        <!-- Card -->
-        <div class="bg-white rounded-2xl shadow-lg flex flex-col items-center p-6 sm:p-8 text-center pt-12 sm:pt-14">
-          <div class="w-full flex flex-col items-center justify-center gap-2 mt-4">
-            <h3
-              class="leading-snug text-center"
-              style="font-size: clamp(28px, 4vw, 42px); font-weight: 800; color: #1171D3;"
-            >
-              NOVO ÁLBUM 3
-            </h3>
-            <p
-              class="text-center"
-              style="font-size: clamp(20px, 2.4vw, 26px); font-weight: 400; color: #1171D3; max-width: 90%;"
-            >
-              por apenas
-            </p>
-            <p
-              class="text-center"
-              style="font-size: clamp(36px, 4.5vw, 54px); font-weight: 800; color: red;"
-            >
-              R$ 69
-            </p>
-          </div>
-
-          <!-- Lista centralizada -->
-          <div class="w-full flex flex-col items-center gap-2 mt-4 px-4">
-            <div class="flex items-center gap-3 text-center" style="font-size: clamp(16px, 1.8vw, 20px); font-weight: 400; color: #1171D3;">
-              <svg class="flex-shrink-0" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="12" fill="#22C55E"/>
-                <path d="M7 12L10.5 15.5L17.5 8.5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span><span class="font-bold">10 cantigas personalizadas</span>, sendo:</span>
-            </div>
-            <div class="flex items-center gap-3 text-center" style="font-size: clamp(16px, 1.8vw, 20px); font-weight: 400; color: #1171D3;">
-              <svg class="flex-shrink-0" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="12" fill="#22C55E"/>
-                <path d="M7 12L10.5 15.5L17.5 8.5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span><span class="font-bold">7 cantigas clássicas</span></span>
-            </div>
-            <div class="flex items-center gap-3 text-center" style="font-size: clamp(16px, 1.8vw, 20px); font-weight: 400; color: #1171D3;">
-              <svg class="flex-shrink-0" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="12" fill="#22C55E"/>
-                <path d="M7 12L10.5 15.5L17.5 8.5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span><span class="font-bold">3 cantigas autorais e inéditas</span></span>
-            </div>
-          </div>
-
-          <!-- Relógios -->
-          <div class="w-full flex items-center justify-center gap-2 mt-12 px-4">
-            <div class="flex-shrink-0">
-              <img
-                src={relogio.src}
-                alt="Relógio"
-                class="w-48 h-auto object-contain"
-              />
-            </div>
-            <h2 class="text-center font-bold whitespace-nowrap" style="font-size: clamp(18px, 2.2vw, 26px); color: red; line-height: 1.3;">
-              A hora é agora, essa condição<br />é por TEMPO ILIMITADO
-            </h2>
-            <div class="flex-shrink-0">
-              <img
-                src={relogio.src}
-                alt="Relógio"
-                class="w-48 h-auto object-contain"
+            <div class="flex-shrink-0 md:-mb-4">
+              <Image 
+                src={tiaoDuvidaImg} 
+                alt="FAQ" 
+                width={320} 
+                height={320} 
+                class="w-40 sm:w-44 md:w-64 lg:w-84 float-slow" 
+                loading="lazy" 
               />
             </div>
           </div>
-
-          <!-- Botão COMPRAR AGORA -->
-          <div class="w-full flex justify-center mt-8">
-            <a
-              href="#produtos"
-              class="btn-red-rounded"
-              data-buy
-              data-buy-name="Cantigas Personalizadas"
-              data-buy-price="R$ 47,00"
-              style="display: inline-flex; align-items: center; gap: 0.75rem; background: #E63946; color: white; font-weight: 700; font-size: 20px; padding: 0.7rem 2.5rem; border-radius: 9999px; text-decoration: none; transition: 0.2s; box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);"
-              onmouseover="this.style.backgroundColor='#c1121f'"
-              onmouseout="this.style.backgroundColor='#E63946'"
-            >
-              COMPRAR AGORA
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="9" cy="21" r="1"></circle>
-                <circle cx="20" cy="21" r="1"></circle>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-              </svg>
-            </a>
+          <div class="mt-8 md:mt-12">
+            <FaqAccordion />
           </div>
-                    
-          <!-- Card laranja - Pré-venda exclusiva -->
-          <div class="w-full mt-8">
-            <div class="bg-[#FF8C00] rounded-2xl py-6 px-6 shadow-md flex flex-col items-center">
-              <!-- Estrela branca maior -->
-              <svg class="w-24 h-24 mb-1" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
-              </svg>
-              <h3
-                class="text-center font-bold"
-                style="font-size: clamp(18px, 2vw, 45px); color: #ffffff; letter-spacing: 0.5px;"
-              >
-                Pré-venda exclusiva
-              </h3>
-              
-              <!-- Lista com bolinhas -->
-              <ul class="mt-4 text-left text-white" style="font-size: clamp(14px, 1.5vw, 25px); font-weight: 400; line-height: 1.8; list-style-type: disc; padding-left: 20px;">
-                <li>Antes do lançamento oficial para o público geral, estamos abrindo um número limitado de gravações para clientes que já conhecem nosso trabalho.</li>
-                <li>Depois do lançamendo os nomes que ainda não estiverem gravados terão custo adicional de estúdio.</li>
-                <li>E as novas gravações poderão entrar em fila de produção e demorar para entregar.</li>
-                <li>Por isso, essa é a melhor oportunidade para garantir o Álbum 3.</li>
-              </ul>
-            </div>
-          </div>
-
-
         </div>
+      </section>
+
+      <!-- BOTAO DE DUVIDA DO FAQ - RESPONSIVO -->
+      <section class="bg-[#EDFDD6] py-12 md:py-20 text-center section-compact px-4" style="content-visibility: auto; contain-intrinsic-size: 0 300px;">
+        <p style="font-size: clamp(18px, 3.5vw, 32px); font-weight: 700; color: #599313;">AINDA FICOU COM ALGUMA DÚVIDA?</p>
+        <p class="mt-2 text-foreground/80" style="color:#599313; font-size: clamp(12px, 2vw, 25px); font-weight: 500;">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
         
-      </div>
-    </div>
-
-  </div>
-</section>
-
-
-
-
-    <!-- PLAYER SECTION -->
-    <PlayerSection />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- TESTIMONIALS -->
-<section class="section-compact bg-[white] pt-28 pb-16 md:pt-10 md:pb-16 px-0 flex flex-col items-center" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
-  <div class="text-center mb-8 md:mb-20 px-4">
-    <h2 style="color: #599313; font-size: clamp(26px, 6vw, 48px); font-weight: 800; line-height: 1.1;">
-      Criando lembranças<br />que ficam para sempre
-    </h2>
-  </div>
-  
-  <!-- Container do fundo azul infinito -->
-  <div class="relative w-full bg-[#EDFDD6] flex justify-center" style="border-radius: 0;">
-    <!-- Container interno com largura máxima para o conteúdo -->
-    <div class="relative w-full max-w-4xl p-8 md:p-12 min-h-[400px] flex flex-col items-center justify-center">
-      
-      <div class="absolute -top-16 -left-1 w-36 sm:w-44 md:w-60 lg:w-72 xl:w-96 md:-top-28 md:-left-4 lg:-top-36 lg:-left-16 xl:-top-44 xl:-left-24 z-10">
-        <Image
-          src={mascoteImg}
-          alt="Mascote Camaleão"
-          width={400}
-          height={347}
-          class="w-full h-auto"
-          loading="lazy"
-        />
-      </div>
-
-<div class="absolute top-2 right-8 flex gap-1">
-  {
-    [0, 1, 2, 3, 4].map((i) => (
-      <Star className="fill-yellow-400 text-yellow-400 w-8 h-8 md:w-12 md:h-12" />
-    ))
-  }
-</div>
-
-      <!-- Carrossel de depoimentos -->
-      <div class="w-full overflow-hidden rounded-2xl" id="dep-track-wrapper">
-        <div id="dep-track" class="flex w-full items-start transition-transform duration-500 ease-in-out">
-
-          <!-- Slide 1: prioritário sozinho -->
-          <div class="w-full flex-shrink-0">
-            <img
-              src="/imagens/depoimentos/depoimento_prioritario.jpeg"
-              alt="Depoimento"
-              class="w-full h-auto rounded-2xl object-contain"
-              loading="lazy"
-              width="800"
-              height="600"
-            />
-          </div>
-
-          <!-- Slides seguintes: quatro depoimentos por slide -->
-          {testimonialSlides.map((slide, slideIndex) => (
-            <div class="w-full flex-shrink-0 flex flex-col gap-3 pt-10">
-              {slide.map((src, i) => (
-                <img
-                  src={src}
-                  alt={`Depoimento ${slideIndex * 4 + i + 2}`}
-                  class="w-full h-auto rounded-xl object-contain"
-                  loading="lazy"
-                  width="800"
-                  height="600"
-                />
-              ))}
-            </div>
-          ))}
-
-        </div>
-      </div>
-
-      <button
-        id="dep-prev"
-        class="absolute left-[-40px] md:left-[-60px] top-1/2 -translate-y-1/2 hover:scale-110 transition z-20"
-        aria-label="Anterior"
-        style="color: #599313;"
-      >
-        <ChevronLeft size={64} strokeWidth={3} />
-      </button>
-      <button
-        id="dep-next"
-        class="absolute right-[-40px] md:right-[-60px] top-1/2 -translate-y-1/2 hover:scale-110 transition z-20"
-        aria-label="Próximo"
-        style="color: #599313;"
-      >
-        <ChevronRight size={64} strokeWidth={3} />
-      </button>
-
-      <script>
-        const track = document.getElementById('dep-track') as HTMLElement;
-        const wrapper = document.getElementById('dep-track-wrapper') as HTMLElement;
-        const total = track ? track.children.length : 0;
-        let current = 0;
-
-        function syncHeight() {
-          if (!wrapper || !track) return;
-          const slide = track.children[current] as HTMLElement;
-          if (slide && slide.offsetHeight > 0) {
-            wrapper.style.height = slide.offsetHeight + 'px';
-          }
-        }
-
-        function goTo(index: number) {
-          current = (index + total) % total;
-          track.style.transform = `translateX(-${current * 100}%)`;
-          syncHeight();
-        }
-
-        document.getElementById('dep-prev')?.addEventListener('click', () => goTo(current - 1));
-        document.getElementById('dep-next')?.addEventListener('click', () => goTo(current + 1));
-
-        // Atualiza altura quando imagens carregarem (lazy)
-        track.querySelectorAll('img').forEach((img) => {
-          if (!(img as HTMLImageElement).complete) {
-            img.addEventListener('load', syncHeight);
-          }
-        });
-
-        syncHeight();
-      </script>
-    </div>
-  </div>
-
-  <a
-    href="#produtos"
-    class="mt-10 btn-red-rounded"
-  >
-    EU TAMBÉM QUERO
-    <ShoppingCart size={20} />
-  </a>
-</section>
-
-
-
-
-
-<section
-  class="relative py-16 md:py-32 overflow-hidden flex flex-col justify-center"
-  style="background-color: #DCF4FF; content-visibility: auto; contain-intrinsic-size: 0 600px;"
->
-  <div class="container flex flex-col items-center gap-10 md:gap-16">
-
-    <!-- WRAPPER COM MESMA LARGURA DO CARD -->
-    <div class="w-full max-w-3xl flex flex-col items-center sm:items-start gap-10 md:gap-16">
-
-    <div class="relative z-10 text-primary-foreground text-center flex flex-col sm:flex-row items-center justify-start gap-2 sm:gap-0">
-      <img
-        src={microfone.src}
-        alt="Fone de ouvido amarelo"
-        width={360}
-        height={360}
-        class="w-12 h-12 sm:w-16 sm:h-16 md:w-28 md:h-28 lg:w-36 lg:h-36 object-contain flex-shrink-0 sm:-mr-3 md:-mr-6"
-      />
-      <h2
-        class="leading-tight text-center sm:text-left sm:ml-4 md:ml-8"
-        aria-label="Ouça como ficou o novo álbum 3"
-        style="font-size: clamp(24px, 6vw, 60px); font-weight: 800; line-height: 1.15; color: #1171D3"
-      >
-        <span class="block whitespace-nowrap">Só falta gravar o</span>
-        <span class="block whitespace-nowrap">nome da sua criança</span>
-      </h2>
-    </div>
-
-<div class="bg-white rounded-2xl shadow-lg w-full flex flex-col sm:flex-row items-center gap-5 sm:gap-8 p-6 sm:p-10">
-
-  <!-- TEXTO + PLAYER (ESQUERDA) -->
-  <div class="flex-1 min-w-0 flex flex-col items-center sm:items-center text-center sm:text-center justify-center gap-6">
-    <h3
-      class="leading-snug"
-      style="font-size: clamp(20px, 3vw, 30px); font-weight: 800; color: #1171D3;"
-    >
-      QUERO PARTICIPAR DO<br />
-      PRÉ-LANÇAMENTO
-    </h3>
-    
-    <!-- Botão GARANTIR EDIÇÃO ESPECIAL -->
-    <div class="flex justify-center mt-2">
-      <a
-        href="#produtos"
-        class="btn-red-rounded"
-        style="display: inline-flex; align-items: center; gap: 0.75rem; background: #E63946; color: white; font-weight: 700; font-size: 0.95rem; padding: 0.7rem 2.2rem; border-radius: 9999px; text-decoration: none; transition: 0.2s; box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);"
-        onmouseover="this.style.backgroundColor='#c1121f'"
-        onmouseout="this.style.backgroundColor='#E63946'"
-      >
-        GARANTIR EDIÇÃO ESPECIAL
-      </a>
-    </div>
-  </div>
-
-  <!-- IMAGEM DO PRODUTO (DIREITA) -->
-  <div class="flex-shrink-0">
-    <img
-      src={capa_album3.src}
-      alt="Caixa Cantigas Personalizadas 3"
-      width={724}
-      height={890}
-      class="w-40 sm:w-48 md:w-56 lg:w-60 h-auto object-contain"
-    />
-  </div>
-
-</div>
-
-    </div>
-  </div>
-</section>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <!-- FAQ -->
-    <section class="py-20" style="background-color: #EDFDD6; content-visibility: auto; contain-intrinsic-size: 0 700px;">
-      <div class="container" style="max-width: 820px;">
-        <div class="flex flex-row items-center gap-4 md:flex-row md:justify-between md:items-end">
-          <div class="text-left">
-            <h2 class="mt-1" style="color: #599313; font-size: clamp(32px, 7vw, 56px); font-weight: 800;">Perguntas frequentes</h2>
-          </div>
-          <div class="-mb-4">
-            <Image src={tiaoDuvidaImg} alt="FAQ" width={320} height={320} class="w-56 md:w-72 lg:w-80 float-slow" loading="lazy" />
-          </div>
-        </div>
-        <div class="mt-12">
-          <FaqAccordion />
-        </div>
-      </div>
-    </section>
-
-<!--BOTAO DE DUVIDA DO FAQ -->
-<section class="bg-[#EDFDD6] py-20 text-center section-compact" style="content-visibility: auto; contain-intrinsic-size: 0 300px;">
-  <p style="font-size: clamp(20px, 4vw, 32px); font-weight: 700; color: #599313;">AINDA FICOU COM ALGUMA DÚVIDA?</p>
-  <p class="mt-2 text-foreground/80" style="color:#599313; font-size: clamp(13px, 2.5vw, 25px); font-weight: 500;">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
-  
-<a
-  href="https://wa.me/message/FFKR2R4DDO27M1"
-  data-wa-track
-  data-wa-text="Olá! Tenho dúvidas sobre as cantigas personalizadas e gostaria de mais informações."
-  data-wa-source="faq_duvida"
-  target="_blank"
-  rel="noopener noreferrer"
-  class="mt-5 inline-flex items-center gap-3 text-white px-6 sm:px-7 py-[14px] rounded-full shadow-lg transition-transform hover:scale-105 font-bold"
-  style="background: #72BC44; font-size: 17px;"
->
-  PRECISO DE MAIS INFORMAÇÕES
-
-  <Image
-    src={whatsappIcon}
-    alt="WhatsApp"
-    width={32}
-    height={32}
-    class="h-8 w-8"
-  />
-</a>
-
-
-</section>
-      <!-- FOOTER -->
+        <a
+          href="https://wa.me/message/FFKR2R4DDO27M1"
+          data-wa-track
+          data-wa-text="Olá! Tenho dúvidas sobre as cantigas personalizadas e gostaria de mais informações."
+          data-wa-source="faq_duvida"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mt-4 md:mt-5 inline-flex items-center gap-3 text-white px-5 sm:px-7 py-3 rounded-full shadow-lg transition-transform hover:scale-105 font-bold"
+          style="background: #72BC44; font-size: clamp(14px, 1.5vw, 17px);"
+        >
+          PRECISO DE MAIS INFORMAÇÕES
+
+          <Image
+            src={whatsappIcon}
+            alt="WhatsApp"
+            width={32}
+            height={32}
+            class="h-6 w-6 md:h-8 md:w-8"
+          />
+        </a>
+      </section>
+
+      <!-- FOOTER - RESPONSIVO -->
       <footer>
-        <div class="bg-card pt-6 pb-14">
+        <div class="bg-card pt-6 pb-10 md:pb-14 px-4">
           <div class="container">
-            <div class="mx-auto flex h-28 md:h-40 w-full max-w-[240px] md:max-w-none md:w-96 items-center justify-center rounded-2xl overflow-hidden">
+            <div class="mx-auto flex h-24 md:h-32 lg:h-40 w-full max-w-[180px] md:max-w-none md:w-72 lg:w-96 items-center justify-center rounded-2xl overflow-hidden">
               <Image
                 src={logoImg}
                 alt="Logo Tião Camaleão"
@@ -1380,14 +602,14 @@ const testimonialSlides = Array.from(
             </div>
             <h3
               class="mt-2 text-center text-foreground"
-              style={{ fontFamily: "'Nunito Variable', system-ui, sans-serif", fontSize: "25px", fontWeight: 700 , color: "#333" }}
+              style={{ fontFamily: "'Nunito Variable', system-ui, sans-serif", fontSize: "clamp(18px, 2.5vw, 25px)", fontWeight: 700 , color: "#333" }}
             >
               Cantigas feitas com carinho<br />da nossa família para a sua.
             </h3>
-            <div class="mx-auto mt-6 max-w-3xl flex flex-row items-center gap-0 text-sm text-muted-foreground">
+            <div class="mx-auto mt-6 max-w-3xl flex flex-col md:flex-row items-center gap-4 md:gap-0 text-sm text-muted-foreground">
               <!-- Coluna esquerda: segurança -->
-              <div class="flex-1 space-y-2 pr-4 text-right" style="font-size: 11px;">
-                <p class="flex items-center justify-end gap-1.5">
+              <div class="w-full md:w-1/2 space-y-2 text-center md:text-right md:pr-4" style="font-size: clamp(10px, 1.2vw, 11px);">
+                <p class="flex items-center justify-center md:justify-end gap-1.5">
                   <Lock className="h-4 w-4 flex-shrink-0 text-accent" />
                   <span class="font-bold text-foreground">Compra segura</span>
                 </p>
@@ -1395,10 +617,9 @@ const testimonialSlides = Array.from(
                 <p>Entrega digital rápida e segura</p>
               </div>
               <!-- Separador azul vertical -->
-              <div class="self-stretch w-[2px] flex-shrink-0" style="background:#DCF4FF; border-radius:1px;"></div>
-              <!-- Coluna direita: contatos -->
-              <div class="flex-1 space-y-2 pl-4" style="font-size: 11px; font-weight: 600;">
-                <p class="flex items-center gap-1.5">
+              <div class="hidden md:block self-stretch w-[2px] flex-shrink-0" style="background:#DCF4FF; border-radius:1px;"></div>
+              <div class="w-full md:w-1/2 space-y-2 text-center md:text-left md:pl-4" style="font-size: clamp(10px, 1.2vw, 11px); font-weight: 600;">
+                <p class="flex items-center justify-center md:justify-start gap-1.5">
                   <a href="mailto:ivan@tiaocamaleao.com.br" class="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
                     <span class="grid h-6 w-6 place-items-center rounded-full bg-secondary text-secondary-foreground flex-shrink-0">
                       <Mail className="h-3.5 w-3.5" />
@@ -1406,7 +627,7 @@ const testimonialSlides = Array.from(
                     <span class="break-all">ivan@tiaocamaleao.com.br</span>
                   </a>
                 </p>
-                <p class="flex items-center gap-1.5">
+                <p class="flex items-center justify-center md:justify-start gap-1.5">
                   <a href="https://wa.me/message/FFKR2R4DDO27M1" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
                       <span class="flex-shrink-0">
                         <Image
@@ -1414,13 +635,13 @@ const testimonialSlides = Array.from(
                           alt="WhatsApp"
                           width={24}
                           height={24}
-                          class="h-6 w-6"
+                          class="h-5 w-5 md:h-6 md:w-6"
                         />
                       </span>
                     (37) 99199-6545
                   </a>
                 </p>
-                <p class="flex items-center gap-1.5">
+                <p class="flex items-center justify-center md:justify-start gap-1.5">
                   <a href="https://instagram.com/tiaocamaleao" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
                     <span class="grid h-6 w-6 place-items-center rounded-full text-card flex-shrink-0" style={{ background: "linear-gradient(135deg, hsl(330 80% 55%), hsl(28 100% 60%))" }}>
                       <Instagram className="h-3.5 w-3.5" />
@@ -1433,11 +654,11 @@ const testimonialSlides = Array.from(
           </div>
         </div>
         <div
-          class="py-8 text-center leading-relaxed"
-          style={{ background: "hsl(var(--secondary))", color: "hsl(0 0% 100%)", fontSize: "12px", fontWeight: 600 }}
+          class="py-6 md:py-8 text-center leading-relaxed px-4"
+          style={{ background: "hsl(var(--secondary))", color: "hsl(0 0% 100%)", fontSize: "clamp(10px, 1.2vw, 12px)", fontWeight: 600 }}
         >
           <p>© {year} Tião Camaleão – Todos os direitos reservados</p>
-          <p class="mt-3" style="color: #777;">
+          <p class="mt-2 md:mt-3" style="color: #777;">
             A marca Tião Camaleão é operada pela Agência<br />
             Futuro Marketing Ltda – CNPJ: 15.727.842/0001-17
           </p>
@@ -1445,6 +666,7 @@ const testimonialSlides = Array.from(
       </footer>
     </div>
 
+    <!-- Scripts existentes mantidos -->
     <script is:inline>
       (function () {
         var video = document.getElementById('hero-video');
