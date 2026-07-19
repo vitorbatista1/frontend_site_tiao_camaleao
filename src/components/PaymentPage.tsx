@@ -28,6 +28,12 @@ interface OrderData {
   productPrice: string;
   total: string;
   gravacaoItems?: GravacaoItem[];
+  // Campanhas de álbum único (ex.: campanha2) não oferecem order bump —
+  // não existe álbum complementar pra sugerir e o produto já é fechado.
+  skipOrderBumps?: boolean;
+  // Página de onde o checkout foi aberto (ex.: "/campanha2") — usado pelo
+  // botão "voltar" pra retornar à campanha de origem em vez da home.
+  sourcePath?: string;
 }
 
 interface OrderBump {
@@ -230,21 +236,23 @@ export default function PaymentPage() {
       setOrderData(parsed);
     }
 
-    fetch(`${API_URL}/api/orderbumps?active=true`)
-      .then(r => r.json())
-      .then(json => {
-        if (json.success) {
-          setBumps(json.data.map((b: OrderBump) => ({
-            ...b,
-            originalPrice: Number(b.originalPrice),
-            offerPrice: Number(b.offerPrice),
-            popularText: b.badge ?? '',
-          })));
-        }
-      })
-      .catch(() => {});
+    if (!parsed?.skipOrderBumps) {
+      fetch(`${API_URL}/api/orderbumps?active=true`)
+        .then(r => r.json())
+        .then(json => {
+          if (json.success) {
+            setBumps(json.data.map((b: OrderBump) => ({
+              ...b,
+              originalPrice: Number(b.originalPrice),
+              offerPrice: Number(b.offerPrice),
+              popularText: b.badge ?? '',
+            })));
+          }
+        })
+        .catch(() => {});
+    }
 
-    if (parsed) {
+    if (parsed && !parsed.skipOrderBumps) {
       // Combo já contempla todos os álbuns — excluir filhos com combo das sugestões de album bump
       const albumsAPI: Array<{ id: string; tipo: string }> = (parsed as any).albumsAPI ?? [];
       const comboIds = new Set(albumsAPI.filter(a => a.tipo === 'COMBO').map(a => a.id));
@@ -302,7 +310,9 @@ export default function PaymentPage() {
     }
   }, [showSuccessAlert]);
 
-  const handleBack = useCallback(() => { window.location.href = '/'; }, []);
+  const handleBack = useCallback(() => {
+    window.location.href = orderData?.sourcePath || '/';
+  }, [orderData?.sourcePath]);
 
   const calculateTotalWithBumps = useMemo(() => {
     const baseTotal = parseFloat(orderData?.total || '0');
@@ -413,8 +423,8 @@ export default function PaymentPage() {
         ln: nameParts.slice(1).join(' ') || null,
       });
     }
-    if (selectedBumps.length === 0 && selectedAlbumBumps.size === 0) setShowBumpModal(true);
-  }, [selectedBumps.length, selectedAlbumBumps.size, calculateTotalWithBumps]);
+    if (!orderData?.skipOrderBumps && selectedBumps.length === 0 && selectedAlbumBumps.size === 0) setShowBumpModal(true);
+  }, [orderData?.skipOrderBumps, selectedBumps.length, selectedAlbumBumps.size, calculateTotalWithBumps]);
 
   const handleViewBumps = useCallback(() => {
     setShowBumpModal(false);

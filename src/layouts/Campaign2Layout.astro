@@ -136,8 +136,8 @@ const testimonialSlides = Array.from(
       <OucaSectionPagina2 />
 
       <!-- SAMPLE - RESPONSIVO -->
-      <section id="amostra" class="relative w-full" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
-        <div class="w-full pt-8 pb-8 md:pb-0 md:pt-16" style="background: #EDFDD6;">
+      <section id="amostra" class="relative w-full section-compact">
+        <div class="w-full pt-8 pb-8 md:pb-10 md:pt-16" style="background: #EDFDD6;">
           <div class="container max-w-6xl mx-auto px-4 md:px-6 flex flex-col items-center justify-between gap-3 md:gap-8">
             
             <!-- Título -->
@@ -177,6 +177,10 @@ const testimonialSlides = Array.from(
                   <a
                     href="#produtos"
                     class="btn-red-rounded"
+                    data-buy
+                    data-buy-name="Álbum 3"
+                    data-buy-price="R$ 69,00"
+                    data-buy-campaign="campanha2"
                     style="display: inline-flex; align-items: center; gap: 0.75rem; background: #E63946; color: white; font-weight: 700; font-size: clamp(14px, 1.5vw, 18px); padding: 0.6rem 1.8rem; border-radius: 9999px; text-decoration: none; transition: 0.2s; box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);"
                     onmouseover="this.style.backgroundColor='#c1121f'"
                     onmouseout="this.style.backgroundColor='#E63946'"
@@ -204,7 +208,7 @@ const testimonialSlides = Array.from(
       >
         <div class="container px-4">
           <div class="text-center mb-8 md:mb-16">
-            <h2 class="mt-2 leading-tight" style="font-size: clamp(26px, 5vw, 68px); font-weight: 800; color: #599313;">
+            <h2 class="mt-2 leading-tight" style="font-size: clamp(28px, 5vw, 68px); font-weight: 800; color: #599313;">
               Pela primeira vez um albúm<br> com músicas autorais e inéditas
             </h2>
           </div>
@@ -231,7 +235,7 @@ const testimonialSlides = Array.from(
                 </p>
                 <hr class="border-t-2 w-full" style="border-color: #d9e6b8;" />
                 <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3">
-                  <span class="font-bold" style="color: #4caf1f; font-size: clamp(1rem, 1.5vw, 1.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
+                  <span class="font-bold" style="color: #4caf1f; font-size: clamp(1.5rem, 1.5vw, 1.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
                     Clique e ouça
                   </span>
 
@@ -289,7 +293,7 @@ const testimonialSlides = Array.from(
                 </p>
                 <hr class="border-t-2 w-full" style="border-color: #d9e6b8;" />
                 <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3">
-                  <span class="font-bold" style="color: #4caf1f; font-size: clamp(1rem, 1.5vw, 1.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
+                  <span class="font-bold" style="color: #4caf1f; font-size: clamp(1.5rem, 1.5vw, 1.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
                     Clique e ouça
                   </span>
 
@@ -347,7 +351,7 @@ const testimonialSlides = Array.from(
                 </p>
                 <hr class="border-t-2 w-full" style="border-color: #d9e6b8;" />
                 <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3">
-                  <span class="font-bold" style="color: #4caf1f; font-size: clamp(1rem, 1.5vw, 1.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
+                  <span class="font-bold" style="color: #4caf1f; font-size: clamp(1.5rem, 1.5vw, 1.8rem); font-family: 'Fredoka', 'Baloo 2', 'Comic Sans MS', sans-serif;">
                     Clique e ouça
                   </span>
 
@@ -411,7 +415,7 @@ const testimonialSlides = Array.from(
       <!-- TESTIMONIALS - RESPONSIVO -->
       <section class="section-compact bg-[white] pt-16 md:pt-10 pb-12 md:pb-16 px-4 flex flex-col items-center" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
         <div class="text-center mb-8 md:mb-20">
-          <h2 style="color: #599313; font-size: clamp(24px, 5vw, 48px); font-weight: 800; line-height: 1.1;">
+          <h2 style="color: #599313; font-size: clamp(40px, 5vw, 48px); font-weight: 800; line-height: 1.1;">
             Criando lembranças<br />que ficam para sempre
           </h2>
         </div>
@@ -523,7 +527,11 @@ const testimonialSlides = Array.from(
         <a
           href="#produtos"
           class="mt-8 md:mt-10 btn-red-rounded"
-          style="font-size: clamp(16px, 2vw, 20px); padding: 8px 24px;"
+          data-buy
+          data-buy-name="Álbum 3"
+          data-buy-price="R$ 69,00"
+          data-buy-campaign="campanha2"
+          style="font-size: clamp(25px, 2vw, 20px); padding: 8px 24px;"
         >
           EU TAMBÉM QUERO
           <ShoppingCart size={20} />
@@ -562,7 +570,7 @@ const testimonialSlides = Array.from(
       <!-- BOTAO DE DUVIDA DO FAQ - RESPONSIVO -->
       <section class="bg-[#EDFDD6] py-12 md:py-20 text-center section-compact px-4" style="content-visibility: auto; contain-intrinsic-size: 0 300px;">
         <p style="font-size: clamp(18px, 3.5vw, 32px); font-weight: 700; color: #599313;">AINDA FICOU COM ALGUMA DÚVIDA?</p>
-        <p class="mt-2 text-foreground/80" style="color:#599313; font-size: clamp(12px, 2vw, 25px); font-weight: 500;">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
+        <p class="mt-2 text-foreground/80" style="color:#599313; font-size: clamp(15px, 2vw, 25px); font-weight: 500;">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
         
         <a
           href="https://wa.me/message/FFKR2R4DDO27M1"
@@ -778,6 +786,7 @@ const testimonialSlides = Array.from(
                 name: btn.dataset.buyName || "Cantigas Personalizadas",
                 price: btn.dataset.buyPrice || "R$ 47,00",
                 combo: btn.hasAttribute("data-buy-combo"),
+                campaign: btn.dataset.buyCampaign || undefined,
               },
             })
           );

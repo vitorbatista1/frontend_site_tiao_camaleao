@@ -146,6 +146,13 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   var productPrice = 0;
   var isCombo = false;
 
+  // Modo "campanha única": usado por campanhas (ex.: campanha2) que vendem um
+  // único álbum ainda sem gravações prévias. Pula a busca por nome (que só
+  // conhece álbum_1/álbum_2) e atribui direto a gravação daquela campanha.
+  var singleCampaignMode = false;
+  var singleCampaignKey = "";
+  var singleGravacao = null;
+
   // var COMBO_GRAVADO_PRICE_FULL = 150;
   // var COMBO_GRAVADO_ONE_MISSING = 120;
   // var GRAVADO_INDIVIDUAL_UM_FALTANDO = 100;
@@ -774,7 +781,21 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
         '<span>Total</span><span>R$ '+calcTotal().replace(".",",")+'</span></div></div>';
   }
 
+  // Card fixo mostrado no modo campanha única: sem opções, sem busca — a
+  // criança já entra direto com a gravação daquela campanha (ex.: Álbum 3).
+  function buildSimplifiedOffer(child) {
+    var sel = child.selectedAlbums || [];
+    if (!sel.length || !singleGravacao) return "";
+    var sub = calcSubtotal(sel, 0);
+    return '<div class="flex items-center gap-3 px-4 py-3 bg-green-50 border-2 border-green-400 rounded-xl">' +
+      '<div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">' + CHECK + '</div>' +
+      '<span class="flex-1 text-sm font-semibold text-green-800 text-left">🎙️ ' + esc(singleGravacao.name) + ' para <strong>' + esc(child.name.trim()) + '</strong></span>' +
+      '<span class="text-sm font-bold text-green-700 flex-shrink-0">R$ ' + sub.toFixed(2).replace(".", ",") + '</span>' +
+    '</div>';
+  }
+
   function resultAreaHtml(child) {
+    if (singleCampaignMode) return buildSimplifiedOffer(child);
     if (child.isSearching) {
       return '<div class="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl border border-gray-200">' +
         '<div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>' +
@@ -802,7 +823,9 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
       '<div class="space-y-4 pt-4">' +
         '<div class="bg-blue-50 rounded-xl p-4 border border-blue-200">' +
           '<p class="text-sm text-blue-800 font-medium mb-1">📝 Adicione o nome das crianças</p>' +
-          '<p class="text-xs text-blue-600">Vamos verificar quais álbuns estão disponíveis para cada nome</p>' +
+          '<p class="text-xs text-blue-600">' + (singleCampaignMode
+            ? "Vamos gravar o álbum com o nome de cada criança"
+            : "Vamos verificar quais álbuns estão disponíveis para cada nome") + '</p>' +
         '</div>' +
         (loadingAlbums?'<div class="flex items-center gap-2 py-2"><div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div><span class="text-xs text-gray-500">Carregando preços...</span></div>':"") +
         '<div id="tc-children" class="space-y-5 max-h-[520px] overflow-y-auto pr-1">'+cards+'</div>' +
@@ -822,6 +845,21 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
       if (!input.classList.contains("tc-child-name")) return;
       var id = input.dataset.id;
       var name = input.value;
+
+      if (singleCampaignMode) {
+        var hasName = name.trim().length > 0;
+        children = children.map(function(c){
+          return c.id === id ? Object.assign({}, c, {
+            name: name,
+            isSearching: false,
+            albumResult: hasName ? { found: false, display_name: name } : null,
+            selectedAlbums: hasName && singleGravacao ? [singleGravacao.id] : []
+          }) : c;
+        });
+        updateResultArea(id);
+        return;
+      }
+
       children = children.map(function(c){
         return c.id === id ? Object.assign({}, c, { name: name, albumResult: null, isSearching: name.trim().length >= 2, selectedAlbums: [] }) : c;
       });
@@ -935,6 +973,10 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     if (children.some(function(c){ return !c.name.trim(); })) {
       alert("Por favor, preencha o nome de todas as crianças"); return false;
     }
+    if (singleCampaignMode) {
+      if (!singleGravacao) { alert("Não foi possível carregar o álbum. Tente novamente."); return false; }
+      return true;
+    }
     var errs = {};
     children.forEach(function(c){
       if (c.albumResult && c.albumResult.found && !(c.selectedAlbums||[]).length) errs[c.id] = "Selecione pelo menos um álbum";
@@ -967,7 +1009,12 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
       .then(function(r){ return r.json(); })
       .then(function(j){
         if (j.success) {
-          albumsAPI = j.data;
+          albumsAPI = singleCampaignMode
+            ? j.data.filter(function(a){ return a.campanha === singleCampaignKey; })
+            : j.data;
+          if (singleCampaignMode) {
+            singleGravacao = albumsAPI.find(function(a){ return a.tipo === "GRAVACAO"; }) || null;
+          }
           var gravs = albumsAPI.filter(function(a){ return a.tipo === "GRAVACAO"; });
           var albumsOnlyCount = albumsAPI.filter(function(a){ return a.tipo === "ALBUM"; }).length;
           if (gravs.length > 0) {
@@ -996,6 +1043,9 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     isCombo = !!detail.combo;
     var _priceRaw = String(detail.price || "0").replace(/[^\d,\.]/g, "").replace(",", ".");
     productPrice = parseFloat(_priceRaw) || 0;
+    singleCampaignMode = !!detail.campaign;
+    singleCampaignKey = detail.campaign ? String(detail.campaign).toUpperCase() : "";
+    singleGravacao = null;
     step = 1;
     childrenCount = 0;
     customer = { fullName: "", email: "", telefone: "" };
@@ -1225,6 +1275,8 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
           customerData: Object.assign({}, customer, { telefone: telefoneComCodigo }), children: childrenClean, albumsAPI: albumsAPI,
           productName: productName, total: calcTotal(), isCombo: isCombo,
           gravacaoItems: gravacaoItems,
+          skipOrderBumps: singleCampaignMode,
+          sourcePath: location.pathname,
           tracking: {
             fbp: getCookie("_fbp"),
             fbc: getFbc(),

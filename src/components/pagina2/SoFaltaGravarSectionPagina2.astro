@@ -11,18 +11,19 @@ import capa_album3 from "../../../public/imagens/campanha2/capa_album3.png";
   <div class="container flex flex-col items-center gap-8 md:gap-12 px-4">
     <div class="w-full max-w-3xl flex flex-col items-center gap-8 md:gap-12">
       <div class="relative z-10 text-primary-foreground text-center flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-0">
+        <!-- Microfone - Subindo mais -->
         <img
           src={microfone.src}
           alt="Microfone"
           width={360}
           height={360}
-          class="object-contain flex-shrink-0 sm:-mr-2 md:-mr-4"
-          style="width: clamp(80px, 15vw, 80px); height: clamp(80px, 15vw, 80px);"
+          class="object-contain flex-shrink-0 sm:-mr-2 md:-mr-4 -mt-12 sm:mt-0"
+          style="width: clamp(120px, 25vw, 80px); height: clamp(120px, 25vw, 80px); margin-bottom: -20px;"
         />
         <h2
-          class="leading-tight text-center"
+          class="leading-tight text-center mt-8 sm:mt-0"
           aria-label="Só falta gravar o nome da sua criança"
-          style="font-size: clamp(35px, 5vw, 60px); font-weight: 800; line-height: 1.15; color: #1171D3"
+          style="font-size: clamp(39px, 5vw, 60px); font-weight: 800; line-height: 1.15; color: #1171D3"
         >
           <span class="block whitespace-nowrap">Só falta gravar o</span>
           <span class="block whitespace-nowrap">nome da sua criança</span>
@@ -33,7 +34,7 @@ import capa_album3 from "../../../public/imagens/campanha2/capa_album3.png";
         class="w-full mt-8 md:mt-12 text-center" 
         style="
           color: #1171D3; 
-          font-size: clamp(20px, 2.8vw, 28px);
+          font-size: clamp(26px, 2.8vw, 28px);
           line-height: 1.6;
           font-weight: 600;
           max-width: 900px;
@@ -51,21 +52,21 @@ import capa_album3 from "../../../public/imagens/campanha2/capa_album3.png";
         <div class="flex-1 min-w-0 flex flex-col items-center sm:items-center text-center sm:text-center justify-center gap-4 md:gap-6 order-1 sm:order-1">
           <h3
             class="leading-snug"
-            style="font-size: clamp(18px, 2.5vw, 30px); font-weight: 800; color: #1171D3;"
+            style="font-size: clamp(25px, 2.5vw, 30px); font-weight: 800; color: #1171D3;"
           >
             QUERO PARTICIPAR DO<br />
             PRÉ-LANÇAMENTO
           </h3>
         </div>
 
-        <!-- Imagem (mobile: no meio) -->
+        <!-- Imagem (mobile: no meio) - AUMENTADA no mobile -->
         <div class="flex-shrink-0 order-2 sm:order-2">
           <img
             src={capa_album3.src}
             alt="Caixa Cantigas Personalizadas 3"
             width={724}
             height={890}
-            class="w-32 sm:w-40 md:w-48 lg:w-56 h-auto object-contain"
+            class="w-64 sm:w-48 md:w-56 lg:w-72 h-auto object-contain"
           />
         </div>
 
@@ -75,7 +76,11 @@ import capa_album3 from "../../../public/imagens/campanha2/capa_album3.png";
             <a
               href="#produtos"
               class="btn-red-rounded"
-              style="display: inline-flex; align-items: center; gap: 0.75rem; background: #E63946; color: white; font-weight: 700; font-size: clamp(14px, 1.5vw, 18px); padding: 0.6rem 1.8rem; border-radius: 9999px; text-decoration: none; transition: 0.2s; box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);"
+              data-buy
+              data-buy-name="Álbum 3"
+              data-buy-price="R$ 69,00"
+              data-buy-campaign="campanha2"
+              style="display: inline-flex; align-items: center; gap: 0.75rem; background: #E63946; color: white; font-weight: 700; font-size: clamp(17px, 1.5vw, 18px); padding: 0.6rem 1.8rem; border-radius: 9999px; text-decoration: none; transition: 0.2s; box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);"
               onmouseover="this.style.backgroundColor='#c1121f'"
               onmouseout="this.style.backgroundColor='#E63946'"
             >

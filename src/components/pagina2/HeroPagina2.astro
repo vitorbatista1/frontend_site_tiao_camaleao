@@ -68,7 +68,7 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
   <header class="hero-header relative bg-white flex flex-col" style="flex: 1; overflow: visible; min-height: 100vh;">
 
     <!-- Logo centralizada no topo -->
-    <div class="relative z-10 w-full flex justify-center -mt-4 pb-8 md:-mt-10 md:pb-2 px-4">
+    <div class="relative z-10 w-full flex justify-center -mt-8 pb-4 md:-mt-10 md:pb-2 px-4">
       <Image
         src={logoImg}
         alt="Tião Camaleão"
@@ -76,7 +76,7 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
         sizes="(max-width: 768px) 288px, (max-width: 1024px) 256px, 320px"
         width={768}
         height={432}
-        class="w-72 md:w-64 lg:w-80"
+        class="w-60 md:w-64 lg:w-80"
         style="height: auto; max-width: 100%;"
       />
     </div>
@@ -86,12 +86,12 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
       <div class="w-full md:max-w-[55%] text-center md:text-left">
       <h1
         class="font-black leading-tight hero-title"
-        style="font-size: clamp(29px, 7vw, 77px); color: #599313; line-height: 1.05; transform: translateY(-20px);"
+        style="font-size: clamp(29px, 7vw, 77px); color: #599313; line-height: 1.05; transform: translateY(-30px); font-weight: 900;"
       >
         <span style="white-space: nowrap;">O álbum mais pedido</span><br /><span style="white-space: nowrap;">finalmente chegou!</span>
       </h1>
 
-      <div class="pre-venda-box" style="transform: translateY(-10px);">
+      <div class="pre-venda-box" style="transform: translateY(-20px);">
         <div class="pre-venda-top" style="font-size: clamp(20px, 2.5vw, 28px);">
           Pré-venda EXCLUSIVA<br>
           para clientes Tião Camaleão.
@@ -103,8 +103,8 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
         </div>
       </div>
 
-        <div class="mt-8 md:mt-10 flex justify-center md:justify-start">
-          <a href="#produtos" class="btn-red-rounded" style="font-size: clamp(18px, 3vw, 26px); font-weight: 600; padding: 8px 24px; white-space: normal; text-align: center;" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">QUERO GARANTIR O MEU</a>
+        <div class="mt-4 md:mt-10 flex justify-center md:justify-start">
+          <a href="#produtos" class="btn-red-rounded" style="font-size: clamp(18px, 3vw, 26px); font-weight: 600; padding: 8px 24px; white-space: normal; text-align: center;" data-buy data-buy-name="Álbum 3" data-buy-price="R$ 69,00" data-buy-campaign="campanha2">QUERO GARANTIR O MEU</a>
         </div>
       </div>
     </div>
@@ -152,17 +152,19 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
      seção seguinte */
   @media (max-width: 767px) {
     .hero-header {
-      min-height: 118vh !important;
+      min-height: 100vh !important;
     }
   }
 
   /* MOBILE: imagem maior, ancorada por posição absoluta (não empurra o header
-     nem a seção seguinte) e vazando um pouco por cima da seção de baixo */
+     nem a seção seguinte) e vazando um pouco por cima da seção de baixo.
+     Subida em relação à versão anterior: bottom menos negativo = imagem mais
+     alta na tela. */
   @media (max-width: 767px) {
     .hero-img {
       position: absolute !important;
       left: 50%;
-      bottom: -150px !important;
+      bottom: calc(-30px - 18vh) !important;
       margin: 0 !important; /* zera o margin-top/bottom legado do global.css que empurrava a imagem de forma imprevisível */
       width: min(250%, 1050px);
       max-width: 1050px;
@@ -176,7 +178,7 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
     .hero-img {
       width: min(270%, 1100px);
       max-width: 1100px;
-      bottom: -155px !important;
+      bottom: calc(-35px - 18vh) !important;
     }
   }
 
@@ -185,7 +187,7 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
     .hero-img {
       width: min(230%, 980px);
       max-width: 980px;
-      bottom: -142px !important;
+      bottom: calc(-22px - 18vh) !important;
     }
   }
 
