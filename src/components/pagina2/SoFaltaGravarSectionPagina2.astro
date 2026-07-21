@@ -17,8 +17,8 @@ import capa_album3 from "../../../public/imagens/campanha2/capa_album3.png";
           alt="Microfone"
           width={360}
           height={360}
-          class="object-contain flex-shrink-0 sm:-mr-2 md:-mr-4 -mt-12 sm:mt-0"
-          style="width: clamp(120px, 25vw, 80px); height: clamp(120px, 25vw, 80px); margin-bottom: -20px;"
+          class="mic-icon object-contain flex-shrink-0 sm:-mr-2 md:-mr-4 -mt-12 sm:mt-0"
+          style="margin-bottom: -20px;"
         />
         <h2
           class="leading-tight text-center mt-8 sm:mt-0"
@@ -45,11 +45,11 @@ import capa_album3 from "../../../public/imagens/campanha2/capa_album3.png";
         Garanta acesso antecipado ao Álbum 3 enquanto ainda há vagas de gravação disponíveis nesta pré-venda. Uma edição criada para famílias que acompanham o Tião há anos — e que agora terão acesso antecipado a um lançamento único.
       </p>
 
-      <!-- Card com layout modificado para mobile -->
-      <div class="bg-white rounded-2xl shadow-lg w-full flex flex-col sm:flex-row items-center gap-5 sm:gap-8 p-6 sm:p-8 md:p-10">
+      <!-- Card sempre em coluna: texto, imagem, botão -->
+      <div class="bg-white rounded-2xl shadow-lg w-full flex flex-col items-center gap-5 sm:gap-8 p-6 sm:p-8 md:p-10">
         
-        <!-- Conteúdo: Título (mobile: em cima) -->
-        <div class="flex-1 min-w-0 flex flex-col items-center sm:items-center text-center sm:text-center justify-center gap-4 md:gap-6 order-1 sm:order-1">
+        <!-- Título -->
+        <div class="w-full flex flex-col items-center text-center justify-center gap-4 md:gap-6">
           <h3
             class="leading-snug"
             style="font-size: clamp(25px, 2.5vw, 30px); font-weight: 800; color: #1171D3;"
@@ -59,8 +59,8 @@ import capa_album3 from "../../../public/imagens/campanha2/capa_album3.png";
           </h3>
         </div>
 
-        <!-- Imagem (mobile: no meio) - AUMENTADA no mobile -->
-        <div class="flex-shrink-0 order-2 sm:order-2">
+        <!-- Imagem -->
+        <div class="flex-shrink-0">
           <img
             src={capa_album3.src}
             alt="Caixa Cantigas Personalizadas 3"
@@ -70,8 +70,8 @@ import capa_album3 from "../../../public/imagens/campanha2/capa_album3.png";
           />
         </div>
 
-        <!-- Botão (mobile: embaixo) -->
-        <div class="flex-1 min-w-0 flex flex-col items-center sm:items-center text-center sm:text-center justify-center gap-4 md:gap-6 order-3 sm:order-3">
+        <!-- Botão -->
+        <div class="w-full flex flex-col items-center text-center justify-center gap-4 md:gap-6">
           <div class="flex justify-center">
             <a
               href="#produtos"
@@ -92,3 +92,17 @@ import capa_album3 from "../../../public/imagens/campanha2/capa_album3.png";
     </div>
   </div>
 </section>
+
+<style>
+  .mic-icon {
+    width: 120px;
+    height: 120px;
+  }
+
+  @media (min-width: 1024px) {
+    .mic-icon {
+      width: clamp(140px, 9vw, 220px);
+      height: clamp(140px, 9vw, 220px);
+    }
+  }
+</style>
