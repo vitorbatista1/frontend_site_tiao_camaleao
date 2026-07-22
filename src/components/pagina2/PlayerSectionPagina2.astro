@@ -28,15 +28,15 @@ import telefoneImg from "../../../public/imagens/campanha2/telefone.png";
   
   <!-- Título - Direita -->
   <div class="ps-hero-right">
-    <h1 class="font-bold leading-tight" style="font-size: clamp(45px, 4vw, 46px); color: #1171D3;">
+    <h1 class="ps-title font-bold leading-tight">
       Simples de ouvir<br />e de presentear
     </h1>
   </div>
 </div>
 
 <!-- Descrição - Alinhada à esquerda -->
-<div class="ps-desc-wrapper" style="margin: 40px 0;">
-  <p class="ps-desc" style="font-size: clamp(25px, 4vw, 46px);">
+<div class="ps-desc-wrapper">
+  <p class="ps-desc">
     As cantigas ficam organizadas em uma página exclusiva do Tião para você ouvir, baixar, presentear e compartilhar com quem desejar, onde estiver.
   </p>
 </div>
@@ -177,16 +177,30 @@ import telefoneImg from "../../../public/imagens/campanha2/telefone.png";
   flex: 1;
 }
 
+/* Título — valor base (usado antes de aplicar o fixo de desktop abaixo) */
+.ps-title {
+  font-size: clamp(45px, 4vw, 46px);
+  color: #1171D3;
+  margin: 0;
+}
+
+/* Desktop: valor fixo em px (não depende de vw) — troque só este número */
+@media (min-width: 769px) {
+  .ps-title {
+    font-size: 48px;
+  }
+}
+
 /* Descrição - alinhada à esquerda */
 .ps-desc-wrapper {
   display: flex;
   justify-content: flex-start;
-  margin-bottom: 1.5rem;
+  margin: 40px 0;
   width: 100%;
 }
 
 .ps-desc {
-  font-size: clamp(18px, 1.6vw, 22px);
+  font-size: clamp(25px, 4vw, 46px);
   color: #1171D3;
   line-height: 1.6;
   text-align: left;
@@ -194,6 +208,13 @@ import telefoneImg from "../../../public/imagens/campanha2/telefone.png";
   margin: 0;
   font-weight: 700;
   width: 100%;
+}
+
+/* Desktop: valor fixo em px (não depende de vw) — troque só este número */
+@media (min-width: 769px) {
+  .ps-desc {
+    font-size: 28px;
+  }
 }
 
 /* Features */

@@ -82,6 +82,8 @@ import productBox from "../../../public/imagens/campanha2/album3.png";
                 ></span>
               ))}
             </span>
+
+            <span class="text-sm font-semibold" style="color: #1171D3; min-width: 74px;" id="audio-time">0:00 / 0:00</span>
           </button>
 
           <audio id="audio-sample" src="/audio/cantigas-preview.mp3" preload="none"></audio>
@@ -115,24 +117,44 @@ import productBox from "../../../public/imagens/campanha2/album3.png";
   const audio = document.getElementById('audio-sample') as HTMLAudioElement;
   const playIcon = document.getElementById('play-icon');
   const pauseIcon = document.getElementById('pause-icon');
+  const timeEl = document.getElementById('audio-time');
+
+  function fmtTime(sec: number) {
+    if (!isFinite(sec) || sec < 0) sec = 0;
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  function updateTime() {
+    if (!timeEl || !audio) return;
+    timeEl.textContent = `${fmtTime(audio.currentTime)} / ${fmtTime(audio.duration)}`;
+  }
+
+  audio?.addEventListener('loadedmetadata', updateTime);
+  audio?.addEventListener('timeupdate', updateTime);
 
   btn?.addEventListener('click', () => {
     if (audio.paused) {
       audio.play();
-      btn.classList.add('playing');
-      playIcon?.classList.add('hidden');
-      pauseIcon?.classList.remove('hidden');
     } else {
       audio.pause();
-      btn.classList.remove('playing');
-      playIcon?.classList.remove('hidden');
-      pauseIcon?.classList.add('hidden');
     }
   });
 
-  audio?.addEventListener('ended', () => {
+  audio?.addEventListener('play', () => {
+    btn?.classList.add('playing');
+    playIcon?.classList.add('hidden');
+    pauseIcon?.classList.remove('hidden');
+  });
+
+  audio?.addEventListener('pause', () => {
     btn?.classList.remove('playing');
     playIcon?.classList.remove('hidden');
     pauseIcon?.classList.add('hidden');
+  });
+
+  audio?.addEventListener('ended', () => {
+    updateTime();
   });
 </script>

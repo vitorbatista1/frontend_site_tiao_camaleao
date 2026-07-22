@@ -151,7 +151,7 @@ import mockup2Img from "../../public/imagens/mockup2.png";
   }
 
   .ps-title {
-    font-size: clamp(35px, 9vw, 60px);
+    font-size: clamp(37px, 9vw, 62px);
     font-weight: 900;
     color: white;
     line-height: 1.1;
@@ -159,8 +159,16 @@ import mockup2Img from "../../public/imagens/mockup2.png";
     white-space: nowrap;
   }
 
+  /* Desktop: valor fixo em px (não depende de vw), assim a edição manual
+     sempre reflete na tela — troque só este número para ajustar o tamanho */
+  @media (min-width: 769px) {
+    .ps-title {
+      font-size: 76px;
+    }
+  }
+
   .ps-desc {
-    font-size: clamp(14px, 2.5vw, 18px);
+    font-size: clamp(9px, 2.5vw, 18px);
     color: rgba(255,255,255,0.85);
     line-height: 1.65;
     margin: 0;

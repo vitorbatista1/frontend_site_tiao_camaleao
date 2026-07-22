@@ -174,7 +174,7 @@ const testimonialSlides = Array.from(
                 
                 <!-- Botão QUERO COMPRAR -->
                 <div class="flex justify-center mt-2">
-                  
+                  <a
                     href="#produtos"
                     class="btn-red-rounded"
                     data-buy
@@ -246,8 +246,12 @@ const testimonialSlides = Array.from(
                     aria-label="Reproduzir áudio"
                     data-audio-btn
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                    <svg data-play-icon xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
                       <path d="M8 5v14l11-7z" />
+                    </svg>
+                    <svg data-pause-icon class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="white">
+                      <rect x="6" y="5" width="4" height="14" />
+                      <rect x="14" y="5" width="4" height="14" />
                     </svg>
                   </button>
 
@@ -263,6 +267,8 @@ const testimonialSlides = Array.from(
                     <span class="w-[3px] rounded" style="height:55%; background:#2b2b2b;"></span>
                     <span class="w-[3px] rounded" style="height:35%; background:#2b2b2b;"></span>
                   </div>
+
+                  <span class="font-semibold" style="color:#2b2b2b; font-size: clamp(12px, 1.2vw, 14px); min-width: 68px;" data-audio-time>0:00 / 0:00</span>
 
                   <audio data-audio-el src="/audio/as-cores-do-tiao.mp3"></audio>
                 </div>
@@ -304,8 +310,12 @@ const testimonialSlides = Array.from(
                     aria-label="Reproduzir áudio"
                     data-audio-btn
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                    <svg data-play-icon xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
                       <path d="M8 5v14l11-7z" />
+                    </svg>
+                    <svg data-pause-icon class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="white">
+                      <rect x="6" y="5" width="4" height="14" />
+                      <rect x="14" y="5" width="4" height="14" />
                     </svg>
                   </button>
 
@@ -321,6 +331,8 @@ const testimonialSlides = Array.from(
                     <span class="w-[3px] rounded" style="height:55%; background:#2b2b2b;"></span>
                     <span class="w-[3px] rounded" style="height:35%; background:#2b2b2b;"></span>
                   </div>
+
+                  <span class="font-semibold" style="color:#2b2b2b; font-size: clamp(12px, 1.2vw, 14px); min-width: 68px;" data-audio-time>0:00 / 0:00</span>
 
                   <audio data-audio-el src="/audio/musica-2.mp3"></audio>
                 </div>
@@ -362,8 +374,12 @@ const testimonialSlides = Array.from(
                     aria-label="Reproduzir áudio"
                     data-audio-btn
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                    <svg data-play-icon xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
                       <path d="M8 5v14l11-7z" />
+                    </svg>
+                    <svg data-pause-icon class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="white">
+                      <rect x="6" y="5" width="4" height="14" />
+                      <rect x="14" y="5" width="4" height="14" />
                     </svg>
                   </button>
 
@@ -380,6 +396,8 @@ const testimonialSlides = Array.from(
                     <span class="w-[3px] rounded" style="height:35%; background:#2b2b2b;"></span>
                   </div>
 
+                  <span class="font-semibold" style="color:#2b2b2b; font-size: clamp(12px, 1.2vw, 14px); min-width: 68px;" data-audio-time>0:00 / 0:00</span>
+
                   <audio data-audio-el src="/audio/musica-3.mp3"></audio>
                 </div>
               </div>
@@ -388,13 +406,43 @@ const testimonialSlides = Array.from(
         </div>
 
         <script>
-          // Toca/pausa o áudio ao clicar no botão de play de cada card
-          document.querySelectorAll('[data-audio-btn]').forEach((btn) => {
-            btn.addEventListener('click', () => {
-              const card = btn.closest('.bg-white');
-              const audio = card ? card.querySelector('[data-audio-el]') : null;
-              if (!audio) return;
+          // Toca/pausa o áudio ao clicar no botão de play de cada card,
+          // alterna o ícone e mostra o tempo tocado / duração total.
+          function fmtTime(sec: number) {
+            if (!isFinite(sec) || sec < 0) sec = 0;
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+          }
 
+          document.querySelectorAll('[data-audio-btn]').forEach((btn) => {
+            const card = btn.closest('.bg-white');
+            const audio = card?.querySelector('[data-audio-el]') as HTMLAudioElement | null;
+            const playIcon = btn.querySelector('[data-play-icon]');
+            const pauseIcon = btn.querySelector('[data-pause-icon]');
+            const timeEl = card?.querySelector('[data-audio-time]');
+            if (!audio) return;
+
+            const updateTime = () => {
+              if (!timeEl) return;
+              timeEl.textContent = `${fmtTime(audio.currentTime)} / ${fmtTime(audio.duration)}`;
+            };
+
+            audio.addEventListener('loadedmetadata', updateTime);
+            audio.addEventListener('timeupdate', updateTime);
+            audio.addEventListener('play', () => {
+              playIcon?.classList.add('hidden');
+              pauseIcon?.classList.remove('hidden');
+            });
+            audio.addEventListener('pause', () => {
+              playIcon?.classList.remove('hidden');
+              pauseIcon?.classList.add('hidden');
+            });
+            audio.addEventListener('ended', () => {
+              updateTime();
+            });
+
+            btn.addEventListener('click', () => {
               if (audio.paused) {
                 audio.play();
               } else {
@@ -523,7 +571,7 @@ const testimonialSlides = Array.from(
             </script>
           </div>
         </div>
-
+        <a
         
           href="#produtos"
           class="mt-8 md:mt-10 btn-red-rounded"
@@ -572,7 +620,7 @@ const testimonialSlides = Array.from(
         <p style="font-size: clamp(18px, 3.5vw, 32px); font-weight: 700; color: #599313;">AINDA FICOU COM ALGUMA DÚVIDA?</p>
         <p class="mt-2 text-foreground/80" style="color:#599313; font-size: clamp(15px, 2vw, 25px); font-weight: 500;">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
         
-        
+        <a
           href="https://wa.me/message/FFKR2R4DDO27M1"
           data-wa-track
           data-wa-text="Olá! Tenho dúvidas sobre as cantigas personalizadas e gostaria de mais informações."
@@ -583,7 +631,7 @@ const testimonialSlides = Array.from(
           style="background: #72BC44; font-size: clamp(14px, 1.5vw, 17px);"
         >
           PRECISO DE MAIS INFORMAÇÕES
-
+  
           <Image
             src={whatsappIcon}
             alt="WhatsApp"
@@ -727,6 +775,16 @@ const testimonialSlides = Array.from(
       })();
     </script>
 
+    <!-- Garante que apenas um áudio toque por vez em toda a página -->
+    <script is:inline>
+      document.addEventListener('play', function (e) {
+        if (!(e.target instanceof HTMLMediaElement)) return;
+        document.querySelectorAll('audio, video').forEach(function (media) {
+          if (media !== e.target && !media.paused) media.pause();
+        });
+      }, true);
+    </script>
+
     <!-- WhatsApp floating button -->
     <style>
       @keyframes wa-ring {
@@ -766,12 +824,25 @@ const testimonialSlides = Array.from(
         margin-left: -50vw;
         margin-right: -50vw;
       }
+
+      /* Acima do breakpoint mobile o container pai (flex + padding) faz o
+         truque left/-50vw acima "escorregar" para a direita. Nesses
+         tamanhos usamos só a margem negativa, que não sofre esse desvio. */
+      @media (min-width: 768px) {
+        .full-bleed-green {
+          position: static;
+          left: auto;
+          right: auto;
+          margin-left: calc(50% - 50vw);
+          margin-right: calc(50% - 50vw);
+        }
+      }
     </style>
 
     <div class="wa-wrap">
       <div class="wa-ring"></div>
       <div class="wa-ring wa-ring-2"></div>
-      
+      <a
         href="https://wa.me/message/FFKR2R4DDO27M1"
         data-wa-text="Olá! Tenho dúvidas sobre as cantigas personalizadas e gostaria de mais informações."
         data-wa-source="floating_button"
