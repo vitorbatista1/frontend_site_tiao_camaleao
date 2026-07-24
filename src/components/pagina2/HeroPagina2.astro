@@ -45,7 +45,7 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
           text-shadow: 0 2px 5px rgba(0,0,0,0.4);
         "
       >
-        CONDIÇÃO ESPECIAL VÁLIDA PARA AS 200 PRIMEIRAS COMPRAS.
+        VÁLIDO PARA AS 200 PRIMEIRAS COMPRAS
       </span>
 
       <span style="display:inline-flex; flex-shrink: 0; vertical-align:middle;">
@@ -106,8 +106,21 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
         </div>
       </div>
 
-        <div class="cta-group cta-group-stack mt-4 md:mt-10" style="width: fit-content;">
-          <a href="#novo-album3" class="btn-red-rounded" style="font-size: clamp(15px, 2vw, 22px); font-weight: 600; padding: 7px 16px; white-space: nowrap; text-align: center;">QUERO GARANTIR O MEU</a>
+        <div class="cta-group cta-group-stack cta-group-center mt-4 md:mt-10">
+                  <a
+                    href="#novo-album3"
+                    class="btn-red-rounded"
+                    style="display: inline-flex; align-items: center; gap: 0.75rem; background: #E63946; color: white; font-weight: 700; font-size: clamp(14px, 1.5vw, 18px); padding: 0.6rem 1.8rem; border-radius: 9999px; text-decoration: none; transition: 0.2s; box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);"
+                    onmouseover="this.style.backgroundColor='#c1121f'"
+                    onmouseout="this.style.backgroundColor='#E63946'"
+                  >
+                    QUERO COMPRAR
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="9" cy="21" r="1"></circle>
+                      <circle cx="20" cy="21" r="1"></circle>
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                  </a>
           <WhatsAppSellerButton style="font-size: clamp(15px, 2vw, 22px); font-weight: 600; padding: 7px 16px; white-space: nowrap; text-align: center;" />
         </div>
       </div>
@@ -152,23 +165,40 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
     }
   }
 
-  /* MOBILE: hero mais alto para caber a imagem maior sem ser encoberta pela
-     seção seguinte */
+  /* BOTÕES: centralizados apenas no mobile. No desktop (min-width: 768px)
+     volta ao comportamento original: width fit-content, sem flex, alinhado
+     à esquerda junto com o resto do texto. */
+  @media (max-width: 767px) {
+    .cta-group-center {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .cta-group-center {
+      width: fit-content;
+    }
+  }
+
+  /* MOBILE: hero mais alto para caber a imagem maior e mais baixa, sem que a
+     seção seguinte a encubra */
   @media (max-width: 767px) {
     .hero-header {
-      min-height: 100vh !important;
+      min-height: 130vh !important;
     }
   }
 
   /* MOBILE: imagem maior, ancorada por posição absoluta (não empurra o header
      nem a seção seguinte) e vazando um pouco por cima da seção de baixo.
-     Subida em relação à versão anterior: bottom menos negativo = imagem mais
-     alta na tela. */
+     Subida um pouco em relação à versão anterior (bottom menos negativo). */
   @media (max-width: 767px) {
     .hero-img {
       position: absolute !important;
       left: 50%;
-      bottom: calc(-30px - 18vh) !important;
+      bottom: calc(-130px - 18vh) !important;
       margin: 0 !important; /* zera o margin-top/bottom legado do global.css que empurrava a imagem de forma imprevisível */
       width: min(250%, 1050px);
       max-width: 1050px;
@@ -182,7 +212,7 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
     .hero-img {
       width: min(270%, 1100px);
       max-width: 1100px;
-      bottom: calc(-35px - 18vh) !important;
+      bottom: calc(-135px - 18vh) !important;
     }
   }
 
@@ -191,7 +221,7 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
     .hero-img {
       width: min(230%, 980px);
       max-width: 980px;
-      bottom: calc(-22px - 18vh) !important;
+      bottom: calc(-122px - 18vh) !important;
     }
   }
 

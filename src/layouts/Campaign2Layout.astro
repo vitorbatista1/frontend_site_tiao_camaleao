@@ -483,14 +483,15 @@ const testimonialSlides = Array.from(
       <PlayerSection />
 
       <!-- TESTIMONIALS - RESPONSIVO -->
+       <!-- TESTIMONIALS - RESPONSIVO -->
       <section class="section-compact bg-[white] pt-16 md:pt-10 pb-12 md:pb-16 px-4 flex flex-col items-center" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
         <div class="text-center mb-8 md:mb-20">
-          <h2 style="color: #599313; font-size: clamp(40px, 5vw, 48px); font-weight: 800; line-height: 1.1;">
+          <h2 style="color: #599313; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height: 1.1;">
             Criando lembranças<br />que ficam para sempre
           </h2>
         </div>
         
-        <div class="full-bleed-green relative flex justify-center">
+        <div class="relative w-full bg-[#EDFDD6] flex justify-center" style="border-radius: 0;">
           <div class="relative w-full max-w-4xl p-6 md:p-8 lg:p-12 min-h-[300px] flex flex-col items-center justify-center">
             
             <div class="absolute -top-12 -left-2 w-24 sm:w-28 md:w-44 lg:w-60 xl:w-72 md:-top-20 md:-left-2 lg:-top-28 lg:-left-8 xl:-top-36 xl:-left-16 z-10">
@@ -567,13 +568,11 @@ const testimonialSlides = Array.from(
               let current = 0;
 
               function syncHeight() {
-                requestAnimationFrame(() => {
-                  if (!wrapper || !track) return;
-                  const slide = track.children[current] as HTMLElement;
-                  if (slide && slide.offsetHeight > 0) {
-                    wrapper.style.height = slide.offsetHeight + 'px';
-                  }
-                });
+                if (!wrapper || !track) return;
+                const slide = track.children[current] as HTMLElement;
+                if (slide && slide.offsetHeight > 0) {
+                  wrapper.style.height = slide.offsetHeight + 'px';
+                }
               }
 
               function goTo(index: number) {
@@ -595,17 +594,22 @@ const testimonialSlides = Array.from(
             </script>
           </div>
         </div>
-        <div class="cta-group mt-8 md:mt-10">
-          <a
-            href="#novo-album3"
-            class="btn-red-rounded"
-            style="font-size: clamp(25px, 2vw, 20px); padding: 8px 24px;"
-          >
-            EU TAMBÉM QUERO
-            <ShoppingCart size={20} />
-          </a>
-          <WhatsAppSellerButton style="font-size: clamp(25px, 2vw, 20px); padding: 8px 24px;" />
-        </div>
+
+      <div class="flex flex-col sm:flex-row items-center gap-4 mt-8 md:mt-10">
+        <a
+          href="#novo-album3"
+          class="btn-red-rounded"
+          style="font-size: clamp(16px, 2vw, 20px); padding: 8px 24px;"
+        >
+          EU TAMBÉM QUERO
+          <ShoppingCart size={20} />
+        </a>
+        <WhatsAppSellerButton
+          style="display: inline-flex; align-items: center; gap: 0.75rem; background: #25D366; color: white; font-weight: 700; font-size: clamp(14px, 1.5vw, 18px); padding: 0.6rem 1.8rem; border-radius: 9999px; text-decoration: none; transition: 0.2s; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.25);"
+          onmouseover="this.style.backgroundColor='#1EBE5B'"
+          onmouseout="this.style.backgroundColor='#25D366'"
+        />
+      </div>
       </section>
 
       <SoFaltaGravarSectionPagina2 />
@@ -643,7 +647,7 @@ const testimonialSlides = Array.from(
         <p class="mt-2 text-foreground/80" style="color:#599313; font-size: clamp(15px, 2vw, 25px); font-weight: 500;">Clique no botão abaixo e fale conosco pelo WhatsApp:</p>
         
         <a
-          href="https://wa.me/message/FFKR2R4DDO27M1"
+          href="https://wa.me/message/2OACSAWR5D6LD1"
           data-wa-track
           data-wa-text="Olá! Tenho dúvidas sobre as cantigas personalizadas e gostaria de mais informações."
           data-wa-source="faq_duvida"
@@ -706,7 +710,7 @@ const testimonialSlides = Array.from(
                   </a>
                 </p>
                 <p class="flex items-center justify-center md:justify-start gap-1.5">
-                  <a href="https://wa.me/message/FFKR2R4DDO27M1" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                  <a href="https://wa.me/message/2OACSAWR5D6LD1" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
                       <span class="flex-shrink-0">
                         <Image
                           src={whatsappIcon}
@@ -865,7 +869,7 @@ const testimonialSlides = Array.from(
       <div class="wa-ring"></div>
       <div class="wa-ring wa-ring-2"></div>
       <a
-        href="https://wa.me/message/FFKR2R4DDO27M1"
+        href="https://wa.me/message/2OACSAWR5D6LD1"
         data-wa-text="Olá! Tenho dúvidas sobre as cantigas personalizadas e gostaria de mais informações."
         data-wa-source="floating_button"
         target="_blank"
