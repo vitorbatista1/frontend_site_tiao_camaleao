@@ -10,6 +10,7 @@ import ConhecaAlbumSectionPagina2 from "../components/pagina2/ConhecaAlbumSectio
 import EdicaoEspecialSectionPagina2 from "../components/pagina2/EdicaoEspecialSectionPagina2.astro";
 import SoFaltaGravarSectionPagina2 from "../components/pagina2/SoFaltaGravarSectionPagina2.astro";
 import ModalVanilla from "../components/ModalVanilla.astro";
+import WhatsAppSellerButton from "../components/WhatsAppSellerButton.astro";
 import PixelHead from "../components/PixelHead.astro";
 import { getHeroPagina2Image } from "../lib/heroPagina2Image";
 import {
@@ -153,10 +154,15 @@ const testimonialSlides = Array.from(
             
             <!-- Imagem de balões -->
             <div class="w-full flex justify-center">
-              <img
-                src={baloes.src}
+              <Image
+                src={baloes}
                 alt="Balões decorativos"
+                widths={[400, 672, 960]}
+                sizes="(max-width: 672px) 100vw, 672px"
+                quality={75}
+                format="webp"
                 class="w-full max-w-2xl h-auto object-contain"
+                loading="lazy"
               />
             </div>
             
@@ -173,14 +179,10 @@ const testimonialSlides = Array.from(
                 </h3>
                 
                 <!-- Botão QUERO COMPRAR -->
-                <div class="flex justify-center mt-2">
+                <div class="cta-group justify-center mt-2">
                   <a
-                    href="#produtos"
+                    href="#novo-album3"
                     class="btn-red-rounded"
-                    data-buy
-                    data-buy-name="Álbum 3"
-                    data-buy-price="R$ 69,00"
-                    data-buy-campaign="campanha2"
                     style="display: inline-flex; align-items: center; gap: 0.75rem; background: #E63946; color: white; font-weight: 700; font-size: clamp(14px, 1.5vw, 18px); padding: 0.6rem 1.8rem; border-radius: 9999px; text-decoration: none; transition: 0.2s; box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);"
                     onmouseover="this.style.backgroundColor='#c1121f'"
                     onmouseout="this.style.backgroundColor='#E63946'"
@@ -192,6 +194,11 @@ const testimonialSlides = Array.from(
                       <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                     </svg>
                   </a>
+                  <WhatsAppSellerButton
+                    style="display: inline-flex; align-items: center; gap: 0.75rem; background: #25D366; color: white; font-weight: 700; font-size: clamp(14px, 1.5vw, 18px); padding: 0.6rem 1.8rem; border-radius: 9999px; text-decoration: none; transition: 0.2s; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.25);"
+                    onmouseover="this.style.backgroundColor='#1EBE5B'"
+                    onmouseout="this.style.backgroundColor='#25D366'"
+                  />
                 </div>
               </div>
             </div>
@@ -219,10 +226,15 @@ const testimonialSlides = Array.from(
             <!-- CARD 1 -->
             <div class="bg-white rounded-[28px] shadow-md overflow-hidden flex flex-col sm:flex-row items-stretch p-0">
               <div class="flex-shrink-0 w-full sm:w-[280px] md:w-[380px] lg:w-[480px] overflow-hidden">
-                <img
-                  src={tiaoPintor.src}
+                <Image
+                  src={tiaoPintor}
                   alt="Tião Camaleão pintando"
+                  widths={[280, 380, 480, 720]}
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 280px, (max-width: 1024px) 380px, 480px"
+                  quality={75}
+                  format="webp"
                   class="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
               <div class="flex-1 min-w-0 flex flex-col items-center sm:items-start text-center sm:text-left justify-center gap-3 p-4 sm:p-6 md:p-8">
@@ -278,10 +290,15 @@ const testimonialSlides = Array.from(
             <!-- CARD 2 -->
             <div class="bg-white rounded-[28px] shadow-md overflow-hidden flex flex-col sm:flex-row items-stretch p-0">
               <div class="flex-shrink-0 w-full sm:w-[280px] md:w-[380px] lg:w-[480px] overflow-hidden">
-                <img
-                  src={tiaoMagico.src}
+                <Image
+                  src={tiaoMagico}
                   alt="Tião Camaleão no circo"
+                  widths={[280, 380, 480, 720]}
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 280px, (max-width: 1024px) 380px, 480px"
+                  quality={75}
+                  format="webp"
                   class="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
               <div class="flex-1 min-w-0 flex flex-col items-center sm:items-start text-center sm:text-left justify-center gap-3 p-4 sm:p-6 md:p-8">
@@ -342,10 +359,15 @@ const testimonialSlides = Array.from(
             <!-- CARD 3 -->
             <div class="bg-white rounded-[28px] shadow-md overflow-hidden flex flex-col sm:flex-row items-stretch p-0">
               <div class="flex-shrink-0 w-full sm:w-[280px] md:w-[380px] lg:w-[480px] overflow-hidden">
-                <img
-                  src={tiaoRoceiro.src}
+                <Image
+                  src={tiaoRoceiro}
                   alt="Tião Camaleão na fazenda"
+                  widths={[280, 380, 480, 720]}
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 280px, (max-width: 1024px) 380px, 480px"
+                  quality={75}
+                  format="webp"
                   class="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
               <div class="flex-1 min-w-0 flex flex-col items-center sm:items-start text-center sm:text-left justify-center gap-3 p-4 sm:p-6 md:p-8">
@@ -571,19 +593,17 @@ const testimonialSlides = Array.from(
             </script>
           </div>
         </div>
-        <a
-        
-          href="#produtos"
-          class="mt-8 md:mt-10 btn-red-rounded"
-          data-buy
-          data-buy-name="Álbum 3"
-          data-buy-price="R$ 69,00"
-          data-buy-campaign="campanha2"
-          style="font-size: clamp(25px, 2vw, 20px); padding: 8px 24px;"
-        >
-          EU TAMBÉM QUERO
-          <ShoppingCart size={20} />
-        </a>
+        <div class="cta-group mt-8 md:mt-10">
+          <a
+            href="#novo-album3"
+            class="btn-red-rounded"
+            style="font-size: clamp(25px, 2vw, 20px); padding: 8px 24px;"
+          >
+            EU TAMBÉM QUERO
+            <ShoppingCart size={20} />
+          </a>
+          <WhatsAppSellerButton style="font-size: clamp(25px, 2vw, 20px); padding: 8px 24px;" />
+        </div>
       </section>
 
       <SoFaltaGravarSectionPagina2 />

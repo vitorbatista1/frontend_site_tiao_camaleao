@@ -1,4 +1,5 @@
 ---
+import { Image } from "astro:assets";
 import iconeTiao from "../../../public/imagens/campanha2/icone_tiao.png";
 ---
 
@@ -11,10 +12,15 @@ import iconeTiao from "../../../public/imagens/campanha2/icone_tiao.png";
   <div class="container px-4">
     <div class="text-center mb-8 md:mb-16 mt-8 md:mt-0">
       <div class="w-full flex justify-center">
-        <img
-          src={iconeTiao.src}
-          alt="Balões decorativos"
+        <Image
+          src={iconeTiao}
+          alt="Tião Camaleão"
+          widths={[80, 120, 240]}
+          sizes="(max-width: 767px) 80px, 120px"
+          quality={75}
+          format="webp"
           class="w-full max-w-[80px] md:max-w-[120px] h-auto object-contain"
+          loading="lazy"
         />
       </div>
       <h2 class="mt-4 leading-tight" style="font-size: clamp(33px, 5vw, 65px); font-weight: 800; color: #1171D3;">

@@ -185,6 +185,85 @@
   flex-shrink: 0;
 }
 
+.btn-whatsapp {
+  background: #25D366;
+  color: white;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+
+  padding: clamp(8px, 1.5vw, 10px) clamp(18px, 3.5vw, 30px);
+  border-radius: 9999px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  white-space: nowrap;
+
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  transition: all 0.2s ease;
+
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+}
+
+.btn-whatsapp:hover {
+  transform: scale(1.03);
+  background: #1EBE5B;
+}
+
+.btn-whatsapp:active {
+  transform: scale(0.97);
+}
+
+.btn-whatsapp svg,
+.btn-whatsapp img {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Agrupa botão de compra + botão de WhatsApp lado a lado no desktop e empilhados no mobile */
+.cta-group {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cta-group > .btn-red-rounded,
+.cta-group > .btn-whatsapp {
+  flex: 1 1 0;
+}
+
+@media (max-width: 767px) {
+  .cta-group {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .cta-group > .btn-red-rounded,
+  .cta-group > .btn-whatsapp {
+    width: 100%;
+  }
+}
+
+/* Variante que sempre empilha os botões, mesmo no desktop */
+.cta-group.cta-group-stack {
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cta-group.cta-group-stack > .btn-red-rounded,
+.cta-group.cta-group-stack > .btn-whatsapp {
+  width: 100%;
+}
+
 @media (max-width: 767px) {
   .hero-img {
     width: 100%;

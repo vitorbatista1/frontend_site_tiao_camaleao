@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import WhatsAppSellerButton from './WhatsAppSellerButton.tsx';
 
 const API_URL = import.meta.env.PUBLIC_API_URL;
 
@@ -163,13 +164,16 @@ export default function CampaignCombo({ campaignId, album1Src, album2Src, album1
             {/* CTA */}
             <div className="flex flex-col items-center gap-4">
               {combo ? (
-                <button
-                  type="button"
-                  onClick={handleBuy}
-                  className="group flex items-center justify-center gap-3 rounded-full bg-red-600 px-12 py-5 text-2xl font-black uppercase text-white shadow-2xl transition-transform hover:scale-105 active:scale-95"
-                >
-                  Comprar agora 🛒
-                </button>
+                <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:gap-4 w-full sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={handleBuy}
+                    className="group flex items-center justify-center gap-3 rounded-full bg-red-600 px-12 py-5 text-2xl font-black uppercase text-white shadow-2xl transition-transform hover:scale-105 active:scale-95"
+                  >
+                    Comprar agora 🛒
+                  </button>
+                  <WhatsAppSellerButton className="!rounded-full !bg-[#25D366] hover:!bg-[#1EBE5B] !px-12 !py-5 !text-2xl !font-black !normal-case !shadow-md" />
+                </div>
               ) : (
                 <div className="h-20 flex items-center justify-center">
                   <span className="text-slate-400 text-sm">Carregando...</span>

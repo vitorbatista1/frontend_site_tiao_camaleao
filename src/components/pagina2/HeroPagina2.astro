@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 import logoImg from "../../../public/imagens/logo.png";
 import { getHeroPagina2Image } from "../../lib/heroPagina2Image";
+import WhatsAppSellerButton from "../WhatsAppSellerButton.astro";
 
 const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
 ---
@@ -44,7 +45,7 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
           text-shadow: 0 2px 5px rgba(0,0,0,0.4);
         "
       >
-        AS VAGAS DESTA PRÉ-VENDA SÃO LIMITADAS.
+        CONDIÇÃO ESPECIAL VÁLIDA PARA AS 200 PRIMEIRAS COMPRAS.
       </span>
 
       <span style="display:inline-flex; flex-shrink: 0; vertical-align:middle;">
@@ -97,14 +98,17 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
           para clientes Tião Camaleão.
         </div>
         <hr style="border: none; border-top: 2px solid #599313; width: 100%; margin: 8px 0;" />
-        <div class="pre-venda-bottom" style="font-size: clamp(16px, 2vw, 24px);">
-          E primeiros nomes ainda garantem<br>
-          gravação sem custo adicional.
+        <div class="pre-venda-bottom" style="font-size: clamp(16px, 2vw, 20px);">
+          <p>As<b> 200 primeiras compras</b> garantem a gravação do nome<br>
+          sem custo adicional de estúdio.</p>
+          <br />
+          <p>A entrega deste primeiro lote acontece na <b>primeira semana de agosto</b>.</p>
         </div>
       </div>
 
-        <div class="mt-4 md:mt-10 flex justify-center md:justify-start">
-          <a href="#produtos" class="btn-red-rounded" style="font-size: clamp(18px, 3vw, 26px); font-weight: 600; padding: 8px 24px; white-space: normal; text-align: center;" data-buy data-buy-name="Álbum 3" data-buy-price="R$ 69,00" data-buy-campaign="campanha2">QUERO GARANTIR O MEU</a>
+        <div class="cta-group cta-group-stack mt-4 md:mt-10" style="width: fit-content;">
+          <a href="#novo-album3" class="btn-red-rounded" style="font-size: clamp(15px, 2vw, 22px); font-weight: 600; padding: 7px 16px; white-space: nowrap; text-align: center;">QUERO GARANTIR O MEU</a>
+          <WhatsAppSellerButton style="font-size: clamp(15px, 2vw, 22px); font-weight: 600; padding: 7px 16px; white-space: nowrap; text-align: center;" />
         </div>
       </div>
     </div>

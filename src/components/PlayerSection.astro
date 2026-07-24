@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 import mackup1Img from "../../public/imagens/mackup1.png";
 import mockup2Img from "../../public/imagens/mockup2.png";
+import WhatsAppSellerButton from "./WhatsAppSellerButton.astro";
 ---
 
 <section class="ps-section">
@@ -101,14 +102,17 @@ import mockup2Img from "../../public/imagens/mockup2.png";
           <li>Player simples e intuitivo</li>
           <li>Downloads disponíveis</li>
         </ul>
-        <a href="#produtos" class="btn-red-rounded">
-          COMPRAR AGORA
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="9" cy="21" r="1"></circle>
-            <circle cx="20" cy="21" r="1"></circle>
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-          </svg>
-        </a>
+        <div class="cta-group">
+          <a href="#produtos" class="btn-red-rounded">
+            COMPRAR AGORA
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+          </a>
+          <WhatsAppSellerButton />
+        </div>
       </div>
     </div>
 
@@ -283,7 +287,7 @@ import mockup2Img from "../../public/imagens/mockup2.png";
     transform-origin: right center;
   }
 
-  .ps-bottom-content .btn-red-rounded {
+  .ps-bottom-content .cta-group {
     align-self: flex-start;
   }
 
@@ -436,8 +440,8 @@ import mockup2Img from "../../public/imagens/mockup2.png";
       font-size: 0.9rem;
     }
 
-    .ps-bottom-content .btn-red-rounded {
-      display: inline-flex;
+    .ps-bottom-content .cta-group {
+      display: flex;
       margin: 0;
     }
   }

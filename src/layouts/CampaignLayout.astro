@@ -7,6 +7,7 @@ import ModalVanilla from "../components/ModalVanilla.astro";
 import PixelHead from "../components/PixelHead.astro";
 import CampaignProducts from "../components/CampaignProducts.tsx";
 import CampaignCombo from "../components/CampaignCombo.astro";
+import WhatsAppSellerButton from "../components/WhatsAppSellerButton.astro";
 import {
   Music, Heart, Play, Lock, Mail, Phone, Instagram, MessageCircle,
   Star, ChevronLeft, ChevronRight, ShoppingCart
@@ -444,17 +445,20 @@ const testimonialSlides = Array.from(
   }
 </div>
 <div class="flex justify-center mt-12">
-  <a
-    href="#produtos"
-    class="btn-red-rounded"
-  >
-    QUERO COMPRAR
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="9" cy="21" r="1"></circle>
-      <circle cx="20" cy="21" r="1"></circle>
-      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-    </svg>
-  </a>
+  <div class="cta-group">
+    <a
+      href="#produtos"
+      class="btn-red-rounded"
+    >
+      QUERO COMPRAR
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9" cy="21" r="1"></circle>
+        <circle cx="20" cy="21" r="1"></circle>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+      </svg>
+    </a>
+    <WhatsAppSellerButton />
+  </div>
 </div>
 </div>
       </section>
@@ -575,13 +579,16 @@ const testimonialSlides = Array.from(
     </script>
   </div>
 
-  <a
-    href="#produtos"
-    class="mt-10 btn-red-rounded"
-  >
-    EU TAMBÉM QUERO
-    <ShoppingCart size={20} />
-  </a>
+  <div class="cta-group mt-10">
+    <a
+      href="#produtos"
+      class="btn-red-rounded"
+    >
+      EU TAMBÉM QUERO
+      <ShoppingCart size={20} />
+    </a>
+    <WhatsAppSellerButton />
+  </div>
 </section>
           <section class="bg-white pt-12 pb-12 md:pt-28 md:pb-16 font-sans overflow-hidden" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
             <div class="container flex flex-col md:flex-row items-center justify-center gap-0">
@@ -629,14 +636,17 @@ const testimonialSlides = Array.from(
               </div>
 
               <div class="md:hidden w-full flex justify-center mt-6">
-                <a href="#produtos" class="btn-red-rounded" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">
-                  QUERO COMPRAR
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="9" cy="21" r="1"></circle>
-                    <circle cx="20" cy="21" r="1"></circle>
-                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                  </svg>
-                </a>
+                <div class="cta-group w-full">
+                  <a href="#produtos" class="btn-red-rounded" data-buy data-buy-name="Cantigas Personalizadas" data-buy-price="R$ 47,00">
+                    QUERO COMPRAR
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="9" cy="21" r="1"></circle>
+                      <circle cx="20" cy="21" r="1"></circle>
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                  </a>
+                  <WhatsAppSellerButton />
+                </div>
               </div>
 
             </div>

@@ -1,6 +1,7 @@
 // CampaignProducts.tsx
 import { useEffect, useRef, useState } from 'react';
 import { ShoppingCart, Play, Pause } from "./Icons.tsx";
+import WhatsAppSellerButton from "./WhatsAppSellerButton.tsx";
 // [TC-CAPI 2026-06] helper de pixel enriquecido
 import { trackPixel } from '../lib/tracking.ts';
 
@@ -275,15 +276,18 @@ export default function CampaignProducts({ campaignId }: Props) {
               </div>
 
               {/* Botão comprar */}
-              <button
-                className="mt-4 mx-6 btn-red-rounded whitespace-nowrap"
-                data-buy
-                data-buy-name={album.name}
-                data-buy-price={fmtPrice(album.priceNew)}
-              >
-                COMPRAR AGORA
-                <ShoppingCart size={18} />
-              </button>
+              <div className="cta-group mt-4 mx-6">
+                <button
+                  className="btn-red-rounded whitespace-nowrap"
+                  data-buy
+                  data-buy-name={album.name}
+                  data-buy-price={fmtPrice(album.priceNew)}
+                >
+                  COMPRAR AGORA
+                  <ShoppingCart size={18} />
+                </button>
+                <WhatsAppSellerButton />
+              </div>
             </div>
           );
         })}

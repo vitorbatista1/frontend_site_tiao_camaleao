@@ -1,4 +1,5 @@
 ---
+import { Image } from "astro:assets";
 import headphonesIcon from "../../../public/imagens/campanha2/headphones.png";
 import productBox from "../../../public/imagens/campanha2/album3.png";
 ---
@@ -13,12 +14,15 @@ import productBox from "../../../public/imagens/campanha2/album3.png";
 
       <!-- TEXTO -->
       <div class="relative z-10 text-primary-foreground text-center flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-0" style="transform: translateY(-20px);">
-<img
-  src={headphonesIcon.src}
+<Image
+  src={headphonesIcon}
   alt="Fone de ouvido amarelo"
-  width={360}
-  height={360}
+  widths={[192, 224, 256, 384]}
+  sizes="(max-width: 767px) 224px, (max-width: 1023px) 192px, 256px"
+  quality={75}
+  format="webp"
   class="w-56 h-56 sm:w-56 sm:h-56 md:w-48 md:h-48 lg:w-64 lg:h-64 object-contain flex-shrink-0 sm:-mr-2 md:-mr-6"
+  loading="lazy"
 />
         <h2
           class="leading-tight text-center sm:text-left"
@@ -34,12 +38,15 @@ import productBox from "../../../public/imagens/campanha2/album3.png";
       <div class="bg-white rounded-2xl shadow-lg w-full flex flex-col sm:flex-row items-center gap-4 sm:gap-8 p-4 sm:p-6 md:p-10">
         <!-- IMAGEM DO PRODUTO -->
         <div class="flex-shrink-0">
-          <img
-            src={productBox.src}
+          <Image
+            src={productBox}
             alt="Caixa Cantigas Personalizadas 3"
-            width={724}
-            height={890}
+            widths={[160, 192, 208, 224, 448]}
+            sizes="(max-width: 639px) 208px, (max-width: 767px) 160px, (max-width: 1023px) 192px, 224px"
+            quality={80}
+            format="webp"
             class="w-52 sm:w-40 md:w-48 lg:w-56 h-auto object-contain"
+            loading="lazy"
           />
         </div>
 

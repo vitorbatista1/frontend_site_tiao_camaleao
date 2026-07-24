@@ -1,4 +1,5 @@
 ---
+import { Image } from "astro:assets";
 import productBox from "../../../public/imagens/campanha2/album3.png";
 ---
 
@@ -24,10 +25,15 @@ import productBox from "../../../public/imagens/campanha2/album3.png";
 
           <!-- CARD 1 - IMAGEM -->
           <div class="bg-white rounded-[28px] shadow-md overflow-hidden flex items-center justify-center" style="background-color: #DCF4FF; min-height: 300px;">
-            <img
-              src={productBox.src}
+            <Image
+              src={productBox}
               alt="Capa do álbum Tião Camaleão"
+              widths={[320, 448, 560, 720]}
+              sizes="(max-width: 767px) 100vw, 560px"
+              quality={80}
+              format="webp"
               class="w-full h-auto object-contain p-4"
+              loading="lazy"
             />
           </div>
 

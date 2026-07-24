@@ -1,4 +1,6 @@
 ---
+import WhatsAppSellerButton from "./WhatsAppSellerButton.astro";
+
 const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
 
 interface Props {
@@ -138,31 +140,34 @@ const CONFIRMACOES = [
         </p>
 
         <div class="flex flex-col items-center gap-4 mt-6">
-          <button
-            id="combo-buy-btn"
-            type="button"
-            class="btn-red-rounded"
-            data-buy
-            data-buy-name="Combo Especial"
-            data-buy-price="R$ 74,00"
-            data-buy-combo
-          >
-            COMPRAR AGORA
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+          <div class="cta-group">
+            <button
+              id="combo-buy-btn"
+              type="button"
+              class="btn-red-rounded"
+              data-buy
+              data-buy-name="Combo Especial"
+              data-buy-price="R$ 74,00"
+              data-buy-combo
             >
-              <circle cx="9" cy="21" r="1"></circle>
-              <circle cx="20" cy="21" r="1"></circle>
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-            </svg>
-          </button>
+              COMPRAR AGORA
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              </svg>
+            </button>
+            <WhatsAppSellerButton />
+          </div>
         </div>
       </div>
     </div>
