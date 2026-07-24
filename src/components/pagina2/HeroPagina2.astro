@@ -193,12 +193,13 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
 
   /* MOBILE: imagem maior, ancorada por posição absoluta (não empurra o header
      nem a seção seguinte) e vazando um pouco por cima da seção de baixo.
-     Subida um pouco em relação à versão anterior (bottom menos negativo). */
+     Subida em relação à versão anterior: bottom mais negativo (25vh em vez
+     de 18vh) para a imagem do cantor ficar mais para cima na tela. */
   @media (max-width: 767px) {
     .hero-img {
       position: absolute !important;
       left: 50%;
-      bottom: calc(-130px - 18vh) !important;
+      bottom: calc(-130px + 5vh) !important;
       margin: 0 !important; /* zera o margin-top/bottom legado do global.css que empurrava a imagem de forma imprevisível */
       width: min(250%, 1050px);
       max-width: 1050px;
@@ -212,7 +213,7 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
     .hero-img {
       width: min(270%, 1100px);
       max-width: 1100px;
-      bottom: calc(-135px - 18vh) !important;
+      bottom: calc(-135px + 5vh) !important;
     }
   }
 
@@ -221,11 +222,11 @@ const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
     .hero-img {
       width: min(230%, 980px);
       max-width: 980px;
-      bottom: calc(-122px - 18vh) !important;
+      bottom: calc(-122px + 5vh) !important;
     }
   }
 
-  /* DESKTOP: posicionamento absoluto */
+  /* DESKTOP: posicionamento absoluto (inalterado) */
   @media (min-width: 768px) {
     .hero-img {
       position: absolute;
