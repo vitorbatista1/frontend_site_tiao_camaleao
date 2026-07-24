@@ -282,7 +282,7 @@ const testimonialSlides = Array.from(
 
                   <span class="font-semibold" style="color:#2b2b2b; font-size: clamp(12px, 1.2vw, 14px); min-width: 68px;" data-audio-time>0:00 / 0:00</span>
 
-                  <audio data-audio-el src="/audio/as-cores-do-tiao.mp3"></audio>
+                  <audio data-audio-el src="/audio/as-cores-do-tiao.mp3" preload="none"></audio>
                 </div>
               </div>
             </div>
@@ -351,7 +351,7 @@ const testimonialSlides = Array.from(
 
                   <span class="font-semibold" style="color:#2b2b2b; font-size: clamp(12px, 1.2vw, 14px); min-width: 68px;" data-audio-time>0:00 / 0:00</span>
 
-                  <audio data-audio-el src="/audio/musica-2.mp3"></audio>
+                  <audio data-audio-el src="/audio/musica-2.mp3" preload="none"></audio>
                 </div>
               </div>
             </div>
@@ -420,7 +420,7 @@ const testimonialSlides = Array.from(
 
                   <span class="font-semibold" style="color:#2b2b2b; font-size: clamp(12px, 1.2vw, 14px); min-width: 68px;" data-audio-time>0:00 / 0:00</span>
 
-                  <audio data-audio-el src="/audio/musica-3.mp3"></audio>
+                  <audio data-audio-el src="/audio/musica-3.mp3" preload="none"></audio>
                 </div>
               </div>
             </div>
@@ -567,11 +567,13 @@ const testimonialSlides = Array.from(
               let current = 0;
 
               function syncHeight() {
-                if (!wrapper || !track) return;
-                const slide = track.children[current] as HTMLElement;
-                if (slide && slide.offsetHeight > 0) {
-                  wrapper.style.height = slide.offsetHeight + 'px';
-                }
+                requestAnimationFrame(() => {
+                  if (!wrapper || !track) return;
+                  const slide = track.children[current] as HTMLElement;
+                  if (slide && slide.offsetHeight > 0) {
+                    wrapper.style.height = slide.offsetHeight + 'px';
+                  }
+                });
               }
 
               function goTo(index: number) {

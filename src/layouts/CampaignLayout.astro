@@ -552,11 +552,13 @@ const testimonialSlides = Array.from(
       let current = 0;
 
       function syncHeight() {
-        if (!wrapper || !track) return;
-        const slide = track.children[current] as HTMLElement;
-        if (slide && slide.offsetHeight > 0) {
-          wrapper.style.height = slide.offsetHeight + 'px';
-        }
+        requestAnimationFrame(() => {
+          if (!wrapper || !track) return;
+          const slide = track.children[current] as HTMLElement;
+          if (slide && slide.offsetHeight > 0) {
+            wrapper.style.height = slide.offsetHeight + 'px';
+          }
+        });
       }
 
       function goTo(index: number) {
