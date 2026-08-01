@@ -300,7 +300,20 @@ export default function PaymentPage() {
       });
     }, 1000);
 
-    return () => clearInterval(timer);
+    // Se a pessoa gerar o QR Code PIX e sair da página de pagamento sem
+    // pagar (fechar aba, voltar, digitar outra URL), o PIX pendente fica
+    // órfão no localStorage e pode ser restaurado indevidamente numa visita
+    // futura a OUTRO checkout (ver CardForm.tsx) — limpa ao sair de fato.
+    const clearStalePix = () => {
+      localStorage.removeItem('pix_payment_data');
+      localStorage.removeItem('pix_payment_expiry');
+    };
+    window.addEventListener('pagehide', clearStalePix);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('pagehide', clearStalePix);
+    };
   }, []);
 
   useEffect(() => {
@@ -311,6 +324,8 @@ export default function PaymentPage() {
   }, [showSuccessAlert]);
 
   const handleBack = useCallback(() => {
+    localStorage.removeItem('pix_payment_data');
+    localStorage.removeItem('pix_payment_expiry');
     window.location.href = orderData?.sourcePath || '/';
   }, [orderData?.sourcePath]);
 

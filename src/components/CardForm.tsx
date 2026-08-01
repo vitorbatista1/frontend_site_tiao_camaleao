@@ -122,9 +122,15 @@ export default function CardForm({
       const expiryTimestamp = parseInt(savedExpiry);
       const now = Date.now();
       const secondsLeft = Math.floor((expiryTimestamp - now) / 1000);
+      const parsedPix: PixData = JSON.parse(savedPix);
+      // PIX_STORAGE_KEY é global (não amarrado ao pedido) — se o valor salvo
+      // não bate com o pedido atual, é sobra de um checkout anterior (outra
+      // campanha/preço) ainda dentro da janela de 5min. Restaurar sem checar
+      // mostraria o QR Code de um valor errado (ex.: 39 num pedido de 19).
+      const amountMatches = Math.abs(parsedPix.amount - numericAmount) < 0.01;
 
-      if (secondsLeft > 0) {
-        setPixData(JSON.parse(savedPix));
+      if (secondsLeft > 0 && amountMatches) {
+        setPixData(parsedPix);
         setTimeLeft(secondsLeft);
         setPaymentMethod('pix');
         startTimer(secondsLeft);
@@ -132,6 +138,7 @@ export default function CardForm({
         clearPixStorage();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
