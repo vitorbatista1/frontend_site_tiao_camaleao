@@ -164,12 +164,34 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   var GRAVADO_INDIVIDUAL_NENHUM = 0;
 
   // ── Helpers de álbum ─────────────────────────────────────────────────────────
+  // [CAMPANHA3 2026-07] Antes, getComboGravacao/getGravacaoAlbumFor resolviam
+  // por POSIÇÃO no array (a N-ésima row GRAVACAO, N = qtd de rows ALBUM) —
+  // quebrava assim que o catálogo ganhasse uma row ALBUM/GRAVACAO nova (ex:
+  // Álbum 3, Coleção Completa, Taxa de Gravação, criadas pro /campanha3).
+  // Agora resolvem por NOME e relatedAlbumId, mesmo critério do Assistente
+  // Guiado (assistente.types.ts) — sobrevive a qualquer produto novo.
+  function normalizeAlbumStr(s) {
+    return String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  }
+  function isTaxaAlbum(a) { return /\btaxa\b/.test(normalizeAlbumStr(a.name)); }
+  function isColecaoAlbum(a) { return /(colecao|completa)/.test(normalizeAlbumStr(a.name)); }
+  function posicaoNoNome(name) {
+    var m = String(name || "").match(/(\d+)/);
+    return m ? parseInt(m[1], 10) : 99;
+  }
+
   function getAlbumsOnly() { return albumsAPI.filter(function(a){ return a.tipo === "ALBUM"; }); }
   function getCombo() { return albumsAPI.find(function(a){ return a.tipo === "COMBO"; }); }
   function getGravacao() { return albumsAPI.filter(function(a){ return a.tipo === "GRAVACAO"; }); }
-  function getComboGravacao() { return getGravacao()[getAlbumsOnly().length] || null; }
+  function getComboGravacao() {
+    return getGravacao().find(function(a){
+      return !isTaxaAlbum(a) && !isColecaoAlbum(a) && /\bcombo\b/.test(normalizeAlbumStr(a.name));
+    }) || null;
+  }
   function getComboGravacaoName() { var cg = getComboGravacao(); return cg ? cg.name : "Combo Gravação"; }
-  function getGravacaoIndividuais() { return getGravacao().slice(0, getAlbumsOnly().length); }
+  function getGravacaoIndividuais() {
+    return getAlbumsOnly().map(function(a){ return getGravacaoAlbumFor(a.id); }).filter(Boolean);
+  }
   function getGravacaoIds() { return getGravacao().map(function(a){ return a.id; }); }
   function isComboGravadoSelected(sel) {
     if (sel.indexOf("personalizado:combo") >= 0) return true;
@@ -181,18 +203,19 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     return getAlbumsOnly()[parseInt(key.replace("album_", "")) - 1];
   }
   function getAlbumById(id) { return albumsAPI.find(function(a){ return a.id === id; }); }
-  // Acha o registro tipo=GRAVACAO correspondente a um álbum normal (mesma
-  // indexação por posição usada em getGravacaoPrice) — usa o nome configurado
-  // no admin pra esse produto (ex: "Álbum 1 - Gravação Exclusiva") em vez de
-  // inventar "<nome do álbum> Gravação" na marra.
+  // Acha o registro tipo=GRAVACAO correspondente a um álbum normal — prioriza
+  // relatedAlbumId (campo confiável já preenchido no admin) e só cai pro
+  // número no nome se o produto ainda não tiver o campo configurado.
   function getGravacaoAlbumFor(albumId) {
-    var albumsOnly = getAlbumsOnly();
-    var idx = -1;
-    for (var i = 0; i < albumsOnly.length; i++) {
-      if (albumsOnly[i].id === albumId) { idx = i; break; }
-    }
-    if (idx < 0) return null;
-    return getGravacao()[idx] || null;
+    var candidatos = getGravacao().filter(function(a){
+      return !isTaxaAlbum(a) && !isColecaoAlbum(a) && !/\bcombo\b/.test(normalizeAlbumStr(a.name));
+    });
+    var porRelacao = candidatos.find(function(a){ return a.relatedAlbumId === albumId; });
+    if (porRelacao) return porRelacao;
+    var origem = getAlbumById(albumId);
+    if (!origem) return null;
+    var pos = posicaoNoNome(origem.name);
+    return candidatos.find(function(a){ return posicaoNoNome(a.name) === pos; }) || null;
   }
   function getGravacaoLabel(albumId) {
     var grav = getGravacaoAlbumFor(albumId);
@@ -1009,20 +1032,17 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
       .then(function(r){ return r.json(); })
       .then(function(j){
         if (j.success) {
-          albumsAPI = singleCampaignMode
+          var scoped = singleCampaignMode
             ? j.data.filter(function(a){ return a.campanha === singleCampaignKey; })
             : j.data;
+          // [CAMPANHA3 2026-07] produtos tagueados campanha=CAMPANHA3 são
+          // exclusivos do Assistente Guiado (/campanha3) — nunca devem entrar
+          // no catálogo que esta modal (campanha1/campanha2) enxerga.
+          albumsAPI = scoped.filter(function(a){ return a.campanha !== "CAMPANHA3"; });
           if (singleCampaignMode) {
             singleGravacao = albumsAPI.find(function(a){ return a.tipo === "GRAVACAO"; }) || null;
           }
-          var gravs = albumsAPI.filter(function(a){ return a.tipo === "GRAVACAO"; });
-          var albumsOnlyCount = albumsAPI.filter(function(a){ return a.tipo === "ALBUM"; }).length;
-          if (gravs.length > 0) {
-            var p1 = parseFloat(gravs[0].priceNew || 0);
-            GRAVADO_INDIVIDUAL_NENHUM = p1;
-            GRAVADO_INDIVIDUAL_UM_FALTANDO = p1;
-          }
-          var comboGrav = gravs[albumsOnlyCount] || null;
+          var comboGrav = getComboGravacao();
           if (comboGrav) {
             var cgPrice = parseFloat(comboGrav.priceNew || 0);
             var cgMistoPrice = parseFloat(comboGrav.priceMistoNew || 0);
@@ -1030,6 +1050,13 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
             // "1 álbum faltando" = combo_misto (criança já tem álbum gravado) —
             // usa priceMistoNew quando configurado, senão cai no preço cheio.
             COMBO_GRAVADO_ONE_MISSING = cgMistoPrice > 0 ? cgMistoPrice : cgPrice;
+          }
+          var primeiroAlbum = getAlbumsOnly()[0];
+          var gravIndividual = primeiroAlbum ? getGravacaoAlbumFor(primeiroAlbum.id) : null;
+          if (gravIndividual) {
+            var p1 = parseFloat(gravIndividual.priceNew || 0);
+            GRAVADO_INDIVIDUAL_NENHUM = p1;
+            GRAVADO_INDIVIDUAL_UM_FALTANDO = p1;
           }
         }
       })

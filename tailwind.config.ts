@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        // usado pelo Assistente Guiado (/campanha3) — títulos/botões em Baloo 2
+        display: ["'Baloo 2'", "cursive"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

@@ -56,24 +56,41 @@ function isComboAlbum(tipo: string, name: string): boolean {
   return tipo === 'COMBO' || /\bcombo\b/i.test(name);
 }
 
-const EMPTY_FORM: AlbumFormData = {
-  name: '',
-  linkAmostra: '',
-  linkImgAlbum: '',
-  priceOld: 0,
-  priceNew: 0,
-  priceMistoOld: 0,
-  priceMistoNew: 0,
-  campanha: '',
-  tipo: 'ALBUM',
-  repertorio: [],
-  isOrderBump: false,
-  orderBumpDiscount: 0,
-  relatedAlbumId: '',
-};
+const CAMPANHAS = ['CAMPANHA1', 'CAMPANHA2', 'CAMPANHA3'] as const;
+
+// [CAMPANHA3 2026-07] CAMPANHA3 é a campanha exclusiva do Assistente Guiado
+// (/campanha3) — produtos com essa tag nunca aparecem no site do campanha1
+// (ModalVanilla.astro filtra explicitamente por isso).
+function campanhaLabel(c: string): string {
+  if (c === 'CAMPANHA1') return 'Campanha 1 (site principal)';
+  if (c === 'CAMPANHA2') return 'Campanha 2';
+  if (c === 'CAMPANHA3') return 'Campanha 3 (Assistente Guiado /campanha3)';
+  return c;
+}
+
+function makeEmptyForm(campanha: string): AlbumFormData {
+  return {
+    name: '',
+    linkAmostra: '',
+    linkImgAlbum: '',
+    priceOld: 0,
+    priceNew: 0,
+    priceMistoOld: 0,
+    priceMistoNew: 0,
+    campanha,
+    tipo: 'ALBUM',
+    repertorio: [],
+    isOrderBump: false,
+    orderBumpDiscount: 0,
+    relatedAlbumId: '',
+  };
+}
+
+const EMPTY_FORM: AlbumFormData = makeEmptyForm('CAMPANHA1');
 
 export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) {
   const [albums, setAlbums] = useState<Album[]>([]);
+  const [campanhaFilter, setCampanhaFilter] = useState<string>('ALL');
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -206,7 +223,9 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
 
   const openCreate = () => {
     setEditingId(null);
-    setFormData(EMPTY_FORM);
+    // Se a aba "Todos" estiver ativa, cadastra por padrão em CAMPANHA3 (é o
+    // que está em andamento); nas abas específicas, respeita a aba aberta.
+    setFormData(makeEmptyForm(campanhaFilter === 'ALL' ? 'CAMPANHA3' : campanhaFilter));
     setNewTrack('');
     setNewTrackPersonalizada(false);
     setIsModalOpen(true);
@@ -301,9 +320,13 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
     );
   }
 
+  const filteredAlbums = campanhaFilter === 'ALL'
+    ? albums
+    : albums.filter(a => a.campanha === campanhaFilter);
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-gray-800">Gerenciar Álbuns</h1>
         <button
           onClick={openCreate}
@@ -316,14 +339,36 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
         </button>
       </div>
 
-      {albums.length === 0 ? (
+      {/* Abas por campanha — CAMPANHA3 é o Assistente Guiado (/campanha3),
+          isolado do site principal (CAMPANHA1) pelo ModalVanilla.astro. */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {(['ALL', ...CAMPANHAS] as const).map(c => (
+          <button
+            key={c}
+            onClick={() => setCampanhaFilter(c)}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+              campanhaFilter === c
+                ? 'bg-blue-600 border-blue-600 text-white'
+                : 'bg-white border-gray-300 text-gray-600 hover:border-blue-400'
+            }`}
+          >
+            {c === 'ALL' ? 'Todos' : campanhaLabel(c)}
+            {' '}
+            <span className="opacity-70">
+              ({c === 'ALL' ? albums.length : albums.filter(a => a.campanha === c).length})
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {filteredAlbums.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-8 text-center">
-          <p className="text-gray-500">Nenhum álbum encontrado.</p>
+          <p className="text-gray-500">Nenhum álbum encontrado{campanhaFilter !== 'ALL' ? ` em ${campanhaLabel(campanhaFilter)}` : ''}.</p>
           <p className="text-gray-400 text-sm mt-2">Clique em "Adicionar Álbum" para começar.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {albums.map((album) => (
+          {filteredAlbums.map((album) => (
             <div key={album.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               {album.linkImgAlbum && (
                 <img src={album.linkImgAlbum} alt={album.name} className="w-full h-48 object-cover" />
@@ -349,7 +394,7 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
                   </div>
                 </div>
                 {album.campanha && (
-                  <p className="text-sm text-blue-600 mb-2">Campanha: {album.campanha}</p>
+                  <p className="text-sm text-blue-600 mb-2">{campanhaLabel(album.campanha)}</p>
                 )}
                 <div className="flex items-center gap-2 mb-3">
                   {album.priceOld > 0 && (
@@ -539,10 +584,16 @@ export default function AlbumManager({ authenticatedFetch }: AlbumManagerProps) 
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Campanha</label>
-                <input type="text" name="campanha" value={formData.campanha} onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Ex: campanha1" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Campanha *</label>
+                <select name="campanha" value={formData.campanha} onChange={handleInputChange} required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+                  {CAMPANHAS.map(c => (
+                    <option key={c} value={c}>{campanhaLabel(c)}</option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Produtos em "Campanha 3" só aparecem no Assistente Guiado (/campanha3) — nunca no site principal.
+                </p>
               </div>
 
               <div>
