@@ -214,13 +214,13 @@ export default function AssistenteGuiado() {
     setEnviando(true);
     const criancasFinal = aplicarBumps(criancas); // bumps aceitos viram Coleção
 
-    const gravacaoItems: Array<{ albumId: string; childName: string; name: string; price: number; misto?: boolean }> = [];
+    const gravacaoItems: Array<{ albumId: string; childName: string; name: string; price: number; misto?: boolean; isRelampago?: boolean }> = [];
     const childrenClean = criancasFinal.map((x) => {
       const nome = displayName(x);
       const cleanSel: string[] = [];
       if (x.relampago) {
         const a1 = catalogo.base[0];
-        gravacaoItems.push({ albumId: a1?.id ?? 'album1', childName: nome, name: `${a1?.name ?? 'Álbum 1'} (Oferta Relâmpago)`, price: precoRelampago(catalogo) });
+        gravacaoItems.push({ albumId: a1?.id ?? 'album1', childName: nome, name: `${a1?.name ?? 'Álbum 1'} (Oferta Relâmpago)`, price: precoRelampago(catalogo), isRelampago: true });
       } else if (x.colecao) {
         const faltantes = catalogo.base.filter((b) => !temAlbum(x, b.id));
         if (faltantes.length === 0 && catalogo.combo) {

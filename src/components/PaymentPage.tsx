@@ -8,6 +8,7 @@ interface GravacaoItem {
   childName: string;
   name: string;
   price: number;
+  isRelampago?: boolean;
 }
 
 interface OrderData {
@@ -460,7 +461,7 @@ export default function PaymentPage() {
     const albumsAPIData: Array<{ id: string; name: string; tipo: string; priceNew: string; priceMistoNew?: string }> =
       (orderData as any).albumsAPI ?? [];
 
-    const byKey = new Map<string, { albumId: string; childName: string; name?: string; price?: number; tipo?: string; misto?: boolean }>();
+    const byKey = new Map<string, { albumId: string; childName: string; name?: string; price?: number; tipo?: string; misto?: boolean; isOrderBump?: boolean; isRelampago?: boolean }>();
 
     orderData.children.forEach((child) => {
       // Criança que já tinha pelo menos 1 álbum gravado antes desta compra — usado
@@ -496,6 +497,7 @@ export default function PaymentPage() {
         name: item.name,
         price: item.price,
         tipo: 'GRAVACAO',
+        isRelampago: item.isRelampago,
       });
     });
 
@@ -516,6 +518,7 @@ export default function PaymentPage() {
         name: album?.name,
         price: offerPrice,
         tipo: album?.tipo,
+        isOrderBump: true,
       });
     });
 
