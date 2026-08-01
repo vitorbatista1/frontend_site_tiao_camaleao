@@ -33,7 +33,7 @@ const MEDLEY_BASE = (import.meta.env.PUBLIC_MEDLEY_BASE as string | undefined)?.
 // Manifestos JSON: via API do backend (CORS já resolvido, credenciais no servidor).
 // GET {API_URL}/api/medleys/medley_{ref}{sufixo}.json
 const MEDLEY_MANIFEST_BASE = `${API_URL}/api/medleys`;
-const WA_ATENDIMENTO = 'https://wa.me/message/FFKR2R4DDO27M1';
+const WA_ATENDIMENTO = 'https://wa.me/message/EIW6E6DLZWLCF1';
 
 type Tela = 'nome' | 'amostra' | 'fallback' | 'oferta' | 'familia' | 'addnome' | 'relampago' | 'dados';
 
@@ -286,7 +286,7 @@ export default function AssistenteGuiado() {
       customerData: { fullName: contato.fullName.trim(), email, telefone: normalizePhoneBR(tel) ?? tel },
       children: childrenClean,
       albumsAPI: Object.values(catalogo.porId),
-      productName: 'Assistente Guiado Tião',
+      productName: 'Cantigas Personalizadas',
       total: totalFinal.toFixed(2),
       isCombo: criancasFinal.some((x) => x.colecao),
       gravacaoItems,
