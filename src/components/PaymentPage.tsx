@@ -9,6 +9,7 @@ interface GravacaoItem {
   name: string;
   price: number;
   isRelampago?: boolean;
+  tipo?: string;
 }
 
 interface OrderData {
@@ -496,7 +497,10 @@ export default function PaymentPage() {
         childName: item.childName,
         name: item.name,
         price: item.price,
-        tipo: 'GRAVACAO',
+        // Padrão GRAVACAO cobre os itens que sempre são gravação nova (taxa
+        // de estúdio, coleção sob encomenda). Itens que carregam tipo próprio
+        // (ex.: relâmpago, que revende um álbum já gravado) respeitam esse valor.
+        tipo: item.tipo ?? 'GRAVACAO',
         isRelampago: item.isRelampago,
       });
     });

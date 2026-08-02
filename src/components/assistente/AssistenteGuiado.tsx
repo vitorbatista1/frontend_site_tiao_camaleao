@@ -63,6 +63,24 @@ async function buscarMedley(ref: string | null, sufixo: string | null): Promise<
   }
   return null;
 }
+// [AJUSTES 2026-08] Seletor de DDI — Brasil padrão + países mais prováveis da base
+// (clientes no exterior da pré-venda do Álbum 3) + "Outro" com DDI livre.
+const DDIS: Array<[string, string]> = [
+  ['55', '🇧🇷 +55'], ['1', '🇺🇸 +1'], ['351', '🇵🇹 +351'], ['81', '🇯🇵 +81'],
+  ['44', '🇬🇧 +44'], ['34', '🇪🇸 +34'], ['49', '🇩🇪 +49'], ['33', '🇫🇷 +33'],
+  ['39', '🇮🇹 +39'], ['41', '🇨🇭 +41'], ['61', '🇦🇺 +61'], ['outro', '🌍 Outro'],
+];
+
+// [AJUSTES 2026-08] Máscara progressiva (00) 00000-0000 — só quando DDI = 55.
+const maskTelBR = (v: string) => {
+  const d = v.replace(/\D/g, '').slice(0, 11);
+  if (!d) return '';
+  if (d.length <= 2) return `(${d}`;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+};
+
 const novaCrianca = (nome: string): Crianca => ({
   id: uuid(), nome, albumResult: null, buscando: true,
   sel: [], colecao: false, autoPromo: false, selAntes: null, relampago: false,
@@ -78,6 +96,9 @@ export default function AssistenteGuiado() {
   const [buscando, setBuscando] = useState(false);
   const [listaAberta, setListaAberta] = useState<string | null>(null);
   const [contato, setContato] = useState({ fullName: '', email: '', telefone: '' });
+  const [ddi, setDdi] = useState('55');            // [AJUSTES 2026-08] DDI selecionado ('outro' = campo livre)
+  const [ddiOutro, setDdiOutro] = useState('');    // [AJUSTES 2026-08] DDI digitado quando 'Outro'
+  const [confirmarRemocao, setConfirmarRemocao] = useState<string | null>(null); // [AJUSTES 2026-08] id da criança aguardando confirmação de remoção
   const [erroContato, setErroContato] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [medley, setMedley] = useState<Medley | null>(null);
@@ -121,7 +142,7 @@ export default function AssistenteGuiado() {
   }, []);
 
   const c = criancas[ativa] ?? criancas[0] ?? null;
-  const irPara = (t: Tela) => { setListaAberta(null); setTela(t); window.scrollTo(0, 0); };
+  const irPara = (t: Tela) => { setListaAberta(null); setConfirmarRemocao(null); setTela(t); window.scrollTo(0, 0); };
   const atualizar = (fn: (draft: Crianca) => void) =>
     setCriancas((prev) => prev.map((x, i) => { if (i !== ativa) return x; const d = { ...x, sel: [...x.sel] }; fn(d); return d; }));
 
@@ -207,20 +228,35 @@ export default function AssistenteGuiado() {
     if (!catalogo || enviando) return;
     const email = contato.email.trim().toLowerCase();
     const tel = (contato.telefone || '').replace(/\D/g, '');
-    if (!contato.fullName.trim() || !email.includes('@') || tel.length < 10) {
-      setErroContato('Preencha seu nome, WhatsApp e e-mail para receber as cantigas.');
+    // [AJUSTES 2026-08] Telefone com DDI: BR exige 10–11 dígitos; exterior 6–14
+    // (comprimentos nacionais variam). telIntl ("+" + DDI + número) sinaliza ao
+    // normalizePhoneBR que o DDI já está presente — sem prefixo 55 forçado.
+    const ddiEfetivo = (ddi === 'outro' ? ddiOutro : ddi).replace(/\D/g, '');
+    const telValido = ddiEfetivo === '55'
+      ? tel.length >= 10 && tel.length <= 11
+      : ddiEfetivo.length >= 1 && tel.length >= 6 && tel.length <= 14;
+    if (!contato.fullName.trim() || !email.includes('@') || !telValido) {
+      setErroContato(ddiEfetivo && ddiEfetivo !== '55' && !telValido && contato.fullName.trim() && email.includes('@')
+        ? 'Confira o código do país (DDI) e o número do WhatsApp.'
+        : 'Preencha seu nome, WhatsApp e e-mail para receber as cantigas.');
       return;
     }
+    const telIntl = `+${ddiEfetivo}${tel}`;
     setEnviando(true);
     const criancasFinal = aplicarBumps(criancas); // bumps aceitos viram Coleção
 
-    const gravacaoItems: Array<{ albumId: string; childName: string; name: string; price: number; misto?: boolean; isRelampago?: boolean }> = [];
+    const gravacaoItems: Array<{ albumId: string; childName: string; name: string; price: number; misto?: boolean; isRelampago?: boolean; tipo?: string }> = [];
     const childrenClean = criancasFinal.map((x) => {
       const nome = displayName(x);
       const cleanSel: string[] = [];
       if (x.relampago) {
+        // A tela relâmpago só é oferecida quando a criança JÁ tem o Álbum 1
+        // gravado (ver irPara(temAlbum(...) ? 'relampago' : 'nome')) — é uma
+        // revenda com desconto, não uma gravação nova. tipo real evita que o
+        // CAPI/n8n classifique como "gravacao" por engano.
         const a1 = catalogo.base[0];
-        gravacaoItems.push({ albumId: a1?.id ?? 'album1', childName: nome, name: `${a1?.name ?? 'Álbum 1'} (Oferta Relâmpago)`, price: precoRelampago(catalogo), isRelampago: true });
+        const jaGravado = a1 ? temAlbum(x, a1.id) : false;
+        gravacaoItems.push({ albumId: a1?.id ?? 'album1', childName: nome, name: `${a1?.name ?? 'Álbum 1'} (Oferta Relâmpago)`, price: precoRelampago(catalogo), isRelampago: true, tipo: jaGravado ? 'ALBUM' : 'GRAVACAO' });
       } else if (x.colecao) {
         const faltantes = catalogo.base.filter((b) => !temAlbum(x, b.id));
         if (faltantes.length === 0 && catalogo.combo) {
@@ -277,13 +313,14 @@ export default function AssistenteGuiado() {
       content_ids: icItems.map((i) => i.id),
       contents: icItems.map((i) => ({ id: i.id, quantity: 1, item_price: i.price })),
       checkout: { currency: 'BRL', value: totalFinal, items: icItems },
-      em: email, ph: contato.telefone,
+      em: email, ph: telIntl, // [AJUSTES 2026-08] telefone já com DDI correto (matching CAPI)
       fn: nameParts[0] ?? null, ln: nameParts.slice(1).join(' ') || null,
       children: criancasFinal.map((x) => ({ nome: displayName(x), resumo: resumoCrianca(x, catalogo) })),
-    }, { email, phone: contato.telefone, fullName: contato.fullName });
+    }, { email, phone: telIntl, fullName: contato.fullName });
 
     localStorage.setItem('orderData', JSON.stringify({
-      customerData: { fullName: contato.fullName.trim(), email, telefone: normalizePhoneBR(tel) ?? tel },
+      // [AJUSTES 2026-08] telIntl preserva o DDI do exterior (entrega WhatsApp correta)
+      customerData: { fullName: contato.fullName.trim(), email, telefone: normalizePhoneBR(telIntl) ?? tel },
       children: childrenClean,
       albumsAPI: Object.values(catalogo.porId),
       productName: 'Cantigas Personalizadas',
@@ -291,7 +328,7 @@ export default function AssistenteGuiado() {
       isCombo: criancasFinal.some((x) => x.colecao),
       gravacaoItems,
       skipOrderBumps: true, // bumps já resolvidos AQUI (um por criança, complemento da Coleção)
-      sourcePath: '/campanha3',
+      sourcePath: '/presente',
       tracking: {
         fbp: (document.cookie.match(/(?:^| )_fbp=([^;]+)/) || [])[1] || null,
         fbc: (document.cookie.match(/(?:^| )_fbc=([^;]+)/) || [])[1] || null,
@@ -306,15 +343,32 @@ export default function AssistenteGuiado() {
 
   function leadContato() {
     const email = contato.email.trim().toLowerCase();
-    if (!email.includes('@') && (contato.telefone || '').replace(/\D/g, '').length < 10) return;
+    const tel = (contato.telefone || '').replace(/\D/g, '');
+    // [AJUSTES 2026-08] mínimo relaxado p/ exterior (6 dígitos) — comprimentos variam por país
+    const ddiEfetivo = (ddi === 'outro' ? ddiOutro : ddi).replace(/\D/g, '');
+    const minTel = ddiEfetivo === '55' ? 10 : 6;
+    if (!email.includes('@') && tel.length < minTel) return;
+    const telIntl = tel.length >= minTel && ddiEfetivo ? `+${ddiEfetivo}${tel}` : null;
     trackBoth('Lead', {
       event_name: 'Lead', event_id: `Lead_${Date.now()}`, value: 1,
-      lead: { name: contato.fullName || undefined, email: email || undefined, phone: normalizePhoneBR(contato.telefone) ? `+${normalizePhoneBR(contato.telefone)}` : undefined },
-    }, { email, phone: contato.telefone, fullName: contato.fullName });
+      lead: { name: contato.fullName || undefined, email: email || undefined, phone: telIntl ?? undefined },
+    }, { email, phone: telIntl ?? undefined, fullName: contato.fullName });
   }
 
   if (!catalogo) {
     return <div className="py-16 text-center font-bold text-white">Carregando as cantigas… 🎵</div>;
+  }
+
+  // [AJUSTES 2026-08] Remoção confirmada de uma criança do pedido (tela família).
+  // Limpa também o bump selecionado da criança (bumpsSel do fluxo de order bump).
+  // Última criança removida → volta ao início (não existe pedido vazio).
+  function removerCrianca(id: string) {
+    const restantes = criancas.filter((x) => x.id !== id);
+    setConfirmarRemocao(null);
+    setBumpsSel((p) => { const n = { ...p }; delete n[id]; return n; });
+    setCriancas(restantes);
+    setAtiva(0);
+    if (restantes.length === 0) { setNomeInput(''); irPara('nome'); }
   }
 
   const anyGrav = criancas.some((x) => (x.colecao && nFalt(x, catalogo) > 0) || x.sel.some((id) => !temAlbum(x, id)));
@@ -322,7 +376,7 @@ export default function AssistenteGuiado() {
 
   // ═══════════════ TELAS ═══════════════
   return (
-    <div className="mx-auto w-full max-w-[430px] px-3.5 pb-24 pt-4">
+    <div className="mx-auto w-full max-w-[430px] px-3.5 pb-24 pt-4 md:max-w-[480px]">
       {/* topo */}
       <div className="mb-2.5 flex items-center gap-2.5">
         <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border-[3px] border-white bg-white">
@@ -445,13 +499,41 @@ export default function AssistenteGuiado() {
         <>
           <Balao>Legal, anotei seu pedido! Deseja adicionar outra criança?</Balao>
           <div className="rounded-[22px] bg-white p-5 shadow-lg">
-            <div className="mb-3.5">
+            {/* [AJUSTES 2026-08] Balões viram linhas com "×" de remover. O × NUNCA remove
+                direto: abre a confirmação abaixo (protege toque acidental e explica a ação). */}
+            <div className="mb-3.5 flex flex-col gap-2">
               {criancas.map((x) => (
-                <span key={x.id} className="m-0.5 mr-1 inline-flex items-center gap-1.5 rounded-xl border-2 border-[#BEE4F7] bg-[#EAF6FD] px-3 py-1.5 text-[14.5px] font-extrabold text-[#0A8FC7]">
-                  🎵 {displayName(x)} · {resumoCrianca(x, catalogo)} · {fmtBRL(precoCrianca(x, catalogo))}
-                </span>
+                <div key={x.id} className="flex items-center justify-between gap-2 rounded-xl border-2 border-[#BEE4F7] bg-[#EAF6FD] px-3 py-2 text-[14.5px] font-extrabold text-[#0A8FC7]">
+                  <span>🎵 {displayName(x)} · {resumoCrianca(x, catalogo)} · {fmtBRL(precoCrianca(x, catalogo))}</span>
+                  <button
+                    onClick={() => setConfirmarRemocao(x.id)}
+                    aria-label={`Remover ${displayName(x)} do pedido`}
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-[#9AD1EE] bg-white text-[#0A8FC7]"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                      <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                </div>
               ))}
             </div>
+            {confirmarRemocao && (() => {
+              const alvo = criancas.find((x) => x.id === confirmarRemocao);
+              if (!alvo) return null;
+              return (
+                <div className="mb-3.5 rounded-[14px] border-2 border-dashed border-[#F2A183] bg-[#FDF1EB] px-3.5 py-3">
+                  <p className="mb-2.5 text-[15px] font-extrabold text-[#9A3F1C]">Remover o pedido de {displayName(alvo)}?</p>
+                  <div className="flex gap-2">
+                    <button onClick={() => removerCrianca(alvo.id)} className="flex-1 rounded-xl bg-[#E0653A] px-3 py-2.5 font-display text-[15px] font-bold text-white shadow-[0_3px_0_#B54A24] active:translate-y-0.5">
+                      Sim, remover
+                    </button>
+                    <button onClick={() => setConfirmarRemocao(null)} className="flex-1 rounded-xl border-2 border-[#D8D9E8] bg-white px-3 py-2.5 font-display text-[15px] font-bold text-[#2B2B4E]">
+                      Não, manter
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
             <BotaoPrimario onClick={() => irPara('dados')}>Fazer pagamento →</BotaoPrimario>
             <button onClick={() => { setNomeInput(''); irPara('addnome'); }} className="mt-2.5 block w-full rounded-2xl border-[2.5px] border-[#D8D9E8] bg-white px-4 py-3.5 font-display text-[17px] font-bold text-[#0A8FC7]">
               + Adicionar outra criança
@@ -551,9 +633,44 @@ export default function AssistenteGuiado() {
               placeholder="Nome completo" autoComplete="name"
               value={contato.fullName} onChange={(e) => setContato({ ...contato, fullName: e.target.value })} />
             <label className="mt-3 block text-[14px] font-extrabold text-[#8A8AA3]">Seu WhatsApp</label>
-            <input className="mt-1.5 w-full rounded-2xl border-[2.5px] border-[#D8D9E8] px-4 py-3.5 text-[17px] font-bold outline-none focus:border-[#12B3F2]"
-              placeholder="(00) 00000-0000" inputMode="tel" autoComplete="tel"
-              value={contato.telefone} onChange={(e) => setContato({ ...contato, telefone: e.target.value })} />
+            {/* [AJUSTES 2026-08] Seletor de DDI (🇧🇷 +55 padrão) + máscara BR condicional.
+                Exterior: sem máscara, número nacional livre — o DDI vai junto no pedido. */}
+            <div className="mt-1.5 flex gap-2">
+              <select
+                value={ddi}
+                aria-label="Código do país (DDI)"
+                onChange={(e) => {
+                  const novo = e.target.value;
+                  setDdi(novo);
+                  const digitos = contato.telefone.replace(/\D/g, '');
+                  setContato({ ...contato, telefone: novo === '55' ? maskTelBR(digitos) : digitos });
+                }}
+                className="shrink-0 rounded-2xl border-[2.5px] border-[#D8D9E8] bg-white px-2.5 py-3.5 text-[15px] font-bold text-[#2B2B4E] outline-none focus:border-[#12B3F2]"
+              >
+                {DDIS.map(([v, rotulo]) => <option key={v} value={v}>{rotulo}</option>)}
+              </select>
+              {ddi === 'outro' && (
+                <input
+                  className="w-[74px] shrink-0 rounded-2xl border-[2.5px] border-[#D8D9E8] px-2 py-3.5 text-center text-[16px] font-bold outline-none focus:border-[#12B3F2]"
+                  placeholder="+DDI" inputMode="numeric" aria-label="DDI do país"
+                  value={ddiOutro}
+                  onChange={(e) => setDdiOutro(e.target.value.replace(/[^\d]/g, '').slice(0, 4))}
+                />
+              )}
+              <input
+                className="w-full min-w-0 rounded-2xl border-[2.5px] border-[#D8D9E8] px-4 py-3.5 text-[17px] font-bold outline-none focus:border-[#12B3F2]"
+                placeholder={ddi === '55' ? '(00) 00000-0000' : 'Número com código de área'}
+                inputMode="tel" autoComplete="tel"
+                value={contato.telefone}
+                onChange={(e) => setContato({
+                  ...contato,
+                  telefone: ddi === '55' ? maskTelBR(e.target.value) : e.target.value.replace(/[^\d ]/g, '').slice(0, 17),
+                })}
+              />
+            </div>
+            {ddi !== '55' && (
+              <p className="mt-1.5 text-[12.5px] font-bold text-[#8A8AA3]">Digite o número sem o código do país — a gente junta o DDI pra você.</p>
+            )}
             <label className="mt-3 block text-[14px] font-extrabold text-[#8A8AA3]">Seu e-mail</label>
             <input className="mt-1.5 w-full rounded-2xl border-[2.5px] border-[#D8D9E8] px-4 py-3.5 text-[17px] font-bold outline-none focus:border-[#12B3F2]"
               placeholder="nome@email.com" inputMode="email" autoComplete="email"
