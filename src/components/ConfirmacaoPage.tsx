@@ -2,7 +2,7 @@
 import { trackBoth, normalizePhoneBR } from '../lib/tracking.ts';
 import { useEffect, useState } from 'react';
 import { CheckCircle, Music, Heart, Lock } from './Icons.tsx';
-import cabecaAlta from '../assets/images/Cabeça-Alta-RGB.png';
+import cabecaAlta from '../assets/images/cabeca-alta-rgb.png';
 
 interface GravacaoItem {
   albumId: string;

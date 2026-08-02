@@ -276,7 +276,12 @@ export default function AssistenteGuiado() {
           for (const b of faltantes) {
             const t = catalogo.taxaPorBase[b.id];
             gravacaoItems.push({
-              albumId: t?.id ?? b.id, childName: nome,
+              // [TAXA-SINTETICA 2026-08] Sem produto de taxa no banco, o ID é
+              // sintético "taxa:{baseId}" — NUNCA o ID do álbum base. Com o ID
+              // base, o backend (anti-manipulação) recalculava pro priceNew do
+              // álbum (39/67) e o cliente via R$197 mas pagava R$203. O valor
+              // real da taxa é a constante TAXA_GRAVACAO do servidor (R$50).
+              albumId: t?.id ?? `taxa:${b.id}`, childName: nome,
               name: t?.name ?? `Taxa de Gravação - ${b.name}`,
               price: t ? num(t.priceNew) : catalogo.taxaPadrao,
             });
