@@ -1,0 +1,119 @@
+---
+const faqs = [
+  {
+    q: "As cantigas do Álbum 3 são todas personalizadas com o nome?",
+    a: "Sim — essa é a grande novidade! Pela primeira vez, todas as 10 cantigas do álbum cantam o nome da criança: 7 clássicos que atravessam gerações e 3 músicas autorais e inéditas do universo do Tião.",
+  },
+  {
+    q: "Já tenho os Álbuns 1 e 2. O que o Álbum 3 tem de diferente?",
+    a: "Repertório 100% novo — nenhuma cantiga se repete — e as 3 primeiras músicas autorais da nossa história (As Cores do Tião, O Grande Circo e Fazendinha). E na sua página, dá pra criar playlists misturando os três álbuns.",
+  },
+  {
+    q: "O nome do meu filho não está no acervo de vocês. E agora?",
+    a: "É justamente o maior benefício desta pré-venda: nomes que ainda não estão no acervo do Álbum 3 serão gravados em estúdio sem nenhum custo adicional para quem garantir a vaga agora. Depois do lançamento oficial, novas gravações terão acréscimo de estúdio e entrarão em fila de produção.",
+  },
+  {
+    q: "Comprei na pré-venda. Quando recebo minhas cantigas?",
+    a: "Todas as compras deste primeiro lote (as 200 primeiras) serão entregues na primeira semana de agosto. Estamos finalizando as gravações em estúdio justamente para que o nome da sua criança já esteja pronto na liberação. Assim que o álbum estiver no ar na sua página, você recebe um aviso pelo WhatsApp.",
+  },
+  {
+    q: "Onde o Álbum 3 vai aparecer depois da compra?",
+    a: "Na mesma página exclusiva dos seus outros álbuns, em meu.tiaocamaleao.com.br — entra só com o telefone, sem senha. Tudo junto: ouvir, baixar, presentear e criar playlists.",
+  },
+  {
+    q: "Para qual idade as cantigas são indicadas?",
+    a: "São pensadas para crianças pequenas, mais ou menos de 0 a 6 anos. As cantigas clássicas, a melodia suave e a repetição combinam com essa fase — e ainda ajudam no desenvolvimento da fala e da atenção.",
+  },
+  {
+    q: "Posso presentear ou compartilhar com a família?",
+    a: "Pode, e é um dos jeitos mais bonitos de usar! Na sua página dá para enviar as cantigas de presente para pais, avós, padrinhos e tios, com uma mensagem de dedicatória. Quem recebe abre direto no player — e você ainda pode gerar um ebook com a dedicatória e um QR code, perfeito para imprimir e presentear fisicamente.",
+  },
+  {
+    q: "Como faço o pagamento? É seguro?",
+    a: "Pelo Mercado Pago, com Pix, cartão ou boleto, em ambiente seguro. A operação é da Agência Futuro Marketing Ltda (CNPJ 15.727.842/0001-17), que cuida do Tião Camaleão desde 2013.",
+    open: true,
+  },
+];
+---
+
+<div class="mt-10 space-y-3">
+  {faqs.map((faq) => (
+    <details
+      class="faq-item overflow-hidden rounded-2xl border-2 border-border"
+      open={faq.open}
+    >
+      <summary
+        class="flex w-full items-center gap-4 p-5 cursor-pointer select-none"
+        style="font-size: 22px; font-weight: 700; color: white; text-transform: uppercase;"
+      >
+        <span class="faq-plus flex-shrink-0" aria-hidden="true"></span>
+        <span class="tracking-wide text-left flex-1">{faq.q}</span>
+      </summary>
+
+      <div
+        class="border-t-2 border-border faq-body p-5 leading-relaxed"
+        style="font-size: 20px; font-weight: 500; color: #599313;"
+      >
+        {faq.a}
+      </div>
+    </details>
+  ))}
+</div>
+
+<style>
+  .faq-item {
+    background: #599313;
+  }
+
+  .faq-item summary {
+    list-style: none;
+  }
+
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-body {
+    background: white;
+  }
+
+  /* Símbolo "+" branco sem fundo */
+  .faq-plus {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: white;
+    font-size: 30px;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+  }
+
+  .faq-plus::before {
+    content: "+";
+    color: white;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  details[open] .faq-plus {
+    transform: rotate(45deg);
+  }
+
+  .faq-item {
+    border-color: #599313 !important;
+  }
+
+  .faq-item .border-border {
+    border-color: #599313 !important;
+  }
+
+  @media (max-width: 767px) {
+    .faq-item summary {
+      font-size: 15px !important;
+    }
+  }
+</style>
