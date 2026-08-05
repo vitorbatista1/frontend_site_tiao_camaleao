@@ -1,0 +1,10 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ConfirmacaoPage from '../components/ConfirmacaoPage.tsx';
+---
+
+<Layout title="Pedido confirmado - Cantigas Personalizadas">
+  <div class="min-h-screen bg-gradient-to-b from-green-50 to-white py-12">
+    <ConfirmacaoPage client:load />
+  </div>
+</Layout>

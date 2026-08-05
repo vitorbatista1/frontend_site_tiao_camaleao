@@ -1,0 +1,275 @@
+---
+import { Image } from "astro:assets";
+import logoImg from "../../../public/imagens/logo.png";
+import { getHeroPagina2Image } from "../../lib/heroPagina2Image";
+import WhatsAppSellerButton from "../WhatsAppSellerButton.astro";
+
+const { heroMdSrc, heroSrcset, heroSizes } = await getHeroPagina2Image();
+---
+
+<!-- TOP STRIP + HERO ocupam 100% da tela -->
+<div class="hero-wrapper" style="display: flex; flex-direction: column;">
+
+  <!-- TOP STRIP - RESPONSIVO -->
+  <div
+    class="text-center uppercase tracking-widest"
+    style="background-color: #FF9900; color: #fff; padding: 12px 8px;"
+  >
+    <div style="display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; gap: 4px; width: 100%;">
+      <span style="display:inline-flex; flex-shrink: 0; vertical-align:middle;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="width: clamp(9px, 2vw, 30px); height: clamp(9px, 2vw, 30px);">
+          <path
+            d="M12 2L1 21h22L12 2z"
+            fill="#FFD54F"
+            stroke="#000"
+            stroke-width="1.6"
+            stroke-linejoin="round"
+          />
+          <rect x="11" y="8" width="2" height="7" rx="1" fill="#000"/>
+          <circle cx="12" cy="18" r="1.2" fill="#000"/>
+          <rect x="5" y="20.3" width="14" height="1.3" rx="0.6" fill="#000"/>
+        </svg>
+      </span>
+
+      <span
+        class="top-strip-text"
+        style="
+          font-size: clamp(15px, 3vw, 26px);
+          font-weight: 700;
+          letter-spacing: normal;
+          white-space: nowrap;
+          vertical-align: middle;
+          text-align: center;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          text-shadow: 0 2px 5px rgba(0,0,0,0.4);
+        "
+      >
+        VÁLIDO PARA AS 200 PRIMEIRAS COMPRAS
+      </span>
+
+      <span style="display:inline-flex; flex-shrink: 0; vertical-align:middle;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="width: clamp(9px, 2vw, 30px); height: clamp(9px, 2vw, 30px);">
+          <path
+            d="M12 2L1 21h22L12 2z"
+            fill="#FFD54F"
+            stroke="#000"
+            stroke-width="1.6"
+            stroke-linejoin="round"
+          />
+          <rect x="11" y="8" width="2" height="7" rx="1" fill="#000"/>
+          <circle cx="12" cy="18" r="1.2" fill="#000"/>
+          <rect x="5" y="20.3" width="14" height="1.3" rx="0.6" fill="#000"/>
+        </svg>
+      </span>
+    </div>
+  </div>
+
+  <!-- HERO - RESPONSIVO -->
+  <header class="hero-header relative bg-white flex flex-col" style="flex: 1; overflow: visible; min-height: 100vh;">
+
+    <!-- Logo centralizada no topo -->
+    <div class="relative z-10 w-full flex justify-center -mt-8 pb-4 md:-mt-10 md:pb-2 px-4">
+      <Image
+        src={logoImg}
+        alt="Tião Camaleão"
+        widths={[160, 256, 320, 512, 640]}
+        sizes="(max-width: 768px) 288px, (max-width: 1024px) 256px, 320px"
+        width={768}
+        height={432}
+        class="w-60 md:w-64 lg:w-80"
+        style="height: auto; max-width: 100%;"
+      />
+    </div>
+
+    <!-- Texto do hero -->
+    <div class="relative z-10 container flex items-start md:items-center flex-none md:flex-1 pt-1 pb-6 md:py-10 px-4">
+      <div class="w-full md:max-w-[55%] text-center md:text-left">
+      <h1
+        class="font-black leading-tight hero-title"
+        style="font-size: clamp(29px, 7vw, 77px); color: #599313; line-height: 1.05; transform: translateY(-30px); font-weight: 900;"
+      >
+        <span style="white-space: nowrap;">O álbum mais pedido</span><br /><span style="white-space: nowrap;">finalmente chegou!</span>
+      </h1>
+
+      <div class="pre-venda-box" style="transform: translateY(-20px);">
+        <div class="pre-venda-top" style="font-size: clamp(20px, 2.5vw, 28px);">
+          Pré-venda EXCLUSIVA<br>
+          para clientes Tião Camaleão.
+        </div>
+        <hr style="border: none; border-top: 2px solid #599313; width: 100%; margin: 8px 0;" />
+        <div class="pre-venda-bottom" style="font-size: clamp(16px, 2vw, 20px);">
+          <p>As<b> 200 primeiras compras</b> garantem a gravação do nome<br>
+          sem custo adicional de estúdio.</p>
+          <br />
+          <p>A entrega deste primeiro lote acontece na <b>primeira semana de agosto</b>.</p>
+        </div>
+      </div>
+
+        <div class="cta-group cta-group-stack cta-group-center mt-4 md:mt-10">
+                  <a
+                    href="#novo-album3"
+                    class="btn-red-rounded"
+                    style="display: inline-flex; align-items: center; gap: 0.75rem; background: #E63946; color: white; font-weight: 700; font-size: clamp(14px, 1.5vw, 18px); padding: 0.6rem 1.8rem; border-radius: 9999px; text-decoration: none; transition: 0.2s; box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);"
+                    onmouseover="this.style.backgroundColor='#c1121f'"
+                    onmouseout="this.style.backgroundColor='#E63946'"
+                  >
+                    QUERO COMPRAR
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="9" cy="21" r="1"></circle>
+                      <circle cx="20" cy="21" r="1"></circle>
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                  </a>
+          <WhatsAppSellerButton style="font-size: clamp(15px, 2vw, 22px); font-weight: 600; padding: 7px 16px; white-space: nowrap; text-align: center;" />
+        </div>
+      </div>
+    </div>
+
+    <!-- IMAGEM DO HERO - AUMENTADA, ENCOSTANDO NA SEÇÃO DE BAIXO -->
+<div class="absolute inset-0 overflow-visible">
+  <img
+    src={heroMdSrc}
+    srcset={heroSrcset}
+    sizes={heroSizes}
+    alt=""
+    aria-hidden="true"
+    width={4800}
+    height={2700}
+    class="block hero-img pointer-events-none select-none"
+    fetchpriority="high"
+    loading="eager"
+    decoding="async"
+  />
+</div>
+
+<style>
+  /* TOP STRIP: leve pulsação para chamar atenção */
+  .top-strip-text {
+    display: inline-block;
+    animation: top-strip-pulse 1.8s ease-in-out infinite;
+  }
+
+  @keyframes top-strip-pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.025);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .top-strip-text {
+      animation: none;
+    }
+  }
+
+  /* BOTÕES: centralizados apenas no mobile. No desktop (min-width: 768px)
+     volta ao comportamento original: width fit-content, sem flex, alinhado
+     à esquerda junto com o resto do texto. */
+  @media (max-width: 767px) {
+    .cta-group-center {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .cta-group-center {
+      width: fit-content;
+    }
+  }
+
+  /* MOBILE: hero mais alto para caber a imagem maior e mais baixa, sem que a
+     seção seguinte a encubra */
+  @media (max-width: 767px) {
+    .hero-header {
+      min-height: 130vh !important;
+    }
+  }
+
+  /* MOBILE: imagem maior, ancorada por posição absoluta (não empurra o header
+     nem a seção seguinte) e vazando um pouco por cima da seção de baixo.
+     Subida em relação à versão anterior: bottom mais negativo (25vh em vez
+     de 18vh) para a imagem do cantor ficar mais para cima na tela. */
+  @media (max-width: 767px) {
+    .hero-img {
+      position: absolute !important;
+      left: 50%;
+      bottom: calc(-130px + 5vh) !important;
+      margin: 0 !important; /* zera o margin-top/bottom legado do global.css que empurrava a imagem de forma imprevisível */
+      width: min(250%, 1050px);
+      max-width: 1050px;
+      transform: translateX(-50%);
+      transform-origin: center center;
+    }
+  }
+
+  /* Mobile pequeno (até 480px) - imagem ainda maior */
+  @media (max-width: 480px) {
+    .hero-img {
+      width: min(270%, 1100px);
+      max-width: 1100px;
+      bottom: calc(-135px + 5vh) !important;
+    }
+  }
+
+  /* Mobile médio (481px - 767px) */
+  @media (min-width: 481px) and (max-width: 767px) {
+    .hero-img {
+      width: min(230%, 980px);
+      max-width: 980px;
+      bottom: calc(-122px + 5vh) !important;
+    }
+  }
+
+  /* DESKTOP: posicionamento absoluto (inalterado) */
+  @media (min-width: 768px) {
+    .hero-img {
+      position: absolute;
+      width: auto;
+      max-width: none;
+      margin: 0;
+      transform: scale(1.25);
+      transform-origin: center center;
+      bottom: -220px;
+      right: max(-370px, calc((100vw - 1400px) / 2 - 370px));
+    }
+  }
+
+  /* Ajuste para tablets */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .hero-img {
+      transform: scale(1.1);
+      bottom: -150px;
+    }
+  }
+
+  /* Ajuste para desktop menor */
+  @media (min-width: 1024px) and (max-width: 1365px) {
+    .hero-img {
+      transform: scale(1.15);
+      bottom: -180px;
+    }
+  }
+
+  /* Ajuste para Full HD */
+  @media (min-width: 1366px) and (max-width: 1919px) {
+    .hero-img {
+      transform: scale(1.2);
+      bottom: -200px;
+    }
+  }
+
+  /* Ajuste para 4K */
+  @media (min-width: 1920px) {
+    .hero-img {
+      transform: scale(1.3);
+      bottom: -250px;
+      right: max(-400px, calc((100vw - 1600px) / 2 - 400px));
+    }
+  }
+</style>

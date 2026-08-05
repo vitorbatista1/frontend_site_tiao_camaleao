@@ -1,0 +1,114 @@
+---
+import microfone from "../../../public/imagens/campanha2/microfone.png";
+import { Image } from "astro:assets";
+import capa_album3 from "../../../public/imagens/campanha2/capa_album3.png";
+import WhatsAppSellerButton from "../WhatsAppSellerButton.astro";
+---
+
+<!-- SÓ FALTA GRAVAR - RESPONSIVO -->
+<section
+  class="relative py-12 md:py-24 lg:py-32 overflow-hidden flex flex-col justify-center"
+  style="background-color: #DCF4FF; content-visibility: auto; contain-intrinsic-size: 0 600px;"
+>
+  <div class="container flex flex-col items-center gap-8 md:gap-12 px-4">
+    <div class="w-full max-w-3xl flex flex-col items-center gap-8 md:gap-12">
+      <div class="relative z-10 text-primary-foreground text-center flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-0">
+        <!-- Microfone - Subindo mais -->
+        <img
+          src={microfone.src}
+          alt="Microfone"
+          width={360}
+          height={360}
+          class="mic-icon object-contain flex-shrink-0 sm:-mr-2 md:-mr-4 -mt-12 sm:mt-0"
+          style="margin-bottom: -20px;"
+        />
+        <h2
+          class="leading-tight text-center mt-8 sm:mt-0"
+          aria-label="Só falta gravar o nome da sua criança"
+          style="font-size: clamp(39px, 5vw, 60px); font-weight: 800; line-height: 1.15; color: #1171D3"
+        >
+          <span class="block whitespace-nowrap">Só falta gravar o</span>
+          <span class="block whitespace-nowrap">nome da sua criança</span>
+        </h2>
+      </div>
+
+      <p 
+        class="w-full mt-8 md:mt-12 text-center" 
+        style="
+          color: #1171D3; 
+          font-size: clamp(26px, 2.8vw, 28px);
+          line-height: 1.6;
+          font-weight: 600;
+          max-width: 900px;
+          margin-left: auto;
+          margin-right: auto;
+        "
+      >
+        Garanta acesso antecipado ao Álbum 3 enquanto ainda há vagas de gravação disponíveis nesta pré-venda. Uma edição criada para famílias que acompanham o Tião há anos — e que agora terão acesso antecipado a um lançamento único.
+      </p>
+
+      <!-- Card sempre em coluna: texto, imagem, botão -->
+      <div class="bg-white rounded-2xl shadow-lg w-full flex flex-col items-center gap-5 sm:gap-8 p-6 sm:p-8 md:p-10">
+        
+        <!-- Título -->
+        <div class="w-full flex flex-col items-center text-center justify-center gap-4 md:gap-6">
+          <h3
+            class="leading-snug"
+            style="font-size: clamp(25px, 2.5vw, 30px); font-weight: 800; color: #1171D3;"
+          >
+            QUERO PARTICIPAR DO<br />
+            PRÉ-LANÇAMENTO
+          </h3>
+        </div>
+
+        <!-- Imagem -->
+        <div class="flex-shrink-0">
+          <Image
+            src={capa_album3}
+            alt="Caixa Cantigas Personalizadas 3"
+            widths={[192, 224, 256, 288, 576]}
+            sizes="(max-width: 639px) 256px, (max-width: 767px) 192px, (max-width: 1023px) 224px, 288px"
+            quality={80}
+            format="webp"
+            class="w-64 sm:w-48 md:w-56 lg:w-72 h-auto object-contain"
+            loading="lazy"
+          />
+        </div>
+
+        <!-- Botão -->
+        <div class="w-full flex flex-col items-center text-center justify-center gap-4 md:gap-6">
+          <div class="cta-group justify-center">
+            <a
+              href="#novo-album3"
+              class="btn-red-rounded"
+              style="display: inline-flex; align-items: center; gap: 0.75rem; background: #E63946; color: white; font-weight: 700; font-size: clamp(17px, 1.5vw, 18px); padding: 0.6rem 1.8rem; border-radius: 9999px; text-decoration: none; transition: 0.2s; box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);"
+              onmouseover="this.style.backgroundColor='#c1121f'"
+              onmouseout="this.style.backgroundColor='#E63946'"
+            >
+              GARANTIR EDIÇÃO ESPECIAL
+            </a>
+            <WhatsAppSellerButton
+              style="display: inline-flex; align-items: center; gap: 0.75rem; background: #25D366; color: white; font-weight: 700; font-size: clamp(17px, 1.5vw, 18px); padding: 0.6rem 1.8rem; border-radius: 9999px; text-decoration: none; transition: 0.2s; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.25);"
+              onmouseover="this.style.backgroundColor='#1EBE5B'"
+              onmouseout="this.style.backgroundColor='#25D366'"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .mic-icon {
+    width: 120px;
+    height: 120px;
+  }
+
+  @media (min-width: 1024px) {
+    .mic-icon {
+      width: clamp(140px, 9vw, 220px);
+      height: clamp(140px, 9vw, 220px);
+    }
+  }
+</style>

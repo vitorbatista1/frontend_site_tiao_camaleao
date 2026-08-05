@@ -1,0 +1,106 @@
+---
+import { Image } from "astro:assets";
+import productBox from "../../../public/imagens/campanha2/album3.png";
+---
+
+<!-- CONHECA O ALBUM 3 - RESPONSIVO -->
+<section id="amostra" class="relative w-full pb-12 md:pb-16 section-compact" style="content-visibility: auto; contain-intrinsic-size: 0 700px;">
+  <div class="w-full pt-8 md:pt-16" style="background: white;">
+    <div class="container max-w-6xl mx-auto px-2 md:px-4 flex flex-col items-center justify-between gap-3 md:gap-8">
+
+      <!-- Título -->
+      <div class="w-full max-w-4xl mx-auto text-center pb-2">
+        <h2
+          class="leading-tight text-center"
+          style="font-size: clamp(38px, 4.5vw, 80px); font-weight: 800; color: #1171D3;"
+          aria-label="Criança ouve o próprio nome na música"
+        >
+          Conheça o Álbum 3
+        </h2>
+      </div>
+
+      <div class="w-full max-w-6xl mx-auto">
+        <!-- DOIS CARDS LADO A LADO -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-6xl mx-auto">
+
+          <!-- CARD 1 - IMAGEM -->
+          <div class="bg-white rounded-[28px] shadow-md overflow-hidden flex items-center justify-center" style="background-color: #DCF4FF; min-height: 300px;">
+            <Image
+              src={productBox}
+              alt="Capa do álbum Tião Camaleão"
+              widths={[320, 448, 560, 720]}
+              sizes="(max-width: 767px) 100vw, 560px"
+              quality={80}
+              format="webp"
+              class="w-full h-auto object-contain p-4"
+              loading="lazy"
+            />
+          </div>
+
+          <!-- CARD 2 - LISTA DE MÚSICAS -->
+          <div class="bg-white rounded-[28px] shadow-md p-3 sm:p-6 md:p-8 lg:p-10 flex flex-col justify-center">
+            <ul class="flex flex-col gap-0" style="font-family: 'Baloo 2', 'Comic Sans MS', sans-serif;">
+              <li style="color: #1171D3; padding: 4px 0; display: flex; align-items: center; gap: 10px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #1171D3; color: white; border-radius: 50%; width: 28px; height: 28px; font-size: 0.9rem; font-weight: 700; flex-shrink: 0;">1</span>
+                <span style="font-size: clamp(1.2rem, 1.8vw, 1.8rem);">Apresentação</span>
+              </li>
+              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
+              <li style="color: #1171D3; padding: 4px 0; display: flex; align-items: center; gap: 10px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #1171D3; color: white; border-radius: 50%; width: 28px; height: 28px; font-size: 0.9rem; font-weight: 700; flex-shrink: 0;">2</span>
+                <span style="font-size: clamp(1.2rem, 1.8vw, 1.8rem);">Mariana conta</span>
+              </li>
+              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
+              <li style="color: #1171D3; padding: 4px 0; display: flex; align-items: center; gap: 10px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #1171D3; color: white; border-radius: 50%; width: 28px; height: 28px; font-size: 0.9rem; font-weight: 700; flex-shrink: 0;">3</span>
+                <span style="font-size: clamp(1.2rem, 1.8vw, 1.8rem);">Seu Lobato</span>
+              </li>
+              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
+              <li style="color: #1171D3; padding: 4px 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #FF8C00; color: white; border-radius: 50%; width: 28px; height: 28px; font-size: 0.9rem; font-weight: 700; flex-shrink: 0;">4</span>
+                <span style="font-size: clamp(1.2rem, 1.8vw, 1.8rem);">Fazendinha</span>
+                <span style="display: inline-block; background-color: #FF8C00; color: white; border-radius: 20px; padding: 2px 12px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px; margin-left: 2px;">AUTORAL</span>
+              </li>
+              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
+              <li style="color: #1171D3; padding: 4px 0; display: flex; align-items: center; gap: 10px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #1171D3; color: white; border-radius: 50%; width: 28px; height: 28px; font-size: 0.9rem; font-weight: 700; flex-shrink: 0;">5</span>
+                <span style="font-size: clamp(1.2rem, 1.8vw, 1.8rem);">Borboletinha</span>
+              </li>
+              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
+              <li style="color: #1171D3; padding: 4px 0; display: flex; align-items: center; gap: 10px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #1171D3; color: white; border-radius: 50%; width: 28px; height: 28px; font-size: 0.9rem; font-weight: 700; flex-shrink: 0;">6</span>
+                <span style="font-size: clamp(1.2rem, 1.8vw, 1.8rem);">A Canoa Virou</span>
+              </li>
+              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
+              <li style="color: #1171D3; padding: 4px 0; display: flex; align-items: center; gap: 10px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #1171D3; color: white; border-radius: 50%; width: 28px; height: 28px; font-size: 0.9rem; font-weight: 700; flex-shrink: 0;">7</span>
+                <span style="font-size: clamp(1.2rem, 1.8vw, 1.8rem);">Marinheiro Só</span>
+              </li>
+              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
+              <li style="color: #1171D3; padding: 4px 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #FF8C00; color: white; border-radius: 50%; width: 28px; height: 28px; font-size: 0.9rem; font-weight: 700; flex-shrink: 0;">8</span>
+                <span style="font-size: clamp(1.2rem, 1.8vw, 1.8rem);">As Cores do Tião</span>
+                <span style="display: inline-block; background-color: #FF8C00; color: white; border-radius: 20px; padding: 2px 12px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px; margin-left: 2px;">AUTORAL</span>
+              </li>
+              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
+              <li style="color: #1171D3; padding: 4px 0; display: flex; align-items: center; gap: 10px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #1171D3; color: white; border-radius: 50%; width: 28px; height: 28px; font-size: 0.9rem; font-weight: 700; flex-shrink: 0;">9</span>
+                <span style="font-size: clamp(1.2rem, 1.8vw, 1.8rem);">A Loja do Mestre André</span>
+              </li>
+              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
+              <li style="color: #1171D3; padding: 4px 0; display: flex; align-items: center; gap: 10px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #1171D3; color: white; border-radius: 50%; width: 28px; height: 28px; font-size: 0.9rem; font-weight: 700; flex-shrink: 0;">10</span>
+                <span style="font-size: clamp(1.2rem, 1.8vw, 1.8rem);">Se Você está contente</span>
+              </li>
+              <hr class="border-t-2 my-0.5" style="border-color: #1171D3; opacity: 0.6;" />
+              <li style="color: #1171D3; padding: 4px 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #FF8C00; color: white; border-radius: 50%; width: 28px; height: 28px; font-size: 0.9rem; font-weight: 700; flex-shrink: 0;">11</span>
+                <span style="font-size: clamp(1.2rem, 1.8vw, 1.8rem);">O Grande Circo</span>
+                <span style="display: inline-block; background-color: #FF8C00; color: white; border-radius: 20px; padding: 2px 12px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px; margin-left: 2px;">AUTORAL</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
