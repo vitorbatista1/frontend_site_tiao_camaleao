@@ -86,9 +86,9 @@ const capitalizar = (s: string) => s.replace(/\b\w/g, (m) => m.toUpperCase());
 // conforme o trecho (cues do JSON gerado junto com o MP3). Sem cues, opera
 // no modo simples (capa/cantiga fixas — ex.: linkAmostra do DB como fallback).
 export function PlayerAmostra({
-  src, capa, cantiga, nome, subtitulo, cues, capaPorAlbum, onFirstPlay,
+  src, srcFallback, capa, cantiga, nome, subtitulo, cues, capaPorAlbum, onFirstPlay,
 }: {
-  src?: string; capa?: string; cantiga: string; nome?: string; subtitulo?: string;
+  src?: string; srcFallback?: string; capa?: string; cantiga: string; nome?: string; subtitulo?: string;
   cues?: MedleyCue[]; capaPorAlbum?: Record<number, string | undefined>;
   onFirstPlay?: () => void;
 }) {
@@ -98,9 +98,29 @@ export function PlayerAmostra({
   const [dur, setDur] = useState(0);
   const [cueAtual, setCueAtual] = useState<MedleyCue | null>(cues?.[0] ?? null);
   const firstPlay = useRef(false);
-  useEffect(() => { setCueAtual(cues?.[0] ?? null); setPct(0); }, [src]);
-  const capaExibida = (cueAtual && capaPorAlbum?.[cueAtual.album]) || capa;
-  const tituloExibido = cueAtual ? capitalizar(cueAtual.cantiga) : cantiga;
+  // [AUDIO-FALLBACK 2026-08] Se o MP3 principal (medley do bucket) falhar,
+  // troca sozinho para o srcFallback (linkAmostra do DB) e loga a URL que
+  // falhou — o player NUNCA fica mudo por erro de origem/URL/permissão.
+  const [srcAtual, setSrcAtual] = useState(src);
+  const usandoFallback = !!srcFallback && srcAtual === srcFallback && srcFallback !== src;
+  useEffect(() => { setSrcAtual(src); setCueAtual(cues?.[0] ?? null); setPct(0); }, [src]);
+  const irParaFallback = () => {
+    if (!srcFallback || srcAtual === srcFallback) return false;
+    console.warn('[PlayerAmostra] áudio falhou, usando fallback. URL com problema:', srcAtual);
+    setSrcAtual(srcFallback);
+    setCueAtual(null);
+    setPct(0);
+    const el = audioRef.current;
+    if (el) {
+      el.src = srcFallback;
+      el.load();
+      el.play().then(() => setTocando(true)).catch(() => setTocando(false));
+    }
+    return true;
+  };
+  const cuesAtivos = usandoFallback ? undefined : cues;
+  const capaExibida = usandoFallback ? capa : ((cueAtual && capaPorAlbum?.[cueAtual.album]) || capa);
+  const tituloExibido = usandoFallback ? cantiga : (cueAtual ? capitalizar(cueAtual.cantiga) : cantiga);
 
   useEffect(() => () => { audioRef.current?.pause(); }, []);
 
@@ -111,7 +131,10 @@ export function PlayerAmostra({
     el.play().then(() => {
       setTocando(true);
       if (!firstPlay.current) { firstPlay.current = true; onFirstPlay?.(); }
-    }).catch(() => {});
+    }).catch(() => {
+      // play() rejeitado (404/403/formato): tenta o fallback na mesma ação
+      if (irParaFallback() && !firstPlay.current) { firstPlay.current = true; onFirstPlay?.(); }
+    });
   };
 
   const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
@@ -154,15 +177,16 @@ export function PlayerAmostra({
       </div>
       <audio
         ref={audioRef}
-        src={src}
+        src={srcAtual}
         preload="metadata"
+        onError={() => { irParaFallback(); }}
         onLoadedMetadata={(e) => setDur(e.currentTarget.duration || 0)}
         onTimeUpdate={(e) => {
           const el = e.currentTarget;
           if (el.duration) setPct((el.currentTime / el.duration) * 100);
-          if (cues?.length) {
+          if (cuesAtivos?.length) {
             const t = el.currentTime;
-            const atual = [...cues].reverse().find((cu) => t >= cu.start) ?? cues[0];
+            const atual = [...cuesAtivos].reverse().find((cu) => t >= cu.start) ?? cuesAtivos[0];
             if (atual !== cueAtual) setCueAtual(atual);
           }
         }}

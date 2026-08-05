@@ -431,6 +431,7 @@ export default function AssistenteGuiado() {
           <div className="rounded-[22px] bg-white p-5 shadow-lg">
             <PlayerAmostra
               src={medley?.src ?? catalogo.base[0]?.linkAmostra}
+              srcFallback={catalogo.base[0]?.linkAmostra}
               cues={medley?.cues}
               capaPorAlbum={capaPorAlbum}
               capa={catalogo.base[0]?.linkImgAlbum}
@@ -458,6 +459,7 @@ export default function AssistenteGuiado() {
             </div>
             <PlayerAmostra
               src={medley?.src ?? catalogo.base[0]?.linkAmostra}
+              srcFallback={catalogo.base[0]?.linkAmostra}
               cues={medley?.cues}
               capaPorAlbum={capaPorAlbum}
               capa={catalogo.base[0]?.linkImgAlbum}
