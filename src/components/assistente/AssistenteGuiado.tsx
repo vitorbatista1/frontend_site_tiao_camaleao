@@ -67,7 +67,8 @@ async function buscarMedley(ref: string | null, sufixo: string | null): Promise<
       const r = await fetch(`${MEDLEY_MANIFEST_BASE}/${arq}`); // JSON via API (proxy)
       if (!r.ok) continue;
       const m = await r.json();
-      return { src: m.file, cues: m.cues as MedleyCue[] };
+      const src = /^https?:\/\//.test(m.file) ? m.file : `${MEDLEY_BASE}/${m.file}`;
+      return { src, cues: m.cues as MedleyCue[] };
     } catch { /* tenta a próxima */ }
   }
   return null;
