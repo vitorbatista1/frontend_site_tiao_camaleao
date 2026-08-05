@@ -199,8 +199,14 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     return ids.length >= 2 && ids.every(function(id){ return sel.indexOf(id) >= 0; });
   }
 
+  // Mesmo critério de getGravacaoAlbumFor: ordena por número no nome antes de
+  // indexar, não pela ordem crua do array (que é createdAt, não posição) —
+  // resolvia errado assim que um álbum de outra campanha/ordem entrava na lista.
+  function getAlbumsOnlyOrdered() {
+    return getAlbumsOnly().slice().sort(function(a, b){ return posicaoNoNome(a.name) - posicaoNoNome(b.name); });
+  }
   function getAlbumByKey(key) {
-    return getAlbumsOnly()[parseInt(key.replace("album_", "")) - 1];
+    return getAlbumsOnlyOrdered()[parseInt(key.replace("album_", "")) - 1];
   }
   function getAlbumById(id) { return albumsAPI.find(function(a){ return a.id === id; }); }
   // Acha o registro tipo=GRAVACAO correspondente a um álbum normal — prioriza
@@ -235,15 +241,13 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     var a = keyOrId.startsWith("album_") ? getAlbumByKey(keyOrId) : getAlbumById(keyOrId);
     return parseFloat((a && a.priceNew) || "0");
   }
+  // Reusa getGravacaoAlbumFor (relatedAlbumId, com fallback por número no nome)
+  // em vez de pairing por índice cru entre duas listas independentes — isso
+  // pegava a Gravação errada (ex.: o "Combo - Gravação" sem relatedAlbumId)
+  // sempre que o índice dela coincidia por acaso com o do álbum buscado.
   function getGravacaoPrice(albumId) {
-    var albumsOnly = getAlbumsOnly();
-    var idx = -1;
-    for (var i = 0; i < albumsOnly.length; i++) {
-      if (albumsOnly[i].id === albumId) { idx = i; break; }
-    }
-    if (idx < 0) return 0;
-    var gravs = getGravacao();
-    return gravs[idx] ? parseFloat(gravs[idx].priceNew || 0) : 0;
+    var grav = getGravacaoAlbumFor(albumId);
+    return grav ? parseFloat(grav.priceNew || 0) : 0;
   }
   function priceOldOf(keyOrId) {
     var a = keyOrId.startsWith("album_") ? getAlbumByKey(keyOrId) : getAlbumById(keyOrId);
@@ -1051,7 +1055,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
             // usa priceMistoNew quando configurado, senão cai no preço cheio.
             COMBO_GRAVADO_ONE_MISSING = cgMistoPrice > 0 ? cgMistoPrice : cgPrice;
           }
-          var primeiroAlbum = getAlbumsOnly()[0];
+          var primeiroAlbum = getAlbumsOnlyOrdered()[0];
           var gravIndividual = primeiroAlbum ? getGravacaoAlbumFor(primeiroAlbum.id) : null;
           if (gravIndividual) {
             var p1 = parseFloat(gravIndividual.priceNew || 0);

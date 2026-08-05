@@ -213,8 +213,19 @@ export default function Modal({
   // Retorna só as gravações individuais (1 por álbum), excluindo o produto "Combo - GRAVAÇÃO"
   const getGravacaoIndividuais = () => getGravacaoAlbums().slice(0, getAlbumsOnly().length);
 
+  // Ordena por número extraído do nome, não pela ordem crua do fetch
+  // (createdAt) — evita resolver "album_N" pro álbum errado quando a lista
+  // combina álbuns de campanhas diferentes ou fora de ordem de criação.
+  const posicaoNoNome = (name: string): number => {
+    const m = name.match(/(\d+)/);
+    return m ? parseInt(m[1], 10) : 99;
+  };
+
+  const getAlbumsOnlyOrdered = () =>
+    getAlbumsOnly().slice().sort((a, b) => posicaoNoNome(a.name) - posicaoNoNome(b.name));
+
   const getAlbumByKey = (key: string): AlbumAPI | undefined => {
-    const albums = getAlbumsOnly();
+    const albums = getAlbumsOnlyOrdered();
     const index = parseInt(key.replace("album_", "")) - 1;
     return albums[index];
   };
