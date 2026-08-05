@@ -29,7 +29,8 @@ import OfertaCards from './OfertaCards';
 const API_URL = import.meta.env.PUBLIC_API_URL as string;
 // MP3s: direto da URL pública do bucket (tag <audio> não exige CORS).
 // Ex.: https://<bucket>.fsn1.your-objectstorage.com/medleys
-const MEDLEY_BASE = (import.meta.env.PUBLIC_MEDLEY_BASE as string | undefined)?.replace(/\/$/, '');
+// const MEDLEY_BASE = (import.meta.env.PUBLIC_MEDLEY_BASE as string | undefined)?.replace(/\/$/, '');
+const MEDLEY_BSAE = 'https://tiao.fsn1.your-objectstorage.com/medleys'
 // Manifestos JSON: via API do backend (CORS já resolvido, credenciais no servidor).
 // GET {API_URL}/api/medleys/medley_{ref}{sufixo}.json
 const MEDLEY_MANIFEST_BASE = `${API_URL}/api/medleys`;
