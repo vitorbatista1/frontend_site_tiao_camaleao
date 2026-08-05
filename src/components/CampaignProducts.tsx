@@ -69,6 +69,35 @@ export default function CampaignProducts({ campaignId }: Props) {
       .finally(() => setLoading(false));
   }, [campaignId]);
 
+
+  async function handlePlay(album: AlbumAPI) {
+    if (!album.linkAmostra) return;
+
+    if (playingId === album.id) {
+      currentAudio.current?.pause();
+      setPlayingId(null);
+      return;
+    }
+
+    currentAudio.current?.pause();
+    const audio = new Audio(album.linkAmostra);
+    currentAudio.current = audio;
+
+    audio.onended = () => setPlayingId(null);
+    audio.onerror = (e) => {
+      console.error('Erro ao carregar áudio:', album.linkAmostra, e);
+      setPlayingId(null);
+    }
+    
+    try {
+      await audio.play();
+      setPlayingId(album.id);
+    } catch (err) {
+      console.error('Erro ao tentar dar play na música de amostra', err);
+      setPlayingId(null);
+    }
+  }
+
   return (
     <section id="produtos" style={{ background: "#6ab248", paddingBottom: typeof window !== 'undefined' && window.innerWidth >= 768 ? "10rem" : "3.5rem" }} className="pt-14 px-4">
       <h2 className="text-center text-white mb-6 md:mb-16" style={{ fontSize: "clamp(30px, 9vw, 60px)", fontWeight: 800 }}>
@@ -115,20 +144,7 @@ export default function CampaignProducts({ campaignId }: Props) {
                       <button
                         className="h-8 w-8 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow"
                         aria-label="Ouvir amostra"
-                        onClick={() => {
-                          if (!album.linkAmostra) return;
-                          if (playingId === album.id) {
-                            currentAudio.current?.pause();
-                            setPlayingId(null);
-                            return;
-                          }
-                          currentAudio.current?.pause();
-                          const audio = new Audio(album.linkAmostra);
-                          currentAudio.current = audio;
-                          audio.play().catch(() => {});
-                          setPlayingId(album.id);
-                          audio.onended = () => setPlayingId(null);
-                        }}
+                        onClick={() => handlePlay(album)}
                       >
                         {playingId === album.id
                           ? <Pause className="h-4 w-4 fill-[#F2C200] text-[#F2C200]" />
@@ -234,20 +250,7 @@ export default function CampaignProducts({ campaignId }: Props) {
                   <button
                     className="h-8 w-8 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow"
                     aria-label="Ouvir amostra"
-                    onClick={() => {
-                      if (!album.linkAmostra) return;
-                      if (playingId === album.id) {
-                        currentAudio.current?.pause();
-                        setPlayingId(null);
-                        return;
-                      }
-                      currentAudio.current?.pause();
-                      const audio = new Audio(album.linkAmostra);
-                      currentAudio.current = audio;
-                      audio.play().catch(() => {});
-                      setPlayingId(album.id);
-                      audio.onended = () => setPlayingId(null);
-                    }}
+                    onClick={() => handlePlay(album)}
                   >
                     {playingId === album.id
                       ? <Pause className="h-4 w-4 fill-[#F2C200] text-[#F2C200]" />
