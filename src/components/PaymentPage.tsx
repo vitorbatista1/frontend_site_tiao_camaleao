@@ -255,18 +255,25 @@ export default function PaymentPage() {
     }
 
     if (parsed && !parsed.skipOrderBumps) {
-      // Combo já contempla todos os álbuns — excluir filhos com combo das sugestões de album bump
-      const albumsAPI: Array<{ id: string; tipo: string }> = (parsed as any).albumsAPI ?? [];
+      // Combo cobre Álbum 1 + Álbum 2 — troca o id do combo pelos ids reais desses
+      // dois álbuns no carrinho enviado ao backend. Isso faz o backend tratá-los
+      // como "já no carrinho" (não sugere bump de álbum 1/2, que o combo já cobre)
+      // sem zerar o carrinho da criança, permitindo que o álbum 3 ainda apareça
+      // como bump pra quem já tem ele gravado.
+      const albumsAPI: Array<{ id: string; tipo: string; position?: number | null }> = (parsed as any).albumsAPI ?? [];
       const comboIds = new Set(albumsAPI.filter(a => a.tipo === 'COMBO').map(a => a.id));
+      const comboBaseAlbumIds = albumsAPI
+        .filter(a => a.tipo === 'ALBUM' && (a.position === 1 || a.position === 2))
+        .map(a => a.id);
 
-      const cartItems = parsed.children.flatMap((child) =>
-        (child.selectedAlbums ?? [])
-          .filter(albumId => !comboIds.has(albumId))
-          .map((albumId) => ({
-            albumId,
-            childName: child.albumResult?.display_name ?? child.name,
-          }))
-      );
+      const cartItems = parsed.children.flatMap((child) => {
+        const childName = child.albumResult?.display_name ?? child.name;
+        return (child.selectedAlbums ?? []).flatMap((albumId) =>
+          comboIds.has(albumId)
+            ? comboBaseAlbumIds.map((id) => ({ albumId: id, childName }))
+            : [{ albumId, childName }]
+        );
+      });
       if (cartItems.length > 0) {
         fetch(`${API_URL}/api/albums/suggest-order-bumps`, {
           method: 'POST',
