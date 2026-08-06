@@ -961,7 +961,6 @@ export default function Modal({
                               })()}
                             </div>
 
-                            {/* Gravação para álbuns faltantes */}
                             {(() => {
                               const albumsOnly = getAlbumsOnly();
                               const childAlbumIds = child.albumResult.albums ?? [];
