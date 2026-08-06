@@ -2,7 +2,7 @@
 // pra Coleção quando (3 marcados) ou (soma ≥ preço da coleção). Preços do DB.
 import React from 'react';
 import {
-  type Catalogo, type Crianca, num, temAlbum, nFalt, foundCount,
+  type Catalogo, type Crianca, num, temAlbum, nFalt, mistoElegivel,
   precoAlbumBase, precoColecao, deColecao, displayName,
 } from './assistente.types';
 
@@ -57,7 +57,7 @@ export default function OfertaCards({
   const pc = precoColecao(c, cat);
   const de = deColecao(c, cat);
   const economia = Math.max(0, de - pc);
-  const misto = faltantes > 0 && foundCount(c) >= 1 && num(cat.comboGravacao?.priceMistoNew) > 0;
+  const misto = mistoElegivel(c, cat) && num(cat.comboGravacao?.priceMistoNew) > 0;
 
   const Check = ({ on }: { on: boolean }) => (
     <div className={`mt-0.5 flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-lg border-[3px] text-base font-black text-white ${on ? 'border-[#3FA744] bg-[#3FA744]' : 'border-[#C9C9DC] bg-white'}`}>

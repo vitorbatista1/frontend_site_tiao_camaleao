@@ -195,6 +195,20 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     return ids.length >= 2 && ids.every(function(id){ return sel.indexOf(id) >= 0; });
   }
 
+  // O combo (Combo - Gravação Exclusiva) cobre só o Álbum 1 + Álbum 2 — o
+  // Álbum 3 é um produto totalmente separado e nunca deve entrar na conta de
+  // elegibilidade do preço misto (nem contar como "já gravado" pro combo,
+  // nem contar como "faltando" pro combo).
+  function comboMistoElegivel(child) {
+    if (!child.albumResult || !child.albumResult.found) return false;
+    var found = child.albumResult.albums || [];
+    var ordenados = getAlbumsOnlyOrdered();
+    var a1 = ordenados[0], a2 = ordenados[1];
+    var tem1 = !!a1 && found.indexOf(a1.id) >= 0;
+    var tem2 = !!a2 && found.indexOf(a2.id) >= 0;
+    return tem1 !== tem2;
+  }
+
   // Mesmo critério de getGravacaoAlbumFor: ordena por número no nome antes de
   // indexar, não pela ordem crua do array (que é createdAt, não posição) —
   // resolvia errado assim que um álbum de outra campanha/ordem entrava na lista.
@@ -249,9 +263,9 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     var a = keyOrId.startsWith("album_") ? getAlbumByKey(keyOrId) : getAlbumById(keyOrId);
     return parseFloat((a && a.priceOld) || "0");
   }
-  function calcSubtotal(sel, foundAlbumsCount) {
+  function calcSubtotal(sel, mistoElegivel) {
     if (isComboGravadoSelected(sel)) {
-      return (foundAlbumsCount >= 1) ? COMBO_GRAVADO_ONE_MISSING : COMBO_GRAVADO_PRICE_FULL;
+      return mistoElegivel ? COMBO_GRAVADO_ONE_MISSING : COMBO_GRAVADO_PRICE_FULL;
     }
     var gravIds = getGravacaoIds();
     return sel.reduce(function(s, k) {
@@ -267,8 +281,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   function calcTotal() {
     return children.reduce(function(t, c) {
       var sel = c.selectedAlbums || [];
-      var foundCount = (c.albumResult && c.albumResult.found) ? (c.albumResult.albums || []).length : 0;
-      return t + calcSubtotal(sel, foundCount);
+      return t + calcSubtotal(sel, comboMistoElegivel(c));
     }, 0).toFixed(2);
   }
 
@@ -648,8 +661,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     var isExpanded = !sel.length || albumsExpanded[child.id] === true;
 
     if (!isExpanded) {
-      var foundCount = (child.albumResult && child.albumResult.found) ? (child.albumResult.albums || []).length : 0;
-      var sub = calcSubtotal(sel, foundCount);
+      var sub = calcSubtotal(sel, comboMistoElegivel(child));
       var labels = isComboGravadoSelected(sel) ? [getComboGravacaoName()] : sel.map(function(k){ return esc(getAlbumLabel(k)); });
       return '<button type="button" class="tc-alterar w-full flex items-center gap-3 px-4 py-3 bg-green-50 border-2 border-green-400 rounded-xl hover:bg-green-100 transition-colors" data-cid="'+child.id+'">' +
         '<div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">' + CHECK + '</div>' +
@@ -693,9 +705,26 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     var missing = albumsOnly.filter(function(a){ return childAlbumIds.indexOf(a.id) < 0; });
 
     var missingWithGravacao = missing.filter(function(a){ return getGravacaoPrice(a.id) > 0; });
+    // O combo (Combo - Gravação Exclusiva) cobre só o Álbum 1 + Álbum 2 — só
+    // esses dois entram na conta de faltantes do combo. O Álbum 3 (ou qualquer
+    // outro álbum fora do combo) é sempre oferecido separado, e NUNCA aciona
+    // (nem entra no preço de) o combo-gravação.
+    var missingCombo = missingWithGravacao.filter(function(a){ return a.position === 1 || a.position === 2; });
+    var missingFora = missingWithGravacao.filter(function(a){ return a.position !== 1 && a.position !== 2; });
     if (missingWithGravacao.length > 0) {
-      if (missingWithGravacao.length >= 2) {
-        var allGravBtns = missingWithGravacao.map(function(a) {
+      var foraBtns = missingFora.map(function(a) {
+        var vKeyFora = "personalizado:" + a.id;
+        var gravSelFora = sel.indexOf(vKeyFora) >= 0;
+        return albumBtn(child.id, vKeyFora, gravSelFora, false,
+          "🎙️ " + getGravacaoLabel(a.id),
+          getGravacaoPrice(a.id),
+          0,
+          "border-yellow-500 bg-yellow-50", "border-dashed border-yellow-400 hover:bg-yellow-50",
+          "border-yellow-500 bg-yellow-500", false);
+      }).join("");
+
+      if (missingCombo.length >= 2) {
+        var allGravBtns = missingCombo.map(function(a) {
           var vKey = "personalizado:" + a.id;
           var gravSel2 = sel.indexOf(vKey) >= 0;
           return albumBtn(child.id, vKey, gravSel2 && !comboGravSel, comboGravSel,
@@ -709,11 +738,11 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
         gravSection =
           '<div class="space-y-1 pt-1">' +
             '<p class="text-xs font-semibold text-yellow-600 px-1">🎙️ Grave os álbuns com o nome de ' + esc(child.albumResult.display_name || child.name) + ':</p>' +
-            allGravBtns +
+            allGravBtns + foraBtns +
             comboGravadoBtn(child.id, comboGravSel, comboGravPrice) +
           '</div>';
-      } else {
-        var mAlbum = missingWithGravacao[0];
+      } else if (missingCombo.length === 1) {
+        var mAlbum = missingCombo[0];
         var vKey1 = "personalizado:" + mAlbum.id;
         var gravSel = sel.indexOf(vKey1) >= 0;
         var mGravPrice = getGravacaoPrice(mAlbum.id);
@@ -727,8 +756,16 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
         gravSection =
           '<div class="space-y-1 pt-1">' +
             '<p class="text-xs font-semibold text-yellow-600 px-1">🎙️ Disponíveis para gravação:</p>' +
-            gravBtnHtml +
+            gravBtnHtml + foraBtns +
             comboGravadoBtn(child.id, comboGravSel, comboOneMissingPrice) +
+          '</div>';
+      } else if (foraBtns) {
+        // Álbum 1 e 2 já gravados — o combo já está completo, não oferecer
+        // o Combo - Gravação Exclusiva. Só falta(m) álbum(ns) fora do combo.
+        gravSection =
+          '<div class="space-y-1 pt-1">' +
+            '<p class="text-xs font-semibold text-yellow-600 px-1">🎙️ Disponíveis para gravação:</p>' +
+            foraBtns +
           '</div>';
       }
     }
@@ -745,7 +782,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     var isExpanded = !sel.length || albumsExpanded[child.id] === true;
 
     if (!isExpanded) {
-      var sub = calcSubtotal(sel, 0);
+      var sub = calcSubtotal(sel, false);
       var labels = isComboGravadoSelected(sel) ? [getComboGravacaoName()] : sel.map(function(k){ return esc(getAlbumLabel(k)); });
       return '<button type="button" class="tc-alterar w-full flex items-center gap-3 px-4 py-3 bg-green-50 border-2 border-green-400 rounded-xl hover:bg-green-100 transition-colors" data-cid="'+child.id+'">' +
         '<div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">' + CHECK + '</div>' +
@@ -788,8 +825,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     var rows = children.map(function(c){
       var sel = c.selectedAlbums || [];
       if (!c.name || !sel.length) return "";
-      var foundCount = (c.albumResult && c.albumResult.found) ? (c.albumResult.albums || []).length : 0;
-      var sub = calcSubtotal(sel, foundCount);
+      var sub = calcSubtotal(sel, comboMistoElegivel(c));
       var labels = isComboGravadoSelected(sel)
         ? [getComboGravacaoName()]
         : sel.map(function(k){ return esc(getAlbumLabel(k)); });
@@ -809,7 +845,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
   function buildSimplifiedOffer(child) {
     var sel = child.selectedAlbums || [];
     if (!sel.length || !singleGravacao) return "";
-    var sub = calcSubtotal(sel, 0);
+    var sub = calcSubtotal(sel, false);
     return '<div class="flex items-center gap-3 px-4 py-3 bg-green-50 border-2 border-green-400 rounded-xl">' +
       '<div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">' + CHECK + '</div>' +
       '<span class="flex-1 text-sm font-semibold text-green-800 text-left">🎙️ ' + esc(singleGravacao.name) + ' para <strong>' + esc(child.name.trim()) + '</strong></span>' +
@@ -1183,7 +1219,6 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
         var gravacaoItems = [];
         var childrenClean = children.map(function(c) {
           var sel = c.selectedAlbums || [];
-          var foundCount = (c.albumResult && c.albumResult.found) ? (c.albumResult.albums || []).length : 0;
           var displayName = (c.albumResult && c.albumResult.display_name) || c.name;
           var cleanSel = [];
           sel.forEach(function(key) {
@@ -1193,7 +1228,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
                 albumId: cgAlbumSel ? cgAlbumSel.id : "combo_gravacao",
                 childName: displayName,
                 name: getComboGravacaoName(),
-                price: foundCount >= 1 ? COMBO_GRAVADO_ONE_MISSING : COMBO_GRAVADO_PRICE_FULL
+                price: comboMistoElegivel(c) ? COMBO_GRAVADO_ONE_MISSING : COMBO_GRAVADO_PRICE_FULL
               });
             } else if (key.startsWith("personalizado:")) {
               var origId = key.slice(14);
@@ -1233,8 +1268,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
           // children no formato do payload N8N
           var ic3Children = children.map(function(c, idx) {
             var sel = c.selectedAlbums || [];
-            var foundCount = (c.albumResult && c.albumResult.found) ? (c.albumResult.albums || []).length : 0;
-            return { index: idx + 1, name: (c.albumResult && c.albumResult.display_name) || c.name, product: isComboGravadoSelected(sel) ? "combo" : "album", type: isComboGravadoSelected(sel) ? "gravado" : "digital", price: calcSubtotal(sel, foundCount) };
+            return { index: idx + 1, name: (c.albumResult && c.albumResult.display_name) || c.name, product: isComboGravadoSelected(sel) ? "combo" : "album", type: isComboGravadoSelected(sel) ? "gravado" : "digital", price: calcSubtotal(sel, comboMistoElegivel(c)) };
           });
           var ic3Ids = ic3Items.map(function(i) { return i.id; });
           var ic3Contents = ic3Items.map(function(i) { return { content_id: i.id, quantity: 1, price: i.price, name: i.name }; });

@@ -123,6 +123,17 @@ export const temAlbum = (c: Crianca, baseId: string) =>
 export const foundCount = (c: Crianca) =>
   c.albumResult?.found ? (c.albumResult.albums ?? []).length : 0;
 
+// Elegibilidade do combo "misto" (Combo - Gravação Exclusiva com desconto):
+// EXATAMENTE UM dos dois álbuns do combo (Álbum 1 ou Álbum 2 — cat.base[0]/[1])
+// já gravado e o outro não. O Álbum 3 é um produto totalmente separado do
+// combo 1+2 e nunca entra nessa conta.
+export const mistoElegivel = (c: Crianca, cat: Catalogo): boolean => {
+  const a1 = cat.base[0];
+  const a2 = cat.base[1];
+  if (!a1 || !a2) return false;
+  return temAlbum(c, a1.id) !== temAlbum(c, a2.id);
+};
+
 export const nFalt = (c: Crianca, cat: Catalogo) =>
   cat.base.filter((b) => !temAlbum(c, b.id)).length;
 

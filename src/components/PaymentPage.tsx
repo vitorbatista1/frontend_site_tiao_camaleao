@@ -466,23 +466,32 @@ export default function PaymentPage() {
   // no CAPI e no N8N.
   const selectedAlbumsForPayment = useMemo(() => {
     if (!orderData) return [];
-    const albumsAPIData: Array<{ id: string; name: string; tipo: string; priceNew: string; priceMistoNew?: string }> =
+    const albumsAPIData: Array<{ id: string; name: string; tipo: string; priceNew: string; priceMistoNew?: string; position?: number | null }> =
       (orderData as any).albumsAPI ?? [];
+    // Ids reais do Álbum 1 e do Álbum 2 (o combo cobre só esses dois) — o
+    // Álbum 3 é um produto totalmente separado e nunca entra na conta de
+    // elegibilidade do combo misto.
+    const album1Id = albumsAPIData.find((a) => a.tipo === 'ALBUM' && a.position === 1)?.id;
+    const album2Id = albumsAPIData.find((a) => a.tipo === 'ALBUM' && a.position === 2)?.id;
 
     const byKey = new Map<string, { albumId: string; childName: string; name?: string; price?: number; tipo?: string; misto?: boolean; isOrderBump?: boolean; isRelampago?: boolean }>();
 
     orderData.children.forEach((child) => {
-      // Criança que já tinha pelo menos 1 álbum gravado antes desta compra — usado
-      // pra marcar o combo de gravação personalizada como "misto" (metade pronto,
-      // metade novo) em vez de "combo" puro, e cobrar o priceMistoNew (mais barato)
-      // quando configurado.
-      const foundCount = child.albumResult?.found ? (child.albumResult.albums?.length ?? 0) : 0;
+      // Criança na situação "combo misto": tem EXATAMENTE UM dos dois álbuns
+      // do combo (Álbum 1 ou Álbum 2) já gravado e o outro não — usado pra
+      // marcar o combo de gravação personalizada como "misto" (metade pronto,
+      // metade novo) em vez de "combo" puro, e cobrar o priceMistoNew (mais
+      // barato) quando configurado. Ter só o Álbum 3 gravado NÃO conta.
+      const albumsDaCrianca = child.albumResult?.found ? (child.albumResult.albums ?? []) : [];
+      const tem1 = !!album1Id && albumsDaCrianca.includes(album1Id);
+      const tem2 = !!album2Id && albumsDaCrianca.includes(album2Id);
+      const mistoElegivel = tem1 !== tem2;
       (child.selectedAlbums ?? []).forEach((albumId) => {
         const albumInfo = albumsAPIData.find((a) => a.id === albumId);
         const suffix = albumInfo?.tipo === 'GRAVACAO' ? ' - GRAVACAO' : ' - GRAVADO';
         const childName = child.albumResult?.display_name ?? child.name;
         const isComboGravacao = albumInfo?.tipo === 'GRAVACAO' && /combo/i.test(albumInfo.name);
-        const misto = isComboGravacao && foundCount >= 1;
+        const misto = isComboGravacao && mistoElegivel;
         const priceMistoNew = albumInfo?.priceMistoNew != null ? Number(albumInfo.priceMistoNew) : 0;
         const price = misto && priceMistoNew > 0
           ? priceMistoNew
