@@ -155,13 +155,9 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
 
   // var COMBO_GRAVADO_PRICE_FULL = 150;
   // var COMBO_GRAVADO_ONE_MISSING = 120;
-  // var GRAVADO_INDIVIDUAL_UM_FALTANDO = 100;
-  // var GRAVADO_INDIVIDUAL_NENHUM = 120;
 
   var COMBO_GRAVADO_PRICE_FULL = 0;
   var COMBO_GRAVADO_ONE_MISSING = 0;
-  var GRAVADO_INDIVIDUAL_UM_FALTANDO = 0;
-  var GRAVADO_INDIVIDUAL_NENHUM = 0;
 
   // ── Helpers de álbum ─────────────────────────────────────────────────────────
   // [CAMPANHA3 2026-07] Antes, getComboGravacao/getGravacaoAlbumFor resolviam
@@ -1055,13 +1051,6 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
             // usa priceMistoNew quando configurado, senão cai no preço cheio.
             COMBO_GRAVADO_ONE_MISSING = cgMistoPrice > 0 ? cgMistoPrice : cgPrice;
           }
-          var primeiroAlbum = getAlbumsOnlyOrdered()[0];
-          var gravIndividual = primeiroAlbum ? getGravacaoAlbumFor(primeiroAlbum.id) : null;
-          if (gravIndividual) {
-            var p1 = parseFloat(gravIndividual.priceNew || 0);
-            GRAVADO_INDIVIDUAL_NENHUM = p1;
-            GRAVADO_INDIVIDUAL_UM_FALTANDO = p1;
-          }
         }
       })
       .catch(function(e){ console.error("Erro ao buscar álbuns:", e); })
@@ -1208,12 +1197,12 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
               });
             } else if (key.startsWith("personalizado:")) {
               var origId = key.slice(14);
-              var origAlbum = getAlbumById(origId);
+              var grav = getGravacaoAlbumFor(origId);
               gravacaoItems.push({
-                albumId: origId,
+                albumId: grav ? grav.id : origId,
                 childName: displayName,
-                name: (origAlbum ? origAlbum.name : "Álbum") + " Gravação",
-                price: foundCount >= 1 ? GRAVADO_INDIVIDUAL_UM_FALTANDO : GRAVADO_INDIVIDUAL_NENHUM
+                name: grav ? grav.name : getGravacaoLabel(origId),
+                price: getGravacaoPrice(origId)
               });
             } else {
               cleanSel.push(key);
