@@ -36,6 +36,16 @@ interface OrderData {
   // Página de onde o checkout foi aberto (ex.: "/campanha2") — usado pelo
   // botão "voltar" pra retornar à campanha de origem em vez da home.
   sourcePath?: string;
+  // Campanha do catálogo deste pedido (ex.: "CAMPANHA3") — escopa a sugestão
+  // de order bump pro catálogo/posições certos. Omitido = CAMPANHA1 (padrão
+  // do backend, mantém o comportamento das campanhas antigas).
+  campanha?: string;
+  // [ORDER-BUMP 2026-08] Fluxo /presente já oferece e resolve o bump por álbum
+  // na própria tela de dados (mesmo endpoint/critério da campanha1) — chega
+  // aqui pronto: as sugestões (pra saber nome/preço/desconto) e o que foi
+  // aceito, só pra aplicar o desconto certo no resumo/total (sem perguntar de novo).
+  albumBumpSuggestions?: AlbumBumpSuggestion[];
+  presenteSelectedBumps?: string[];
 }
 
 interface OrderBump {
@@ -238,6 +248,24 @@ export default function PaymentPage() {
       setOrderData(parsed);
     }
 
+    // [ORDER-BUMP 2026-08] /presente já resolveu o bump por álbum na própria
+    // tela de dados — semeia os mesmos estados que a UI abaixo usa pra
+    // calcular preço/resumo, sem refazer a pergunta aqui.
+    if (parsed?.albumBumpSuggestions?.length) {
+      setAlbumBumpSuggestions(
+        parsed.albumBumpSuggestions.map((s) => ({
+          ...s,
+          albums: s.albums.map((a) => ({
+            ...a,
+            priceOld: a.priceOld != null ? Number(a.priceOld) : null,
+            priceNew: Number(a.priceNew),
+            orderBumpDiscount: Number(a.orderBumpDiscount) || 0,
+          })),
+        }))
+      );
+      setSelectedAlbumBumps(new Set(parsed.presenteSelectedBumps ?? []));
+    }
+
     if (!parsed?.skipOrderBumps) {
       fetch(`${API_URL}/api/orderbumps?active=true`)
         .then(r => r.json())
@@ -263,7 +291,7 @@ export default function PaymentPage() {
       const albumsAPI: Array<{ id: string; tipo: string; position?: number | null }> = (parsed as any).albumsAPI ?? [];
       const comboIds = new Set(albumsAPI.filter(a => a.tipo === 'COMBO').map(a => a.id));
       const comboBaseAlbumIds = albumsAPI
-        .filter(a => a.tipo === 'ALBUM' && (a.position === 1 || a.position === 2))
+        .filter(a => a.tipo === 'ALBUM')
         .map(a => a.id);
 
       const cartItems = parsed.children.flatMap((child) => {
@@ -278,7 +306,7 @@ export default function PaymentPage() {
         fetch(`${API_URL}/api/albums/suggest-order-bumps`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cartItems }),
+          body: JSON.stringify({ cartItems, campanha: parsed.campanha }),
         })
           .then(r => r.json())
           .then(json => {
@@ -344,7 +372,12 @@ export default function PaymentPage() {
       const bump = bumps.find(b => b.id === bumpId);
       return total + (bump?.offerPrice || 0);
     }, 0);
-    const albumBumpsTotal = Array.from(selectedAlbumBumps).reduce((total, key) => {
+    // [ORDER-BUMP 2026-08] /presente já resolve o bump por álbum na própria
+    // tela de dados e soma o valor no `total` salvo — somar de novo aqui
+    // dobraria o bônus no total (o `selectedAlbumBumps` seedado só serve pra
+    // exibir o item no resumo, não é uma escolha feita nesta página).
+    const bumpsJaNoTotal = orderData?.sourcePath === '/presente';
+    const albumBumpsTotal = bumpsJaNoTotal ? 0 : Array.from(selectedAlbumBumps).reduce((total, key) => {
       const [childName, albumId] = key.split('::');
       const suggestion = albumBumpSuggestions.find(s => s.childName === childName);
       const album = suggestion?.albums.find(a => a.id === albumId);
@@ -608,8 +641,11 @@ export default function PaymentPage() {
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Coluna esquerda — order bumps + resumo (mobile: 2º, desktop: 1º) */}
         <div className="space-y-6 order-1 lg:order-1">
-          {/* Order Bumps */}
-          {(bumps.length > 0 || albumBumpSuggestions.length > 0) && <div id="order-bumps" className="scroll-mt-4">
+          {/* Order Bumps — [ORDER-BUMP 2026-08] pedidos vindos de /presente já
+              resolveram o bump por álbum na própria tela de dados; aqui só o
+              preço/resumo reflete a escolha (ver seeding acima), sem repetir
+              a pergunta. */}
+          {(bumps.length > 0 || (albumBumpSuggestions.length > 0 && orderData?.sourcePath !== '/presente')) && <div id="order-bumps" className="scroll-mt-4">
             {timeLeft > 0 && (
               <div className="bg-gradient-to-r from-red-500 to-orange-500 rounded-t-2xl p-3 text-white text-center animate-pulse">
                 <div className="flex items-center justify-center gap-2">

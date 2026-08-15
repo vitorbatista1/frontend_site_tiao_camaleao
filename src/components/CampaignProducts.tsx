@@ -281,7 +281,7 @@ export default function CampaignProducts({ campaignId }: Props) {
               {/* Botão comprar */}
               <div className="cta-group mt-4 mx-6">
                 <button
-                  className="btn-red-rounded whitespace-nowrap"
+                  className="btn-red-rounded cta-pulse whitespace-nowrap"
                   data-buy
                   data-buy-name={album.name}
                   data-buy-price={fmtPrice(album.priceNew)}

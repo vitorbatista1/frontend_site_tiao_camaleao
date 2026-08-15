@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import WhatsAppSellerButton from './WhatsAppSellerButton.tsx';
 
 const API_URL = import.meta.env.PUBLIC_API_URL;
@@ -168,7 +168,8 @@ export default function CampaignCombo({ campaignId, album1Src, album2Src, album1
                   <button
                     type="button"
                     onClick={handleBuy}
-                    className="group flex items-center justify-center gap-3 rounded-full bg-red-600 px-12 py-5 text-2xl font-black uppercase text-white shadow-2xl transition-transform hover:scale-105 active:scale-95"
+                    className="cta-pulse group flex items-center justify-center gap-3 rounded-full bg-red-600 px-12 py-5 text-2xl font-black uppercase text-white shadow-2xl transition-transform hover:scale-105 active:scale-95"
+                    style={{ "--cta-glow": "255, 82, 82" } as CSSProperties}
                   >
                     Comprar agora 🛒
                   </button>

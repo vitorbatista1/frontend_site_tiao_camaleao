@@ -21,7 +21,7 @@ import {
   type AlbumAPI, type AlbumResult, type Catalogo, type Crianca,
   montarCatalogo, num, displayName, temAlbum, nFalt, foundCount,
   precoAlbumBase, precoColecao, precoCrianca, precoRelampago,
-  resumoCrianca, checkPromote, menorPreco, faltantesTxt,
+  resumoCrianca, checkPromote, menorPreco,
 } from './assistente.types';
 import { Balao, BotaoPrimario, BotaoWhatsApp, LinkDiscreto, ReguaEntrega, SeloProva, PlayerAmostra, type MedleyCue } from './AssistentePecas';
 import OfertaCards from './OfertaCards';
@@ -36,6 +36,14 @@ const MEDLEY_MANIFEST_BASE = `${API_URL}/api/medleys`;
 const WA_ATENDIMENTO = 'https://wa.me/message/EIW6E6DLZWLCF1';
 
 type Tela = 'nome' | 'amostra' | 'fallback' | 'oferta' | 'familia' | 'addnome' | 'relampago' | 'dados';
+
+// [ORDER-BUMP 2026-08] Mesmo shape retornado por /api/albums/suggest-order-bumps.
+interface AlbumBumpAlbum {
+  id: string; name: string; linkImgAlbum?: string;
+  priceOld: number | string | null; priceNew: number | string;
+  orderBumpDiscount: number | string; tipo?: string;
+}
+interface AlbumBumpSuggestion { childName: string; albums: AlbumBumpAlbum[] }
 
 // [NOME-DIGITADO 2026-08] Exibição usa o nome como a pessoa escreveu (Arthur),
 // capitalizado; a referência (Artur) segue interna: busca do medley no bucket,
@@ -112,7 +120,11 @@ export default function AssistenteGuiado() {
   const [erroContato, setErroContato] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [medley, setMedley] = useState<Medley | null>(null);
-  const [bumpsSel, setBumpsSel] = useState<Record<string, boolean>>({});
+  // [ORDER-BUMP 2026-08] Sugestões por álbum (mesmo endpoint da campanha1,
+  // escopado por campanha=CAMPANHA3) — oferecidas aqui, na tela de dados,
+  // antes de seguir pro pagamento.
+  const [albumBumps, setAlbumBumps] = useState<AlbumBumpSuggestion[]>([]);
+  const [selectedBumpKeys, setSelectedBumpKeys] = useState<Set<string>>(new Set());
   const vcDisparado = useRef(false);
 
   // capa por álbum (posição 1..N do catálogo) — usada na troca durante o medley
@@ -150,6 +162,48 @@ export default function AssistenteGuiado() {
       })
       .catch(() => {});
   }, []);
+
+  // [ORDER-BUMP 2026-08] Ao chegar na tela de dados, busca álbuns complementares
+  // já disponíveis pro(s) nome(s) do pedido — mesmo endpoint/critério da campanha1
+  // (oferece o que falta, checando disponibilidade por nome). Crianças em
+  // "relâmpago" ou que já pegaram a Coleção não entram (nada falta pra sugerir).
+  useEffect(() => {
+    if (tela !== 'dados' || !catalogo) return;
+    const cartItems = criancas
+      .filter((x) => !x.relampago)
+      .flatMap((x) => {
+        const nome = displayName(x);
+        if (x.colecao) return catalogo.base.map((b) => ({ albumId: b.id, childName: nome }));
+        return x.sel.filter((id) => temAlbum(x, id)).map((id) => ({ albumId: id, childName: nome }));
+      });
+    if (cartItems.length === 0) { setAlbumBumps([]); return; }
+    let ativo = true;
+    fetch(`${API_URL}/api/albums/suggest-order-bumps`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cartItems, campanha: 'CAMPANHA3' }),
+    })
+      .then((r) => r.json())
+      .then((json) => { if (ativo && json.success) setAlbumBumps(json.data); })
+      .catch(() => {});
+    return () => { ativo = false; };
+  }, [tela, criancas, catalogo]);
+
+  const bumpPrecoOferta = (a: AlbumBumpAlbum) => {
+    const preco = num(a.priceNew);
+    const desconto = num(a.orderBumpDiscount);
+    return desconto > 0 ? Math.max(0, preco - desconto) : preco;
+  };
+  const bumpTotal = useMemo(
+    () => albumBumps.reduce((acc, s) => acc + s.albums.reduce((a2, alb) =>
+      selectedBumpKeys.has(`${s.childName}::${alb.id}`) ? a2 + bumpPrecoOferta(alb) : a2, 0), 0),
+    [albumBumps, selectedBumpKeys],
+  );
+  const toggleBump = (key: string) => setSelectedBumpKeys((prev) => {
+    const next = new Set(prev);
+    if (next.has(key)) next.delete(key); else next.add(key);
+    return next;
+  });
 
   const c = criancas[ativa] ?? criancas[0] ?? null;
   const irPara = (t: Tela) => { setListaAberta(null); setConfirmarRemocao(null); setTela(t); window.scrollTo(0, 0); };
@@ -216,22 +270,7 @@ export default function AssistenteGuiado() {
     [criancas, catalogo],
   );
 
-  // Um bump por criança: completar a Coleção pelo complemento exato.
-  const bumpsDisp = useMemo(() => {
-    if (!catalogo) return [];
-    return criancas
-      .filter((x) => !x.colecao && (x.sel.length > 0 || x.relampago))
-      .map((x) => ({
-        id: x.id, nome: nomeDigitado(x),
-        dif: precoColecao(x, catalogo) - precoCrianca(x, catalogo),
-        faltam: faltantesTxt(x, catalogo),
-      }))
-      .filter((b) => b.dif > 0);
-  }, [criancas, catalogo]);
-  const totalFinal = totalPedido + bumpsDisp.reduce((a, b) => a + (bumpsSel[b.id] ? b.dif : 0), 0);
-  const aplicarBumps = (lista: Crianca[]) =>
-    lista.map((x) => bumpsSel[x.id] && !x.colecao
-      ? { ...x, colecao: true, relampago: false, autoPromo: false } : x);
+  const totalFinal = totalPedido + bumpTotal;
 
   // ── handoff: mesmo orderData do ModalVanilla → /pagamento ──
   function fazerPagamento() {
@@ -253,10 +292,9 @@ export default function AssistenteGuiado() {
     }
     const telIntl = `+${ddiEfetivo}${tel}`;
     setEnviando(true);
-    const criancasFinal = aplicarBumps(criancas); // bumps aceitos viram Coleção
 
     const gravacaoItems: Array<{ albumId: string; childName: string; name: string; price: number; misto?: boolean; isRelampago?: boolean; tipo?: string }> = [];
-    const childrenClean = criancasFinal.map((x) => {
+    const childrenClean = criancas.map((x) => {
       const nome = displayName(x);
       const cleanSel: string[] = [];
       if (x.relampago) {
@@ -308,7 +346,15 @@ export default function AssistenteGuiado() {
           });
         }
       }
-      return { name: x.nome, albumResult: x.albumResult, selectedAlbums: cleanSel };
+      return { id: x.id, name: x.nome, albumResult: x.albumResult, selectedAlbums: cleanSel };
+    });
+
+    // [ORDER-BUMP 2026-08] Mescla os álbuns-bônus aceitos na tela de dados —
+    // já confirmadamente disponíveis pro nome (checado no fetch de sugestões).
+    selectedBumpKeys.forEach((key) => {
+      const [childName, albumId] = key.split('::');
+      const alvo = childrenClean.find((ch) => (ch.albumResult?.display_name ?? ch.name) === childName);
+      if (alvo && !alvo.selectedAlbums.includes(albumId)) alvo.selectedAlbums.push(albumId);
     });
 
     // InitiateCheckout — browser + CAPI, mesmo event_id (dedup no Meta).
@@ -330,7 +376,7 @@ export default function AssistenteGuiado() {
       checkout: { currency: 'BRL', value: totalFinal, items: icItems },
       em: email, ph: telIntl, // [AJUSTES 2026-08] telefone já com DDI correto (matching CAPI)
       fn: nameParts[0] ?? null, ln: nameParts.slice(1).join(' ') || null,
-      children: criancasFinal.map((x) => ({ nome: displayName(x), resumo: resumoCrianca(x, catalogo) })),
+      children: criancas.map((x) => ({ nome: displayName(x), resumo: resumoCrianca(x, catalogo) })),
     }, { email, phone: telIntl, fullName: contato.fullName });
 
     localStorage.setItem('orderData', JSON.stringify({
@@ -340,9 +386,16 @@ export default function AssistenteGuiado() {
       albumsAPI: Object.values(catalogo.porId),
       productName: 'Cantigas Personalizadas',
       total: totalFinal.toFixed(2),
-      isCombo: criancasFinal.some((x) => x.colecao),
+      isCombo: criancas.some((x) => x.colecao),
       gravacaoItems,
-      skipOrderBumps: true, // bumps já resolvidos AQUI (um por criança, complemento da Coleção)
+      // [ORDER-BUMP 2026-08] Bump por álbum já resolvido aqui (mesmo mecanismo/
+      // critério da campanha1 — /api/albums/suggest-order-bumps escopado por
+      // campanha), então /pagamento não pergunta de novo: só recebe as
+      // sugestões e a seleção pra aplicar o desconto certo no resumo/total.
+      skipOrderBumps: true,
+      albumBumpSuggestions: albumBumps,
+      presenteSelectedBumps: Array.from(selectedBumpKeys),
+      campanha: 'CAMPANHA3',
       sourcePath: '/presente',
       tracking: {
         fbp: (document.cookie.match(/(?:^| )_fbp=([^;]+)/) || [])[1] || null,
@@ -375,12 +428,10 @@ export default function AssistenteGuiado() {
   }
 
   // [AJUSTES 2026-08] Remoção confirmada de uma criança do pedido (tela família).
-  // Limpa também o bump selecionado da criança (bumpsSel do fluxo de order bump).
   // Última criança removida → volta ao início (não existe pedido vazio).
   function removerCrianca(id: string) {
     const restantes = criancas.filter((x) => x.id !== id);
     setConfirmarRemocao(null);
-    setBumpsSel((p) => { const n = { ...p }; delete n[id]; return n; });
     setCriancas(restantes);
     setAtiva(0);
     if (restantes.length === 0) { setNomeInput(''); irPara('nome'); }
@@ -505,6 +556,9 @@ export default function AssistenteGuiado() {
                     ? `Quero o ${catalogo.porId[c.sel[0]]?.name} · ${fmtBRL(precoCrianca(c, catalogo))}`
                     : `Quero os ${c.sel.length} álbuns · ${fmtBRL(precoCrianca(c, catalogo))}`}
             </BotaoPrimario>
+            <BotaoWhatsApp onClick={() => window.open(`${WA_ATENDIMENTO}?text=${encodeURIComponent('Vi um album no seu site e tenho duvidas')}`, '_blank')}>
+              Prefiro comprar com o vendedor
+            </BotaoWhatsApp>
             {ativa === 0
               ? <LinkDiscreto onClick={() => irPara(temAlbum(c, catalogo.base[0]?.id ?? '') ? 'relampago' : 'nome')}>Agora não</LinkDiscreto>
               : <LinkDiscreto onClick={() => { setCriancas((p) => p.filter((_, i) => i !== ativa)); setAtiva(0); irPara('familia'); }}>← Voltar sem adicionar {displayName(c)}</LinkDiscreto>}
@@ -617,34 +671,56 @@ export default function AssistenteGuiado() {
                   <span className="whitespace-nowrap font-extrabold">{fmtBRL(precoCrianca(x, catalogo))}</span>
                 </div>
               ))}
-              {bumpsDisp.filter((b) => bumpsSel[b.id]).map((b) => (
-                <div key={b.id} className="flex justify-between gap-2 border-b border-dashed border-[#D8D9E8] py-1.5 text-[15px] font-bold last:border-0">
-                  <span>🎁 Completar coleção — {b.nome}</span>
-                  <span className="whitespace-nowrap font-extrabold">+ {fmtBRL(b.dif)}</span>
-                </div>
-              ))}
+              {albumBumps.flatMap((s) => s.albums.map((a) => {
+                const key = `${s.childName}::${a.id}`;
+                if (!selectedBumpKeys.has(key)) return null;
+                return (
+                  <div key={key} className="flex justify-between gap-2 border-b border-dashed border-[#D8D9E8] py-1.5 text-[15px] font-bold last:border-0">
+                    <span>🎁 {a.name} · {s.childName}</span>
+                    <span className="whitespace-nowrap font-extrabold">+ {fmtBRL(bumpPrecoOferta(a))}</span>
+                  </div>
+                );
+              }))}
               <div className="flex justify-between pt-2 font-display text-[19px] font-bold">
                 <span>Total</span><span className="text-[22px] text-[#3FA744]">{fmtBRL(totalFinal)}</span>
               </div>
             </div>
 
-            {bumpsDisp.map((b) => (
-              <div key={b.id}
-                onClick={() => setBumpsSel((p) => ({ ...p, [b.id]: !p[b.id] }))}
-                className={`mt-3.5 flex cursor-pointer items-start gap-3 rounded-[18px] border-[3px] border-dashed border-[#F2762E] bg-[#FFF6EF] p-3.5 ${bumpsSel[b.id] ? '' : ''}`}>
-                <div className={`mt-0.5 flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-[9px] border-[3px] border-[#F2762E] text-[19px] font-black text-white ${bumpsSel[b.id] ? 'bg-[#F2762E]' : 'bg-white'}`}>
-                  {bumpsSel[b.id] ? '✓' : ''}
-                </div>
-                <div>
-                  <h4 className="font-display text-[16.5px] font-bold leading-tight text-[#B4531A]">
-                    🎁 Complete a coleção de {b.nome} por + {fmtBRL(b.dif)}
-                  </h4>
-                  <p className="mt-1 text-[14px] font-bold leading-snug text-[#7A4A22]">
-                    Adicione {b.faltam} e leve as 25 cantigas incluindo o Parabéns com o nome de {b.nome}.
-                  </p>
-                </div>
+            {/* [ORDER-BUMP 2026-08] Álbuns complementares já disponíveis pro(s)
+                nome(s) do pedido — mesmo mecanismo/critério da campanha1. */}
+            {albumBumps.length > 0 && (
+              <div className="mt-3.5 space-y-3">
+                <p className="text-center text-[13.5px] font-extrabold text-[#B4531A]">🎁 Complete o pedido com esses álbuns</p>
+                {albumBumps.map((s) => s.albums.map((a) => {
+                  const key = `${s.childName}::${a.id}`;
+                  const on = selectedBumpKeys.has(key);
+                  return (
+                    <div key={key}
+                      onClick={() => toggleBump(key)}
+                      className={`flex cursor-pointer items-center gap-3 rounded-[18px] border-[3px] border-dashed p-3.5 ${on ? 'border-[#3FA744] bg-[#EDF7EE]' : 'border-[#F2762E] bg-[#FFF6EF]'}`}
+                    >
+                      <div className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-[9px] border-[3px] text-[19px] font-black text-white ${on ? 'border-[#3FA744] bg-[#3FA744]' : 'border-[#F2762E] bg-white'}`}>
+                        {on ? '✓' : ''}
+                      </div>
+                      {a.linkImgAlbum && (
+                        <img src={a.linkImgAlbum} alt="" loading="lazy" className="h-[46px] w-[46px] shrink-0 rounded-[10px] object-cover shadow" />
+                      )}
+                      <div className="flex-1">
+                        <h4 className="font-display text-[15.5px] font-bold leading-tight text-[#2B2B4E]">
+                          {a.name} <span className="font-normal text-[#8A8AA3]">· {s.childName}</span>
+                        </h4>
+                        <div className="mt-0.5 flex items-baseline gap-1.5">
+                          {num(a.orderBumpDiscount) > 0 && (
+                            <span className="text-[12.5px] font-bold text-[#8A8AA3] line-through">{fmtBRL(num(a.priceNew))}</span>
+                          )}
+                          <span className="font-display text-[17px] font-extrabold text-[#3FA744]">{fmtBRL(bumpPrecoOferta(a))}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }))}
               </div>
-            ))}
+            )}
             <label className="mt-3 block text-[14px] font-extrabold text-[#8A8AA3]">Seu nome</label>
             <input className="mt-1.5 w-full rounded-2xl border-[2.5px] border-[#D8D9E8] px-4 py-3.5 text-[17px] font-bold outline-none focus:border-[#12B3F2]"
               placeholder="Nome completo" autoComplete="name"
