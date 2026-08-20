@@ -46,6 +46,11 @@ interface OrderData {
   // aceito, só pra aplicar o desconto certo no resumo/total (sem perguntar de novo).
   albumBumpSuggestions?: AlbumBumpSuggestion[];
   presenteSelectedBumps?: string[];
+  // [CHECKOUT-LINK 2026-08] presente quando o pedido veio de um link gerado
+  // por outro sistema (?orderId= na URL) em vez do fluxo normal de
+  // localStorage — repassado ao CardForm pra marcar o link como usado
+  // assim que o pagamento for aprovado.
+  checkoutDraftId?: string;
 }
 
 interface OrderBump {
@@ -206,6 +211,7 @@ const MemoizedCardForm = React.memo(({
   telefone,
   cpf,
   selectedAlbums,
+  checkoutDraftId,
 }: {
   amount: string;
   email: string;
@@ -213,6 +219,7 @@ const MemoizedCardForm = React.memo(({
   telefone?: string;
   cpf?: string;
   selectedAlbums?: { albumId: string; childName: string }[];
+  checkoutDraftId?: string;
 }) => (
   <CardForm
     step={3}
@@ -223,6 +230,7 @@ const MemoizedCardForm = React.memo(({
     telefone={telefone}
     cpf={cpf}
     selectedAlbums={selectedAlbums}
+    checkoutDraftId={checkoutDraftId}
   />
 ));
 
@@ -238,15 +246,38 @@ export default function PaymentPage() {
   const [bumps, setBumps] = useState<OrderBump[]>([]);
   const [albumBumpSuggestions, setAlbumBumpSuggestions] = useState<AlbumBumpSuggestion[]>([]);
   const [selectedAlbumBumps, setSelectedAlbumBumps] = useState<Set<AlbumBumpKey>>(new Set());
+  // [CHECKOUT-LINK 2026-08] motivo de falha ao resolver um link ?orderId= —
+  // distinto de "nenhum pedido" (carrinho vazio/expirado por localStorage),
+  // pra dar uma mensagem específica ("link expirado/usado") em vez de mandar
+  // a pessoa "voltar pra loja" sem explicação.
+  const [linkErrorReason, setLinkErrorReason] = useState<'used' | 'expired' | 'not_found' | null>(null);
   const paymentInfoFired = useRef(false);
 
   useEffect(() => {
-    const savedData = localStorage.getItem('orderData');
-    let parsed: OrderData | null = null;
-    if (savedData) {
-      parsed = JSON.parse(savedData);
-      setOrderData(parsed);
+    async function resolveOrderData(): Promise<OrderData | null> {
+      const orderId = new URLSearchParams(window.location.search).get('orderId');
+      if (!orderId) {
+        const savedData = localStorage.getItem('orderData');
+        return savedData ? JSON.parse(savedData) : null;
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/api/checkout-links/${orderId}`);
+        const json = await res.json();
+        if (!res.ok || json.status !== 'success') {
+          setLinkErrorReason(json.reason ?? 'not_found');
+          return null;
+        }
+        return { ...json.data, checkoutDraftId: orderId } as OrderData;
+      } catch {
+        setLinkErrorReason('not_found');
+        return null;
+      }
     }
+
+    (async () => {
+    const parsed = await resolveOrderData();
+    if (parsed) setOrderData(parsed);
 
     // [ORDER-BUMP 2026-08] /presente já resolveu o bump por álbum na própria
     // tela de dados — semeia os mesmos estados que a UI abaixo usa pra
@@ -329,6 +360,7 @@ export default function PaymentPage() {
     }
 
     setIsLoading(false);
+    })();
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -596,19 +628,27 @@ export default function PaymentPage() {
   }
 
   if (!orderData) {
+    const linkMessages: Record<'used' | 'expired' | 'not_found', { title: string; body: string }> = {
+      used: { title: 'Link já utilizado', body: 'Este link de pagamento já foi usado. Se você já pagou, não precisa fazer nada — se precisar de um novo link, entre em contato.' },
+      expired: { title: 'Link expirado', body: 'Este link de pagamento expirou. Peça um novo link para continuar.' },
+      not_found: { title: 'Link inválido', body: 'Não encontramos esse link de pagamento. Confira se o endereço foi copiado corretamente.' },
+    };
+    const linkMsg = linkErrorReason ? linkMessages[linkErrorReason] : null;
     return (
       <div className="text-center py-12 max-w-md mx-auto px-4">
         <div className="bg-yellow-50 rounded-2xl p-8 border-2 border-yellow-200">
           <Music className="h-16 w-16 text-yellow-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Nenhum pedido encontrado</h2>
-          <p className="text-gray-600 mb-6">Parece que você não tem nenhum pedido em andamento.</p>
-          <button
-            onClick={handleBack}
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-secondary text-white px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform"
-          >
-            <ArrowLeft className="h-5 w-5" />
-            Voltar para a loja
-          </button>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{linkMsg?.title ?? 'Nenhum pedido encontrado'}</h2>
+          <p className="text-gray-600 mb-6">{linkMsg?.body ?? 'Parece que você não tem nenhum pedido em andamento.'}</p>
+          {!linkMsg && (
+            <button
+              onClick={handleBack}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-secondary text-white px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              Voltar para a loja
+            </button>
+          )}
         </div>
       </div>
     );
@@ -918,6 +958,7 @@ export default function PaymentPage() {
                 telefone={orderData.customerData.telefone}
                 cpf={orderData.customerData.cpf ?? ""}
                 selectedAlbums={selectedAlbumsForPayment}
+                checkoutDraftId={orderData.checkoutDraftId}
               />
             </div>
           </div>

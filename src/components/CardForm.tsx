@@ -13,6 +13,10 @@ type CardFormProps = {
   telefone?: string;
   cpf?: string;
   selectedAlbums?: { albumId: string; childName: string; name?: string; price?: number; tipo?: string; misto?: boolean; isOrderBump?: boolean; isRelampago?: boolean }[];
+  // [CHECKOUT-LINK 2026-08] id do CheckoutDraft de origem (link gerado por
+  // outro sistema) — repassado ao backend pra marcar o link como usado
+  // quando o pagamento for aprovado.
+  checkoutDraftId?: string;
 };
 
 interface PixData {
@@ -77,6 +81,7 @@ export default function CardForm({
   telefone = "",
   cpf = "",
   selectedAlbums = [],
+  checkoutDraftId,
 }: CardFormProps) {
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'pix'>('card');
   const [pixData, setPixData] = useState<PixData | null>(null);
@@ -225,6 +230,7 @@ export default function CardForm({
           user_agent: tracking.user_agent,
           event_source_url: tracking.event_source_url,
           referrer: tracking.referrer,
+          checkoutDraftId,
         }),
       });
 
@@ -305,6 +311,7 @@ export default function CardForm({
           user_agent: tracking.user_agent,
           event_source_url: tracking.event_source_url,
           referrer: tracking.referrer,
+          checkoutDraftId,
         }),
       });
       const json = await res.json();
