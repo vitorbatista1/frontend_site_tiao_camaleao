@@ -5,7 +5,7 @@ interface Props {
 export default function WhatsAppSellerButton({ className = "" }: Props) {
   return (
     <a
-      href="https://wa.me/message/2OACSAWR5D6LD1"
+      href="https://wa.me/message/EIW6E6DLZWLCF1"
       target="_blank"
       rel="noopener noreferrer"
       className={`btn-whatsapp cta-pulse ${className}`.trim()}
