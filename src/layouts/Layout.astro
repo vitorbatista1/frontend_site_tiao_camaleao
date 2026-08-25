@@ -3,6 +3,7 @@ import FooterInstitucional from '../components/FooterInstitucional.astro';
 // src/layouts/Layout.astro
 import "../styles/global.css";
 import PixelHead from "../components/PixelHead.astro";
+import AnalyticsHead from "../components/AnalyticsHead.astro";
 
 const TC_API_URL = import.meta.env.PUBLIC_API_URL ?? "";
 ---
@@ -19,6 +20,7 @@ const TC_API_URL = import.meta.env.PUBLIC_API_URL ?? "";
       content={Astro.props.description || "Cantigas infantis personalizadas com o nome da sua criança. Mais de 2.000 nomes gravados em estúdio. Presente único que vira memória de família."}
     />
     <PixelHead />
+    <AnalyticsHead />
     {Astro.props.slot}
   </head>
   <body>

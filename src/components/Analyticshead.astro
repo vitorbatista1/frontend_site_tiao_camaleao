@@ -1,0 +1,29 @@
+---
+// [ANALYTICS 2026-08] GA4 + Contentsquare, centralizados aqui (mesmo padrão do PixelHead).
+// IDs via env — deixe em branco no .env para desativar cada ferramenta sem tocar no código.
+const GA_MEASUREMENT_ID = import.meta.env.PUBLIC_GA_MEASUREMENT_ID ?? "";
+const CS_TAG_ID = import.meta.env.PUBLIC_CONTENTSQUARE_TAG_ID ?? "";
+---
+
+<!-- Google Analytics (GA4) — carrega gtag.js normalmente.
+     Página estática (Astro output: 'static'), então cada navegação já é um
+     page load completo: NÃO precisa de tracking manual de rota, o GA4 pega
+     o pageview automaticamente em cada página. -->
+{GA_MEASUREMENT_ID && (
+  <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}></script>
+  <script is:inline define:vars={{ GA_MEASUREMENT_ID }}>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', GA_MEASUREMENT_ID);
+  </script>
+)}
+
+<!-- Contentsquare — tag principal.
+     [IMPORTANTE] Este é o formato padrão (script src com o Tag ID de 13 caracteres),
+     mas confirme no painel Contentsquare (Settings > Tag Installation) se o snippet
+     de vocês é exatamente esse ou se há variação — copie o snippet oficial de lá se
+     houver qualquer diferença. -->
+{CS_TAG_ID && (
+  <script async src={`https://t.contentsquare.net/uxa/${CS_TAG_ID}.js`}></script>
+)}
