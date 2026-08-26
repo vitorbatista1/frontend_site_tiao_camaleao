@@ -17,6 +17,8 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { trackBoth, getSessionId, normalizePhoneBR } from '../../lib/tracking';
+// [CS+GA4 2026-08] funil Contentsquare + GA4 (helper separado do Meta/CAPI acima)
+import { trackStep, trackAction, slugProduto, type StepKey } from '../../lib/analytics-tracking';
 import {
   type AlbumAPI, type AlbumResult, type Catalogo, type Crianca,
   montarCatalogo, num, displayName, temAlbum, nFalt, foundCount,
@@ -199,11 +201,37 @@ export default function AssistenteGuiado() {
       selectedBumpKeys.has(`${s.childName}::${alb.id}`) ? a2 + bumpPrecoOferta(alb) : a2, 0), 0),
     [albumBumps, selectedBumpKeys],
   );
-  const toggleBump = (key: string) => setSelectedBumpKeys((prev) => {
-    const next = new Set(prev);
-    if (next.has(key)) next.delete(key); else next.add(key);
-    return next;
-  });
+  const toggleBump = (key: string) => {
+    // [CS+GA4 2026-08] order bump marcado/desmarcado na tela de dados.
+    // key = "<nomeCrianca>::<albumId>" — só o álbum vai pro evento (sem PII).
+    const albumId = key.split('::')[1];
+    const alb = albumBumps.flatMap((s) => s.albums).find((a) => a.id === albumId);
+    const slug = slugProduto(alb?.name ?? albumId);
+    const acao = selectedBumpKeys.has(key) ? 'desmarcou' : 'marcou';
+    trackAction('presente_order_bump', { csEvent: `presente|order-bump|${acao}|${slug}`, params: { produto: slug, acao } });
+    setSelectedBumpKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
+
+  // [CS+GA4 2026-08] ETAPAS do funil /presente — dispara quando a tela fica
+  // visível (mudança de `tela`), uma vez por exibição. `nome` é o load real de
+  // /presente (não dispara). `addnome` é coberto pela ação presente_adicionar_crianca
+  // (re-dispara CS /presente). `dados` = lead + order bumps, etapa-chave do funil.
+  const TELA_STEP: Partial<Record<Tela, StepKey>> = {
+    amostra: 'presente_amostras',
+    fallback: 'presente_amostras',   // amostra com outro nome (nome não gravado)
+    oferta: 'presente_produtos',
+    familia: 'presente_resumo',
+    relampago: 'presente_oferta_relampago',
+    dados: 'presente_dados',
+  };
+  useEffect(() => {
+    const k = TELA_STEP[tela];
+    if (k) trackStep(k);
+  }, [tela]);
 
   const c = criancas[ativa] ?? criancas[0] ?? null;
   const irPara = (t: Tela) => { setListaAberta(null); setConfirmarRemocao(null); setTela(t); window.scrollTo(0, 0); };
@@ -490,10 +518,11 @@ export default function AssistenteGuiado() {
               cantiga="Ciranda Cirandinha"
               nome={nomeDigitado(c)}
               onFirstPlay={onPrimeiraReproducao}
+              onPlay={() => trackAction('presente_play_amostra', { csEvent: 'presente|play-amostra' })} // [CS+GA4 2026-08]
             />
             <div className="h-3" />
             <BotaoPrimario onClick={() => irPara('oferta')}>Conhecer as cantigas para {displayName(c)} →</BotaoPrimario>
-            <LinkDiscreto onClick={() => { setCriancas([]); setNomeInput(''); irPara('nome'); }}>← Trocar o nome</LinkDiscreto>
+            <LinkDiscreto onClick={() => { trackAction('presente_trocar_nome', { csEvent: 'presente|trocar-nome', csPageview: '/presente' }); setCriancas([]); setNomeInput(''); irPara('nome'); }}>← Trocar o nome</LinkDiscreto>
           </div>
         </>
       )}
@@ -517,10 +546,11 @@ export default function AssistenteGuiado() {
               capa={catalogo.base[0]?.linkImgAlbum}
               cantiga="Ciranda Cirandinha"
               subtitulo="exemplos reais, gravados no nosso estúdio"
+              onPlay={() => trackAction('presente_play_amostra', { csEvent: 'presente|play-amostra' })} // [CS+GA4 2026-08]
             />
             <BotaoPrimario onClick={() => irPara('oferta')}>Escolher os álbuns de {displayName(c)} →</BotaoPrimario>
-            <BotaoWhatsApp onClick={() => window.open(WA_ATENDIMENTO, '_blank')}>Prefiro pedir pelo WhatsApp</BotaoWhatsApp>
-            <LinkDiscreto onClick={() => { setCriancas([]); setNomeInput(''); irPara('nome'); }}>← Tentar outro nome</LinkDiscreto>
+            <BotaoWhatsApp onClick={() => { trackAction('presente_whatsapp', { csEvent: 'presente|whatsapp-sem-amostra' }); window.open(WA_ATENDIMENTO, '_blank'); }}>Prefiro pedir pelo WhatsApp</BotaoWhatsApp>
+            <LinkDiscreto onClick={() => { trackAction('presente_trocar_nome', { csEvent: 'presente|trocar-nome', csPageview: '/presente' }); setCriancas([]); setNomeInput(''); irPara('nome'); }}>← Tentar outro nome</LinkDiscreto>
           </div>
         </>
       )}
@@ -541,7 +571,14 @@ export default function AssistenteGuiado() {
           <div className="rounded-[22px] bg-white p-5 shadow-lg">
             <OfertaCards
               crianca={c} catalogo={catalogo}
-              listaAberta={listaAberta} setListaAberta={setListaAberta}
+              listaAberta={listaAberta}
+              setListaAberta={(v) => { // [CS+GA4 2026-08] abriu detalhes de um produto (só ao abrir)
+                if (v) {
+                  const slug = v === 'colecao' ? 'colecao-completa' : slugProduto(catalogo.porId[v]?.name ?? v);
+                  trackAction('presente_detalhes_produto', { csEvent: 'presente|detalhes-produto|' + slug, params: { produto: slug } });
+                }
+                setListaAberta(v);
+              }}
               onToggleColecao={toggleColecao} onToggleAlbum={toggleAlbum} onDesfazerPromo={desfazerPromo}
             />
                         <ReguaEntrega anyGrav={nFalt(c, catalogo) > 0 && foundCount(c) > 0} allGrav={foundCount(c) === 0} />
@@ -556,7 +593,7 @@ export default function AssistenteGuiado() {
                     ? `Quero o ${catalogo.porId[c.sel[0]]?.name} · ${fmtBRL(precoCrianca(c, catalogo))}`
                     : `Quero os ${c.sel.length} álbuns · ${fmtBRL(precoCrianca(c, catalogo))}`}
             </BotaoPrimario>
-            <BotaoWhatsApp onClick={() => window.open(`${WA_ATENDIMENTO}?text=${encodeURIComponent('Vi um album no seu site e tenho duvidas')}`, '_blank')}>
+            <BotaoWhatsApp onClick={() => { trackAction('presente_vendedor', { csEvent: 'presente|falar-vendedor' }); window.open(`${WA_ATENDIMENTO}?text=${encodeURIComponent('Vi um album no seu site e tenho duvidas')}`, '_blank'); }}>
               Prefiro comprar com o vendedor
             </BotaoWhatsApp>
             {ativa === 0
@@ -606,7 +643,7 @@ export default function AssistenteGuiado() {
               );
             })()}
             <BotaoPrimario onClick={() => irPara('dados')}>Fazer pagamento →</BotaoPrimario>
-            <button onClick={() => { setNomeInput(''); irPara('addnome'); }} className="mt-2.5 block w-full rounded-2xl border-[2.5px] border-[#D8D9E8] bg-white px-4 py-3.5 font-display text-[17px] font-bold text-[#0A8FC7]">
+            <button onClick={() => { trackAction('presente_adicionar_crianca', { csEvent: 'presente|adicionar-crianca', csPageview: '/presente' }); setNomeInput(''); irPara('addnome'); }} className="mt-2.5 block w-full rounded-2xl border-[2.5px] border-[#D8D9E8] bg-white px-4 py-3.5 font-display text-[17px] font-bold text-[#0A8FC7]">
               + Adicionar outra criança
             </button>
           </div>
@@ -650,12 +687,12 @@ export default function AssistenteGuiado() {
             <div className="mt-2.5 rounded-xl border-2 border-[#F6C3CD] bg-[#FDECEF] px-3 py-2 text-[13.5px] font-extrabold text-[#B4233C]">⏰ vale só nesta visita</div>
             <div className="h-3.5" />
             <button
-              onClick={() => { atualizar((d) => { d.relampago = true; d.colecao = false; d.sel = []; }); irPara('dados'); }}
+              onClick={() => { trackAction('presente_oferta_aceitou', { csEvent: 'presente|oferta-relampago-aceitou' }); atualizar((d) => { d.relampago = true; d.colecao = false; d.sel = []; }); irPara('dados'); }}
               className="block w-full rounded-2xl bg-[#F2762E] px-4 py-4 font-display text-[19px] font-bold text-white shadow-[0_5px_0_#C4551B] active:translate-y-[3px]"
             >
               Quero o {catalogo.base[0]?.name} · {fmtBRL(precoRelampago(catalogo))}
             </button>
-            <LinkDiscreto onClick={() => { setCriancas([]); irPara('nome'); }}>Não, obrigado</LinkDiscreto>
+            <LinkDiscreto onClick={() => { trackAction('presente_oferta_recusou', { csEvent: 'presente|oferta-relampago-recusou', csPageview: '/presente' }); setCriancas([]); irPara('nome'); }}>Não, obrigado</LinkDiscreto>
           </div>
         </>
       )}

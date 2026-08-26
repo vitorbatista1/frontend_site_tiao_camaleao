@@ -315,7 +315,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
         '<div class="flex-1 h-1 rounded-full transition-all ' + (step >= 2 ? "bg-primary" : "bg-gray-200") + '"></div>' +
         '<div class="flex-1 h-1 rounded-full transition-all ' + (step >= 3 ? "bg-primary" : "bg-gray-200") + '"></div>' +
       '</div>';
-    document.getElementById("tc-close").onclick = function(){ closeModal(); };
+    document.getElementById("tc-close").onclick = function(){ closeModal(true); };
   }
 
   // ── Step 2 — Quantidade de crianças ──────────────────────────────────────────
@@ -1053,6 +1053,16 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     if (backBtn) backBtn.style.display = step > 1 ? "flex" : "none";
   }
 
+  // [CS+GA4 2026-08] etapa do funil ficou visível → CS pageview virtual + evento GA4.
+  // Ponte window.__tcFunnel definida pelo <script> bundlado no fim deste arquivo
+  // (helper único em src/lib/analytics-tracking.ts). Dispara no RENDER da etapa,
+  // não no clique — cliques barrados por validação não contam.
+  var STEP_KEYS = { 1: "modal_lead", 2: "modal_qtd_criancas", 3: "modal_nomes_produtos" };
+  function trackModalStep(n) {
+    var f = window.__tcFunnel;
+    if (f && STEP_KEYS[n]) f.trackStep(STEP_KEYS[n]);
+  }
+
   function goStep(n) {
     step = n;
     renderHeader();
@@ -1060,6 +1070,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     else if (n === 2) renderStep2();
     else renderStep3();
     updateNextBtn();
+    trackModalStep(n); // [CS+GA4 2026-08]
   }
 
   function fetchAlbums() {
@@ -1117,19 +1128,27 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     renderHeader();
     renderStep1();
     updateNextBtn();
+    trackModalStep(1); // [CS+GA4 2026-08] modal abriu na etapa 1 (lead)
     fetchAlbums();
   }
 
-  function closeModal() {
+  // [CS+GA4 2026-08] `abandonou=true` = usuário fechou (X / ESC / clique fora).
+  // O fechamento que antecede o redirect p/ /pagamento chama closeModal(false)
+  // e NÃO conta como abandono.
+  function closeModal(abandonou) {
+    var estavaAberto = isOpen;
     isOpen = false;
     document.getElementById("tc-modal").style.display = "none";
     document.body.style.overflow = "";
+    if (abandonou && estavaAberto && window.__tcFunnel) {
+      window.__tcFunnel.trackAction("modal_fechou", { csEvent: "modal-compra|fechou", csPageview: "/" });
+    }
   }
 
   // ── Eventos ───────────────────────────────────────────────────────────────────
   window.addEventListener("open-modal", function(e){ openModal(e.detail); });
 
-  document.getElementById("tc-backdrop").onclick = function(){ closeModal(); };
+  document.getElementById("tc-backdrop").onclick = function(){ closeModal(true); };
 
   document.getElementById("tc-back-btn").onclick = function(){ if (step > 1) goStep(step - 1); };
 
@@ -1340,14 +1359,20 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
             session_id: getSessionId()
           }
         }));
-        closeModal();
+        closeModal(false); // [CS+GA4 2026-08] não é abandono
         window.location.href = "/pagamento";
       }
     }
   };
 
   document.addEventListener("keydown", function(e){
-    if (e.key === "Escape" && isOpen) closeModal();
+    if (e.key === "Escape" && isOpen) closeModal(true);
   });
 })();
+</script>
+
+<!-- [CS+GA4 2026-08] Ponte p/ o script is:inline acima (que não consegue importar módulos). -->
+<script>
+  import { exposeOnWindow } from "../lib/analytics-tracking";
+  exposeOnWindow();
 </script>

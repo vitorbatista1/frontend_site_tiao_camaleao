@@ -9,3 +9,11 @@ import PaymentPage from '../components/PaymentPage.tsx';
         <PaymentPage client:load />
     </div>
 </Layout>
+
+<!-- [CS+GA4 2026-08] chegou_checkout (GA4) — uma vez por carregamento real de /pagamento.
+     O site é MPA (sem ViewTransitions), então este <script> de página é o ÚNICO ponto
+     de disparo. No Contentsquare o /pagamento já é pageview real automático. -->
+<script>
+  import { trackCheckout } from "../lib/analytics-tracking";
+  trackCheckout();
+</script>
