@@ -1,0 +1,29 @@
+---
+const GA_MEASUREMENT_ID = "G-JMDLD91HJR";
+const CS_TAG_ID = "143e9890c318e";
+---
+
+<Fragment>
+  {GA_MEASUREMENT_ID && (
+    <>
+      <script
+        async
+        src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+      ></script>
+
+      <script is:inline define:vars={{ GA_MEASUREMENT_ID }}>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){ dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', GA_MEASUREMENT_ID);
+      </script>
+    </>
+  )}
+
+  {CS_TAG_ID && (
+    <script
+      async
+      src={`https://t.contentsquare.net/uxa/${CS_TAG_ID}.js`}
+    ></script>
+  )}
+</Fragment>

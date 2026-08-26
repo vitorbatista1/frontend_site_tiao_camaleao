@@ -1,0 +1,20 @@
+---
+// [CS+GA4 2026-08 v3] Catch-all das ETAPAS do assistente na URL (pushState).
+// Gera /presente/2-amostras/, /presente/3-produtos/ etc. como cópias estáticas
+// da página /presente, para refresh/deep link não dar 404 (nginx: try_files
+// $uri $uri/index.html já serve). O componente resolve a etapa pela URL no
+// mount (ver AssistenteGuiado.tsx). Paths = contrato com CS/GA4 (stepNavigation.ts).
+import AssistenteLayout from "../../layouts/AssistenteLayout.astro";
+import AssistenteGuiado from "../../components/assistente/AssistenteGuiado.tsx";
+import { STEPS } from "../../lib/stepNavigation";
+
+export function getStaticPaths() {
+  return Object.values(STEPS)
+    .map((s) => s.path)
+    .filter((p) => p.startsWith("/presente/"))
+    .map((p) => ({ params: { etapa: p.replace("/presente/", "") } }));
+}
+---
+<AssistenteLayout>
+  <AssistenteGuiado client:load />
+</AssistenteLayout>

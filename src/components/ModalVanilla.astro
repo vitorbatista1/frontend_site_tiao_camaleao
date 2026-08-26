@@ -315,7 +315,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
         '<div class="flex-1 h-1 rounded-full transition-all ' + (step >= 2 ? "bg-primary" : "bg-gray-200") + '"></div>' +
         '<div class="flex-1 h-1 rounded-full transition-all ' + (step >= 3 ? "bg-primary" : "bg-gray-200") + '"></div>' +
       '</div>';
-    document.getElementById("tc-close").onclick = function(){ closeModal(); };
+    document.getElementById("tc-close").onclick = function(){ closeModal(true); };
   }
 
   // ── Step 2 — Quantidade de crianças ──────────────────────────────────────────
@@ -1053,13 +1053,29 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     if (backBtn) backBtn.style.display = step > 1 ? "flex" : "none";
   }
 
-  function goStep(n) {
+  // [CS+GA4 2026-08 v3] etapa na URL (/modal-compra/<n>) via window.__tcNav
+  // (src/lib/stepNavigation.ts, exposto pelo <script> bundlado no fim deste arquivo).
+  // goToStep = pushState (preservando fbclid/utm) + CS pageview virtual + evento GA4,
+  // disparado no RENDER da etapa, não no clique.
+  var STEP_KEYS = { 1: "modal_lead", 2: "modal_qtd_criancas", 3: "modal_nomes_produtos" };
+  function trackModalStep(n) {
+    var nav = window.__tcNav;
+    if (nav && STEP_KEYS[n]) nav.goToStep(STEP_KEYS[n], { state: { modalStep: n } });
+  }
+
+  // `fromHistory=true` = veio do botão voltar (popstate): só renderiza, a URL já mudou
+  // e o tracking da re-exibição é feito pelo initStepHistory.
+  function renderStep(n) {
     step = n;
     renderHeader();
     if (n === 1) renderStep1();
     else if (n === 2) renderStep2();
     else renderStep3();
     updateNextBtn();
+  }
+  function goStep(n) {
+    renderStep(n);
+    trackModalStep(n); // [CS+GA4 2026-08 v3]
   }
 
   function fetchAlbums() {
@@ -1114,22 +1130,45 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
     isOpen = true;
     document.getElementById("tc-modal").style.display = "";
     document.body.style.overflow = "hidden";
-    renderHeader();
-    renderStep1();
-    updateNextBtn();
+    renderStep(1);
+    trackModalStep(1); // [CS+GA4 2026-08 v3] modal abriu na etapa 1 (lead) → URL /modal-compra/1-lead
     fetchAlbums();
   }
 
-  function closeModal() {
+  // [CS+GA4 2026-08] `abandonou=true` = usuário fechou (X / ESC / clique fora).
+  // O fechamento que antecede o redirect p/ /pagamento chama closeModal(false)
+  // e NÃO conta como abandono.
+  // `fromHistory=true` = o voltar do navegador já tirou a URL de /modal-compra/*.
+  function closeModal(abandonou, fromHistory) {
+    var estavaAberto = isOpen;
     isOpen = false;
     document.getElementById("tc-modal").style.display = "none";
     document.body.style.overflow = "";
+    if (!estavaAberto) return;
+    if (abandonou && !fromHistory && window.__tcNav) window.__tcNav.goToBase("/"); // URL volta p/ '/' + CS pageview '/'
+    if (abandonou && window.__tcFunnel) window.__tcFunnel.trackAction("modal_fechou", { csEvent: "modal-compra|fechou" });
   }
+
+  // [CS+GA4 2026-08 v3] chamado pelo <script> bundlado assim que __tcNav existe.
+  window.__tcModalInitHistory = function () {
+    var nav = window.__tcNav; if (!nav) return;
+    nav.initStepHistory(function (stepKey, st) {
+      if (!stepKey || String(stepKey).indexOf("modal_") !== 0) { if (isOpen) closeModal(true, true); return; }
+      var n = (st && st.modalStep) || ({ modal_lead: 1, modal_qtd_criancas: 2, modal_nomes_produtos: 3 })[stepKey] || 1;
+      if (!isOpen) { // 'avançar' do navegador caiu num path do modal com ele fechado → URL volta p/ '/'
+        nav.goToBase("/", { replace: true, silent: true });
+        return;
+      }
+      renderStep(n);
+    }, "/");
+    // Deep link / refresh em /modal-compra/*: a LP abre; sem contexto de produto, volta a URL p/ '/'.
+    if (nav.resolveStepFromPath(location.pathname)) nav.goToBase("/", { replace: true, silent: true });
+  };
 
   // ── Eventos ───────────────────────────────────────────────────────────────────
   window.addEventListener("open-modal", function(e){ openModal(e.detail); });
 
-  document.getElementById("tc-backdrop").onclick = function(){ closeModal(); };
+  document.getElementById("tc-backdrop").onclick = function(){ closeModal(true); };
 
   document.getElementById("tc-back-btn").onclick = function(){ if (step > 1) goStep(step - 1); };
 
@@ -1340,14 +1379,23 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "";
             session_id: getSessionId()
           }
         }));
-        closeModal();
+        closeModal(false); // [CS+GA4 2026-08] não é abandono
         window.location.href = "/pagamento";
       }
     }
   };
 
   document.addEventListener("keydown", function(e){
-    if (e.key === "Escape" && isOpen) closeModal();
+    if (e.key === "Escape" && isOpen) closeModal(true);
   });
 })();
+</script>
+
+<!-- [CS+GA4 2026-08 v3] Ponte p/ o script is:inline acima (que não consegue importar módulos). -->
+<script>
+  import { exposeOnWindow } from "../lib/analytics-tracking";
+  import { exposeStepNavigation } from "../lib/stepNavigation";
+  exposeOnWindow();
+  exposeStepNavigation();
+  (window as any).__tcModalInitHistory && (window as any).__tcModalInitHistory();
 </script>

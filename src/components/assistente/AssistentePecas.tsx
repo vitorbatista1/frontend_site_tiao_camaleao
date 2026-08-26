@@ -86,11 +86,12 @@ const capitalizar = (s: string) => s.replace(/\b\w/g, (m) => m.toUpperCase());
 // conforme o trecho (cues do JSON gerado junto com o MP3). Sem cues, opera
 // no modo simples (capa/cantiga fixas — ex.: linkAmostra do DB como fallback).
 export function PlayerAmostra({
-  src, srcFallback, capa, cantiga, nome, subtitulo, cues, capaPorAlbum, onFirstPlay,
+  src, srcFallback, capa, cantiga, nome, subtitulo, cues, capaPorAlbum, onFirstPlay, onPlay,
 }: {
   src?: string; srcFallback?: string; capa?: string; cantiga: string; nome?: string; subtitulo?: string;
   cues?: MedleyCue[]; capaPorAlbum?: Record<number, string | undefined>;
   onFirstPlay?: () => void;
+  onPlay?: () => void; // [CS+GA4 2026-08] a cada play (não só o primeiro) — rastreio CS/GA4
 }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [tocando, setTocando] = useState(false);
@@ -130,6 +131,7 @@ export function PlayerAmostra({
     if (tocando) { el.pause(); setTocando(false); return; }
     el.play().then(() => {
       setTocando(true);
+      onPlay?.(); // [CS+GA4 2026-08]
       if (!firstPlay.current) { firstPlay.current = true; onFirstPlay?.(); }
     }).catch(() => {
       // play() rejeitado (404/403/formato): tenta o fallback na mesma ação
