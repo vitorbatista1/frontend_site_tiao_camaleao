@@ -41,31 +41,11 @@ function ga4(evento: string, params: Record<string, string | number> = {}): void
   if (typeof window.gtag === 'function') window.gtag('event', evento, params);
 }
 
-// --- Mapa central das ETAPAS de funil (CS path + evento GA4 = a própria chave) ---
-const STEPS = {
-  modal_lead:                { cs: '/modal-compra/1-lead' },
-  modal_qtd_criancas:        { cs: '/modal-compra/2-quantidade-criancas' },
-  modal_nomes_produtos:      { cs: '/modal-compra/3-nomes-e-produtos' },
-  presente_amostras:         { cs: '/presente/2-amostras' },
-  presente_produtos:         { cs: '/presente/3-produtos' },
-  presente_resumo:           { cs: '/presente/4-resumo' },
-  presente_oferta_relampago: { cs: '/presente/oferta-relampago' },
-  presente_dados:            { cs: '/presente/5-dados' }, // [CS+GA4 2026-08] lead + order bumps (pré-checkout)
-} as const;
-
-export type StepKey = keyof typeof STEPS;
-
-/**
- * Dispara uma ETAPA de funil (CS pageview virtual + evento GA4 de mesmo nome).
- * @param stepKey chave em STEPS
- * @param params  params opcionais só p/ o GA4 (sem PII)
- */
-export function trackStep(stepKey: StepKey, params: Record<string, string | number> = {}): void {
-  const step = STEPS[stepKey];
-  if (!step) { console.warn('[tracking] etapa desconhecida:', stepKey); return; }
-  csPageview(step.cs);
-  ga4(stepKey, params);
-}
+// --- ETAPAS de funil ---------------------------------------------------------
+// [v3] O mapa de etapas e o `trackStep` MIGRARAM para `./stepNavigation.ts`
+// (goToStep = URL via pushState + CS + GA4 num único ponto). Este arquivo fica
+// só com ações/clique e checkout. Re-exportado p/ compatibilidade de import:
+export { STEPS, goToStep, type StepKey } from './stepNavigation';
 
 /**
  * Evento de CHECKOUT — chamado uma vez no carregamento de /pagamento
@@ -115,5 +95,5 @@ export function slugProduto(nome: string): string {
 // ---------------------------------------------------------------------------
 export function exposeOnWindow(): void {
   if (typeof window === 'undefined') return;
-  (window as any).__tcFunnel = { trackStep, trackAction, trackCheckout };
+  (window as any).__tcFunnel = { trackAction, trackCheckout };
 }

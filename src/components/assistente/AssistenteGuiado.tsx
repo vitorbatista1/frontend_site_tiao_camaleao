@@ -18,7 +18,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { trackBoth, getSessionId, normalizePhoneBR } from '../../lib/tracking';
 // [CS+GA4 2026-08] funil Contentsquare + GA4 (helper separado do Meta/CAPI acima)
-import { trackStep, trackAction, slugProduto, type StepKey } from '../../lib/analytics-tracking';
+import { trackAction, slugProduto } from '../../lib/analytics-tracking';
+// [CS+GA4 2026-08 v3] etapa na URL (pushState) + CS + GA4 num único ponto
+import { goToStep, initStepHistory, resolveStepFromPath, type StepKey } from '../../lib/stepNavigation';
 import {
   type AlbumAPI, type AlbumResult, type Catalogo, type Crianca,
   montarCatalogo, num, displayName, temAlbum, nFalt, foundCount,
@@ -216,25 +218,42 @@ export default function AssistenteGuiado() {
     });
   };
 
-  // [CS+GA4 2026-08] ETAPAS do funil /presente — dispara quando a tela fica
-  // visível (mudança de `tela`), uma vez por exibição. `nome` é o load real de
-  // /presente (não dispara). `addnome` é coberto pela ação presente_adicionar_crianca
-  // (re-dispara CS /presente). `dados` = lead + order bumps, etapa-chave do funil.
-  const TELA_STEP: Partial<Record<Tela, StepKey>> = {
+  // [CS+GA4 2026-08 v3] ETAPAS do funil /presente — cada `tela` corresponde a
+  // uma etapa em stepNavigation.STEPS. `irPara` é a ÚNICA porta de troca de tela:
+  // atualiza estado + URL (pushState, preservando fbclid/utm) + CS + GA4.
+  // `nome`/`addnome` = '/presente' (page_view nativo no load; sem evento GA4).
+  // `fallback` = amostra com outro nome (nome não gravado) → mesma etapa de amostras.
+  const TELA_STEP: Record<Tela, StepKey> = {
+    nome: 'presente_nome',
+    addnome: 'presente_nome',
     amostra: 'presente_amostras',
-    fallback: 'presente_amostras',   // amostra com outro nome (nome não gravado)
+    fallback: 'presente_amostras',
     oferta: 'presente_produtos',
     familia: 'presente_resumo',
     relampago: 'presente_oferta_relampago',
     dados: 'presente_dados',
   };
+  const criancasRef = useRef(criancas);
+  criancasRef.current = criancas;
+  const mostrarTela = (t: Tela) => { setListaAberta(null); setConfirmarRemocao(null); setTela(t); window.scrollTo(0, 0); };
+  const irPara = (t: Tela) => { mostrarTela(t); goToStep(TELA_STEP[t], { state: { tela: t } }); };
   useEffect(() => {
-    const k = TELA_STEP[tela];
-    if (k) trackStep(k);
-  }, [tela]);
+    // Botão voltar do celular/navegador: volta UMA etapa (URL regride) em vez de sair do site.
+    initStepHistory((stepKey, st) => {
+      const desejada = (st?.tela as Tela | undefined);
+      const temCrianca = criancasRef.current.length > 0;
+      if (!stepKey || stepKey === 'presente_nome') { mostrarTela(desejada === 'addnome' && temCrianca ? 'addnome' : 'nome'); return; }
+      if (desejada && TELA_STEP[desejada] === stepKey && temCrianca) { mostrarTela(desejada); return; }
+      // etapa exige estado que não existe (ex.: histórico de outra sessão) → volta ao início
+      mostrarTela('nome');
+      goToStep('presente_nome', { replace: true, silent: true });
+    }, '/presente');
+    // Deep link / refresh em /presente/<etapa>: sem carrinho não há como abrir a etapa → início.
+    const inicial = resolveStepFromPath(location.pathname);
+    if (inicial && inicial !== 'presente_nome') goToStep('presente_nome', { replace: true, silent: true });
+  }, []);
 
   const c = criancas[ativa] ?? criancas[0] ?? null;
-  const irPara = (t: Tela) => { setListaAberta(null); setConfirmarRemocao(null); setTela(t); window.scrollTo(0, 0); };
   const atualizar = (fn: (draft: Crianca) => void) =>
     setCriancas((prev) => prev.map((x, i) => { if (i !== ativa) return x; const d = { ...x, sel: [...x.sel] }; fn(d); return d; }));
 
@@ -522,7 +541,7 @@ export default function AssistenteGuiado() {
             />
             <div className="h-3" />
             <BotaoPrimario onClick={() => irPara('oferta')}>Conhecer as cantigas para {displayName(c)} →</BotaoPrimario>
-            <LinkDiscreto onClick={() => { trackAction('presente_trocar_nome', { csEvent: 'presente|trocar-nome', csPageview: '/presente' }); setCriancas([]); setNomeInput(''); irPara('nome'); }}>← Trocar o nome</LinkDiscreto>
+            <LinkDiscreto onClick={() => { trackAction('presente_trocar_nome', { csEvent: 'presente|trocar-nome' }); setCriancas([]); setNomeInput(''); irPara('nome'); }}>← Trocar o nome</LinkDiscreto>
           </div>
         </>
       )}
@@ -550,7 +569,7 @@ export default function AssistenteGuiado() {
             />
             <BotaoPrimario onClick={() => irPara('oferta')}>Escolher os álbuns de {displayName(c)} →</BotaoPrimario>
             <BotaoWhatsApp onClick={() => { trackAction('presente_whatsapp', { csEvent: 'presente|whatsapp-sem-amostra' }); window.open(WA_ATENDIMENTO, '_blank'); }}>Prefiro pedir pelo WhatsApp</BotaoWhatsApp>
-            <LinkDiscreto onClick={() => { trackAction('presente_trocar_nome', { csEvent: 'presente|trocar-nome', csPageview: '/presente' }); setCriancas([]); setNomeInput(''); irPara('nome'); }}>← Tentar outro nome</LinkDiscreto>
+            <LinkDiscreto onClick={() => { trackAction('presente_trocar_nome', { csEvent: 'presente|trocar-nome' }); setCriancas([]); setNomeInput(''); irPara('nome'); }}>← Tentar outro nome</LinkDiscreto>
           </div>
         </>
       )}
@@ -643,7 +662,7 @@ export default function AssistenteGuiado() {
               );
             })()}
             <BotaoPrimario onClick={() => irPara('dados')}>Fazer pagamento →</BotaoPrimario>
-            <button onClick={() => { trackAction('presente_adicionar_crianca', { csEvent: 'presente|adicionar-crianca', csPageview: '/presente' }); setNomeInput(''); irPara('addnome'); }} className="mt-2.5 block w-full rounded-2xl border-[2.5px] border-[#D8D9E8] bg-white px-4 py-3.5 font-display text-[17px] font-bold text-[#0A8FC7]">
+            <button onClick={() => { trackAction('presente_adicionar_crianca', { csEvent: 'presente|adicionar-crianca' }); setNomeInput(''); irPara('addnome'); }} className="mt-2.5 block w-full rounded-2xl border-[2.5px] border-[#D8D9E8] bg-white px-4 py-3.5 font-display text-[17px] font-bold text-[#0A8FC7]">
               + Adicionar outra criança
             </button>
           </div>
@@ -692,7 +711,7 @@ export default function AssistenteGuiado() {
             >
               Quero o {catalogo.base[0]?.name} · {fmtBRL(precoRelampago(catalogo))}
             </button>
-            <LinkDiscreto onClick={() => { trackAction('presente_oferta_recusou', { csEvent: 'presente|oferta-relampago-recusou', csPageview: '/presente' }); setCriancas([]); irPara('nome'); }}>Não, obrigado</LinkDiscreto>
+            <LinkDiscreto onClick={() => { trackAction('presente_oferta_recusou', { csEvent: 'presente|oferta-relampago-recusou' }); setCriancas([]); irPara('nome'); }}>Não, obrigado</LinkDiscreto>
           </div>
         </>
       )}

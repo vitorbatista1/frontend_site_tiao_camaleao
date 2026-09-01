@@ -1,0 +1,16 @@
+---
+// [CS+GA4 2026-08 v3] Catch-all das ETAPAS do modal de compra na URL (pushState).
+// Gera /modal-compra/1-lead/ etc. como cópias estáticas da LP (/), para
+// refresh/deep link não dar 404. No load com esse path o ModalVanilla volta a
+// URL para '/' (sem contexto de produto não há como reabrir o modal).
+import CampaignLayout from "../../layouts/CampaignLayout.astro";
+import { STEPS } from "../../lib/stepNavigation";
+
+export function getStaticPaths() {
+  return Object.values(STEPS)
+    .map((s) => s.path)
+    .filter((p) => p.startsWith("/modal-compra/"))
+    .map((p) => ({ params: { etapa: p.replace("/modal-compra/", "") } }));
+}
+---
+<CampaignLayout campaignId="campanha1" />
