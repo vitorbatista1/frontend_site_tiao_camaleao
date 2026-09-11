@@ -3,27 +3,41 @@ const GA_MEASUREMENT_ID = "G-JMDLD91HJR";
 const CS_TAG_ID = "143e9890c318e";
 ---
 
+<!-- GA4 e Contentsquare: stub síncrono (grátis) fica na fila; os scripts pesados
+     (gtag.js ~167 KiB, uxa.js ~155 KiB) só baixam após idle, para não brigar
+     com o LCP/TBT. Mesmo padrão usado no Meta Pixel (PixelHead.astro). -->
 <Fragment>
   {GA_MEASUREMENT_ID && (
-    <>
-      <script
-        async
-        src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-      ></script>
+    <script is:inline define:vars={{ GA_MEASUREMENT_ID }}>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      window.gtag = gtag;
+      gtag('js', new Date());
+      gtag('config', GA_MEASUREMENT_ID);
 
-      <script is:inline define:vars={{ GA_MEASUREMENT_ID }}>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){ dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', GA_MEASUREMENT_ID);
-      </script>
-    </>
+      function _gaLoad(){
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
+        document.head.appendChild(s);
+      }
+      'requestIdleCallback' in window
+        ? requestIdleCallback(_gaLoad, { timeout: 4000 })
+        : window.addEventListener('load', function(){ setTimeout(_gaLoad, 500); });
+    </script>
   )}
 
   {CS_TAG_ID && (
-    <script
-      async
-      src={`https://t.contentsquare.net/uxa/${CS_TAG_ID}.js`}
-    ></script>
+    <script is:inline define:vars={{ CS_TAG_ID }}>
+      function _csLoad(){
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://t.contentsquare.net/uxa/' + CS_TAG_ID + '.js';
+        document.head.appendChild(s);
+      }
+      'requestIdleCallback' in window
+        ? requestIdleCallback(_csLoad, { timeout: 4000 })
+        : window.addEventListener('load', function(){ setTimeout(_csLoad, 500); });
+    </script>
   )}
 </Fragment>
