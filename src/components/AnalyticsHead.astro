@@ -4,8 +4,11 @@ const CS_TAG_ID = "143e9890c318e";
 ---
 
 <!-- GA4 e Contentsquare: stub síncrono (grátis) fica na fila; os scripts pesados
-     (gtag.js ~167 KiB, uxa.js ~155 KiB) só baixam após idle, para não brigar
-     com o LCP/TBT. Mesmo padrão usado no Meta Pixel (PixelHead.astro). -->
+     (gtag.js ~167 KiB, uxa.js ~155 KiB) só baixam na PRIMEIRA interação real do
+     usuário (scroll/toque/mouse/tecla) — ou após um tempo maior de ociosidade
+     como fallback para quem não interage. Isso tira a execução deles da janela
+     FCP→TTI que o Lighthouse usa pra medir TBT, sem perder nenhum evento (o
+     stub já enfileira tudo). Mesmo padrão do Meta Pixel (PixelHead.astro). -->
 <Fragment>
   {GA_MEASUREMENT_ID && (
     <script is:inline define:vars={{ GA_MEASUREMENT_ID }}>
@@ -21,9 +24,7 @@ const CS_TAG_ID = "143e9890c318e";
         s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
         document.head.appendChild(s);
       }
-      'requestIdleCallback' in window
-        ? requestIdleCallback(_gaLoad, { timeout: 4000 })
-        : window.addEventListener('load', function(){ setTimeout(_gaLoad, 500); });
+      _tcDeferLoad(_gaLoad);
     </script>
   )}
 
@@ -35,9 +36,7 @@ const CS_TAG_ID = "143e9890c318e";
         s.src = 'https://t.contentsquare.net/uxa/' + CS_TAG_ID + '.js';
         document.head.appendChild(s);
       }
-      'requestIdleCallback' in window
-        ? requestIdleCallback(_csLoad, { timeout: 4000 })
-        : window.addEventListener('load', function(){ setTimeout(_csLoad, 500); });
+      _tcDeferLoad(_csLoad);
     </script>
   )}
 </Fragment>
