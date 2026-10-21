@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { X, Check, ChevronRight } from "./Icons.tsx";
+import { digitosTelBR } from "../lib/tracking.ts";
 
 interface Country {
   code: string;
@@ -375,7 +376,7 @@ export default function Modal({
   const handlePhoneChange = (value: string, country = selectedCountry) => {
     const digits = value.replace(/\D/g, "");
     if (country.code === "BR") {
-      const n = digits.slice(0, 11);
+      const n = digitosTelBR(value); // remove +55/0 do autocomplete antes de cortar em 11
       let fmt: string;
       if (n.length <= 10) {
         fmt = n.replace(/^(\d{0,2})(\d{0,4})(\d{0,4})$/, (_, a, b, c) =>

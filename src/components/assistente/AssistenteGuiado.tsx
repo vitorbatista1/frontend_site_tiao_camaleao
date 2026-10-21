@@ -16,7 +16,7 @@
 //   AddPaymentInfo/Purchase → páginas /pagamento e /confirmacao existentes.
 // ═══════════════════════════════════════════════════════════════════════════
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { trackBoth, getSessionId, normalizePhoneBR } from '../../lib/tracking';
+import { trackBoth, getSessionId, normalizePhoneBR, digitosTelBR } from '../../lib/tracking';
 // [CS+GA4 2026-08] funil Contentsquare + GA4 (helper separado do Meta/CAPI acima)
 import { trackAction, slugProduto } from '../../lib/analytics-tracking';
 // [CS+GA4 2026-08 v3] etapa na URL (pushState) + CS + GA4 num único ponto
@@ -95,7 +95,7 @@ const DDIS: Array<[string, string]> = [
 
 // [AJUSTES 2026-08] Máscara progressiva (00) 00000-0000 — só quando DDI = 55.
 const maskTelBR = (v: string) => {
-  const d = v.replace(/\D/g, '').slice(0, 11);
+  const d = digitosTelBR(v); // remove +55/0 do autocomplete antes de cortar em 11
   if (!d) return '';
   if (d.length <= 2) return `(${d}`;
   if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;

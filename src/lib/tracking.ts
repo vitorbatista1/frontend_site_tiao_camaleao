@@ -34,6 +34,18 @@ export function getSessionId(): string {
   return s;
 }
 
+// Dígitos nacionais (DDD + número, máx 11) de um telefone BR digitado/colado/
+// autopreenchido. O autocomplete "tel" do navegador entrega "+55 37 99875-3394";
+// sem remover o DDI, o slice(0, 11) guardava "55379987533" e o pedido saía
+// como 5555379987533. Só remove 55 com 12+ dígitos (DDD 55 tem 10–11).
+export function digitosTelBR(raw: string): string {
+  let d = String(raw).replace(/\D/g, "");
+  if (d.startsWith("00")) d = d.slice(2);          // 0055… (discagem internacional)
+  if (d.length >= 12 && d.startsWith("55")) d = d.slice(2);
+  d = d.replace(/^0+/, "");                         // 037… (prefixo de tronco)
+  return d.slice(0, 11);
+}
+
 // [TC-CAPI 2026-06] telefone BR canônico (13 díg: 55 + DDD + 9 + 8).
 // IMPORTANTE: o N8N tem que normalizar IGUAL para o external_id casar
 // (sha256 do MESMO string nas duas pontas: browser e servidor).
