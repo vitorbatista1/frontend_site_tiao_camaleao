@@ -10,10 +10,16 @@
 // duplicar código de pagamento.
 //
 // EVENTOS (browser + CAPI via lib/tracking.ts, mesmo event_id p/ dedup):
-//   ViewContent → primeira reprodução da amostra
-//   Lead        → contato capturado na tela de dados
-//   InitiateCheckout → clique final "Fazer pagamento" (items reais)
-//   AddPaymentInfo/Purchase → páginas /pagamento e /confirmacao existentes.
+// [SINAIS 2026-11] funil redistribuído — antes Lead e InitiateCheckout só
+// disparavam na ÚLTIMA tela (dados), com volume ≈ ao de Purchase (o Meta não
+// via nada entre o PageView e a compra). Agora, um evento por etapa:
+//   Search           → nome da criança enviado (1x por nome; sem PII, sem o nome)
+//   ViewContent      → 1ª reprodução da amostra (amostra E fallback), 1x por criança
+//   AddToCart        → "Quero o/os…" na oferta (valor da criança)
+//   InitiateCheckout → "Fazer pagamento →" no resumo, ou aceitar o relâmpago (1x por sessão)
+//   Lead             → contato válido na tela de dados (1x por sessão, com PII)
+//   AddPaymentInfo   → Pix gerado / cartão enviado (CardForm)
+//   Purchase         → /confirmacao (browser) + webhook MP (CAPI), event_id Purchase_BWS_<external_reference>
 // ═══════════════════════════════════════════════════════════════════════════
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { trackBoth, getSessionId, normalizePhoneBR, digitosTelBR } from '../../lib/tracking';
@@ -129,7 +135,10 @@ export default function AssistenteGuiado() {
   // antes de seguir pro pagamento.
   const [albumBumps, setAlbumBumps] = useState<AlbumBumpSuggestion[]>([]);
   const [selectedBumpKeys, setSelectedBumpKeys] = useState<Set<string>>(new Set());
-  const vcDisparado = useRef(false);
+  // [SINAIS 2026-11] guardas de disparo único
+  const vcDisparado = useRef<Set<string>>(new Set());
+  const icDisparado = useRef(false);
+  const leadDisparado = useRef(false);
 
   // capa por álbum (posição 1..N do catálogo) — usada na troca durante o medley
   const capaPorAlbum = useMemo(() => {
@@ -274,6 +283,14 @@ export default function AssistenteGuiado() {
     const resultado = await buscarDisponibilidade(nome);
     nova.albumResult = resultado; nova.buscando = false;
     setBuscando(false);
+    // [SINAIS 2026-11] Search — intenção forte e barata (quem digita o nome).
+    // NÃO enviamos o nome da criança ao Meta; só se foi encontrado no acervo.
+    trackBoth('Search', {
+      event_name: 'Search',
+      event_id: `SR_${getSessionId()}_${nova.id}`,
+      search_string: resultado.found ? 'nome_encontrado' : 'nome_sob_encomenda',
+      content_name: resultado.found ? 'nome_encontrado' : 'nome_sob_encomenda',
+    });
     if (!primeira && criancas.some((x) => displayName(x).toLowerCase() === (resultado.display_name ?? nome).toLowerCase())) {
       irPara('familia'); return;
     }
@@ -285,13 +302,15 @@ export default function AssistenteGuiado() {
 
   // ── ViewContent na primeira reprodução da amostra ──
   function onPrimeiraReproducao() {
-    if (vcDisparado.current || !catalogo || !c) return;
-    vcDisparado.current = true;
+    if (!catalogo || !c || vcDisparado.current.has(c.id)) return;
+    vcDisparado.current.add(c.id);
     const ids = catalogo.base.map((b) => b.id);
+    // [SINAIS 2026-11] event_id estável por criança (antes: Date.now) e sem o
+    // nome da criança no content_name (dado de menor não precisa ir ao Meta).
     trackBoth('ViewContent', {
       event_name: 'ViewContent',
-      event_id: `VC_${getSessionId()}_${Date.now()}`,
-      content_name: `Amostra - ${displayName(c)}`,
+      event_id: `VC_${getSessionId()}_${c.id}`,
+      content_name: tela === 'fallback' ? 'Amostra - outro nome' : 'Amostra - nome encontrado',
       content_ids: ids,
       contents: ids.map((id) => ({ id, quantity: 1 })),
       value: num(catalogo.combo?.priceNew),
@@ -318,6 +337,48 @@ export default function AssistenteGuiado() {
   );
 
   const totalFinal = totalPedido + bumpTotal;
+
+  // [SINAIS 2026-11] itens de uma criança (ids reais do catálogo) para AddToCart/IC
+  const itensCrianca = (x: Crianca) => {
+    if (!catalogo) return [] as Array<{ id: string; quantity: number; item_price: number }>;
+    if (x.relampago) return [{ id: catalogo.base[0]?.id ?? 'album1', quantity: 1, item_price: precoRelampago(catalogo) }];
+    if (x.colecao) return [{ id: catalogo.combo?.id ?? 'colecao', quantity: 1, item_price: precoColecao(x, catalogo) }];
+    return x.sel.map((id) => ({ id, quantity: 1, item_price: precoAlbumBase(x, id, catalogo) }));
+  };
+
+  // AddToCart — escolheu produto(s) para a criança na tela de oferta
+  function addToCart(x: Crianca) {
+    if (!catalogo) return;
+    const contents = itensCrianca(x);
+    if (!contents.length) return;
+    trackBoth('AddToCart', {
+      event_name: 'AddToCart',
+      event_id: `ATC_${getSessionId()}_${x.id}_${contents.map((i) => i.id).join('-')}`,
+      value: precoCrianca(x, catalogo),
+      content_ids: contents.map((i) => i.id),
+      contents,
+      num_items: contents.length,
+      content_name: x.colecao ? 'Coleção Completa' : 'Álbuns avulsos',
+    });
+  }
+
+  // InitiateCheckout — abriu o checkout (tela de dados). 1x por sessão.
+  // Ainda sem contato: vai com fbp/fbc/IP/UA + id anônimo.
+  function initiateCheckout(lista: Crianca[]) {
+    if (!catalogo || icDisparado.current) return;
+    icDisparado.current = true;
+    const contents = lista.flatMap(itensCrianca);
+    const value = lista.reduce((acc, x) => acc + precoCrianca(x, catalogo), 0);
+    trackBoth('InitiateCheckout', {
+      event_name: 'InitiateCheckout',
+      event_id: `IC_${getSessionId()}`,
+      value,
+      num_items: contents.length,
+      content_ids: contents.map((i) => i.id),
+      contents,
+      checkout: { currency: 'BRL', value, items: contents.map((i) => ({ id: i.id, name: catalogo.porId[i.id]?.name ?? i.id, quantity: 1, price: i.item_price })) },
+    });
+  }
 
   // ── handoff: mesmo orderData do ModalVanilla → /pagamento ──
   function fazerPagamento() {
@@ -404,27 +465,10 @@ export default function AssistenteGuiado() {
       if (alvo && !alvo.selectedAlbums.includes(albumId)) alvo.selectedAlbums.push(albumId);
     });
 
-    // InitiateCheckout — browser + CAPI, mesmo event_id (dedup no Meta).
-    const icEventId = `IC_${Date.now()}`;
-    const nameParts = contato.fullName.trim().split(/\s+/);
-    const icItems = [
-      ...childrenClean.flatMap((ch) => ch.selectedAlbums.map((id) => ({
-        id, name: catalogo.porId[id]?.name ?? id, quantity: 1, price: num(catalogo.porId[id]?.priceNew),
-      }))),
-      ...gravacaoItems.map((g) => ({ id: g.albumId, name: g.name, quantity: 1, price: g.price })),
-    ];
-    trackBoth('InitiateCheckout', {
-      event_name: 'InitiateCheckout',
-      event_id: icEventId,
-      value: totalFinal,
-      num_items: icItems.length,
-      content_ids: icItems.map((i) => i.id),
-      contents: icItems.map((i) => ({ id: i.id, quantity: 1, item_price: i.price })),
-      checkout: { currency: 'BRL', value: totalFinal, items: icItems },
-      em: email, ph: telIntl, // [AJUSTES 2026-08] telefone já com DDI correto (matching CAPI)
-      fn: nameParts[0] ?? null, ln: nameParts.slice(1).join(' ') || null,
-      children: criancas.map((x) => ({ nome: displayName(x), resumo: resumoCrianca(x, catalogo) })),
-    }, { email, phone: telIntl, fullName: contato.fullName });
+    // [SINAIS 2026-11] O InitiateCheckout saiu daqui (agora dispara ao abrir a
+    // tela de dados). Aqui só garantimos o Lead com PII caso o blur não tenha
+    // acontecido (autofill + toque direto no botão).
+    leadContato();
 
     localStorage.setItem('orderData', JSON.stringify({
       // [AJUSTES 2026-08] telIntl preserva o DDI do exterior (entrega WhatsApp correta)
@@ -453,7 +497,9 @@ export default function AssistenteGuiado() {
         session_id: getSessionId(),
       },
     }));
-    window.location.href = '/pagamento';
+    // [SINAIS 2026-11] 300 ms para o beacon do Pixel sair antes da troca de página
+    // (o CAPI já usa keepalive). Antes, ~55% dos eventos do browser se perdiam aqui.
+    setTimeout(() => { window.location.href = '/pagamento'; }, 300);
   }
 
   function leadContato() {
@@ -464,8 +510,15 @@ export default function AssistenteGuiado() {
     const minTel = ddiEfetivo === '55' ? 10 : 6;
     if (!email.includes('@') && tel.length < minTel) return;
     const telIntl = tel.length >= minTel && ddiEfetivo ? `+${ddiEfetivo}${tel}` : null;
+    // [SINAIS 2026-11] 1x por sessão, event_id determinístico e PII no topo
+    // (em/ph/fn/ln) — antes ia só em `lead:{}` e o CAPI do Lead chegava sem PII.
+    if (leadDisparado.current) return;
+    if (!(email.includes('@') && telIntl)) return; // espera os dois p/ EMQ máximo; o clique final força o envio
+    leadDisparado.current = true;
+    const np = contato.fullName.trim().split(/\s+/);
     trackBoth('Lead', {
-      event_name: 'Lead', event_id: `Lead_${Date.now()}`, value: 1,
+      event_name: 'Lead', event_id: `Lead_${getSessionId()}`, value: 1,
+      em: email || null, ph: telIntl, fn: np[0] || null, ln: np.slice(1).join(' ') || null,
       lead: { name: contato.fullName || undefined, email: email || undefined, phone: telIntl ?? undefined },
     }, { email, phone: telIntl ?? undefined, fullName: contato.fullName });
   }
@@ -565,6 +618,7 @@ export default function AssistenteGuiado() {
               capa={catalogo.base[0]?.linkImgAlbum}
               cantiga="Ciranda Cirandinha"
               subtitulo="exemplos reais, gravados no nosso estúdio"
+              onFirstPlay={onPrimeiraReproducao} // [SINAIS 2026-11] fallback também conta como ViewContent
               onPlay={() => trackAction('presente_play_amostra', { csEvent: 'presente|play-amostra' })} // [CS+GA4 2026-08]
             />
             <BotaoPrimario onClick={() => irPara('oferta')}>Escolher os álbuns de {displayName(c)} →</BotaoPrimario>
@@ -603,7 +657,7 @@ export default function AssistenteGuiado() {
                         <ReguaEntrega anyGrav={nFalt(c, catalogo) > 0 && foundCount(c) > 0} allGrav={foundCount(c) === 0} />
             <SeloProva />
             <div className="h-3.5" />
-            <BotaoPrimario disabled={!c.colecao && c.sel.length === 0} onClick={() => irPara('familia')}>
+            <BotaoPrimario disabled={!c.colecao && c.sel.length === 0} onClick={() => { addToCart(c); irPara('familia'); }}>
               {c.colecao
                 ? `Quero a Coleção Completa · ${fmtBRL(precoCrianca(c, catalogo))}`
                 : c.sel.length === 0
@@ -661,7 +715,7 @@ export default function AssistenteGuiado() {
                 </div>
               );
             })()}
-            <BotaoPrimario onClick={() => irPara('dados')}>Fazer pagamento →</BotaoPrimario>
+            <BotaoPrimario onClick={() => { initiateCheckout(criancas); irPara('dados'); }}>Fazer pagamento →</BotaoPrimario>
             <button onClick={() => { trackAction('presente_adicionar_crianca', { csEvent: 'presente|adicionar-crianca' }); setNomeInput(''); irPara('addnome'); }} className="mt-2.5 block w-full rounded-2xl border-[2.5px] border-[#D8D9E8] bg-white px-4 py-3.5 font-display text-[17px] font-bold text-[#0A8FC7]">
               + Adicionar outra criança
             </button>
@@ -706,7 +760,7 @@ export default function AssistenteGuiado() {
             <div className="mt-2.5 rounded-xl border-2 border-[#F6C3CD] bg-[#FDECEF] px-3 py-2 text-[13.5px] font-extrabold text-[#B4233C]">⏰ vale só nesta visita</div>
             <div className="h-3.5" />
             <button
-              onClick={() => { trackAction('presente_oferta_aceitou', { csEvent: 'presente|oferta-relampago-aceitou' }); atualizar((d) => { d.relampago = true; d.colecao = false; d.sel = []; }); irPara('dados'); }}
+              onClick={() => { trackAction('presente_oferta_aceitou', { csEvent: 'presente|oferta-relampago-aceitou' }); atualizar((d) => { d.relampago = true; d.colecao = false; d.sel = []; }); if (c) { const r = { ...c, relampago: true, colecao: false, sel: [] as string[] }; addToCart(r); initiateCheckout(criancas.map((x, i) => (i === ativa ? r : x))); } irPara('dados'); }}
               className="block w-full rounded-2xl bg-[#F2762E] px-4 py-4 font-display text-[19px] font-bold text-white shadow-[0_5px_0_#C4551B] active:translate-y-[3px]"
             >
               Quero o {catalogo.base[0]?.name} · {fmtBRL(precoRelampago(catalogo))}
@@ -810,6 +864,7 @@ export default function AssistenteGuiado() {
                 className="w-full min-w-0 rounded-2xl border-[2.5px] border-[#D8D9E8] px-4 py-3.5 text-[17px] font-bold outline-none focus:border-[#12B3F2]"
                 placeholder={ddi === '55' ? '(00) 00000-0000' : 'Número com código de área'}
                 inputMode="tel" autoComplete="tel"
+                onBlur={leadContato} // [SINAIS 2026-11] Lead assim que tiver e-mail + WhatsApp válidos
                 value={contato.telefone}
                 onChange={(e) => setContato({
                   ...contato,

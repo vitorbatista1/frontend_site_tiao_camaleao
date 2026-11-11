@@ -89,6 +89,7 @@ export default function ConfirmacaoPage() {
               ? allItems
               : childIds.map((id: string) => ({ id, quantity: 1, item_price: value / (childIds.length || 1) })),
             num_items: childIds.length || 1,
+            order_id: String(orderId), // [SINAIS 2026-11] mesma chave do Purchase do webhook
             em: cd.email ?? null,
             ph: cd.telefone ?? null,
             fn: nameParts[0] ?? null,

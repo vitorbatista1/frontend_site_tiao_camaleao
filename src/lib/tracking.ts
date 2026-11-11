@@ -9,20 +9,84 @@ export function getCookie(name: string): string | null {
   return m ? decodeURIComponent(m[2]) : null;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// [SINAIS 2026-11] Identificadores first-party estáveis (_fbp, _fbc, tc_uid).
+// Problema que resolve: quando a fbevents.js é bloqueada/atrasada (adblock,
+// navegador in-app, saída rápida), o cookie _fbc não existe e o getFbc antigo
+// reconstruía `fb.1.<Date.now()>.<fbclid>` A CADA evento — timestamps
+// diferentes por evento ("fbc modificado" no Gerenciador) — e na /pagamento
+// (sem fbclid na URL) o fbc sumia, derrubando o fbc do Purchase (~58%).
+// Agora: no 1º carregamento com fbclid gravamos o _fbc (mesmo formato do
+// Pixel, 90 dias); se não houver _fbp, geramos um no formato oficial — a
+// fbevents.js reaproveita cookies _fbp/_fbc já existentes.
+// tc_uid: id anônimo do navegador (sem PII), enviado como external_id
+// adicional para ligar ViewContent/Search/AddToCart/IC (sem contato) ao Purchase.
+// ═══════════════════════════════════════════════════════════════════════════
+const FB_COOKIE_DAYS = 90;
+
+function cookieDomain(): string {
+  if (typeof location === "undefined") return "";
+  const h = location.hostname;
+  if (!h || /^[\d.]+$/.test(h) || h === "localhost") return "";
+  const parts = h.split(".");
+  // eTLD+1 para *.com.br (3 rótulos) e domínios comuns (2 rótulos)
+  const n = /\.(com|net|org|gov|edu)\.br$/.test(h) ? 3 : 2;
+  return parts.length > n ? "." + parts.slice(-n).join(".") : "";
+}
+
+function setCookie(name: string, value: string, days: number): void {
+  if (typeof document === "undefined") return;
+  const exp = new Date(Date.now() + days * 864e5).toUTCString();
+  const dom = cookieDomain();
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${exp}; path=/; SameSite=Lax${dom ? "; domain=" + dom : ""}${location.protocol === "https:" ? "; Secure" : ""}`;
+}
+
+/** Garante _fbc (quando há fbclid) e _fbp. Idempotente; roda no import do módulo. */
+export function ensureFbCookies(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const fbclid = new URLSearchParams(window.location.search).get("fbclid");
+    const atual = getCookie("_fbc");
+    // novo clique (fbclid diferente do gravado) → atualiza; mesmo clique → mantém o timestamp original
+    if (fbclid && (!atual || !atual.endsWith("." + fbclid))) {
+      setCookie("_fbc", `fb.1.${Date.now()}.${fbclid}`, FB_COOKIE_DAYS);
+    }
+    if (!getCookie("_fbp")) {
+      const rnd = Math.floor(Math.random() * 9e9) + 1e9; // 10 dígitos, mesmo formato da fbevents
+      setCookie("_fbp", `fb.1.${Date.now()}.${rnd}`, FB_COOKIE_DAYS);
+    }
+  } catch { /* nunca quebra a UX */ }
+}
+
 export function getFbp(): string | null {
   return getCookie("_fbp");
 }
 
 export function getFbc(): string | null {
-  // [TC-CAPI 2026-06] lê o cookie _fbc primeiro (timestamp correto do clique);
-  // só reconstrói a partir do fbclid se o cookie não existir.
+  // cookie primeiro (timestamp correto do clique). Se não existir mas houver
+  // fbclid, grava o cookie UMA vez e devolve o mesmo valor nos próximos eventos.
   const c = getCookie("_fbc");
   if (c) return c;
   if (typeof window === "undefined") return null;
   const fbclid = new URLSearchParams(window.location.search).get("fbclid");
-  if (fbclid) return `fb.1.${Date.now()}.${fbclid}`;
-  return null;
+  if (!fbclid) return null;
+  ensureFbCookies();
+  return getCookie("_fbc") ?? `fb.1.${Date.now()}.${fbclid}`;
 }
+
+/** Id anônimo persistente do navegador (localStorage + cookie 1 ano). Sem PII. */
+export function getAnonId(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    let id = getCookie("tc_uid") || localStorage.getItem("tc_uid");
+    if (!id) id = (crypto as any).randomUUID ? crypto.randomUUID() : `${Date.now()}${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem("tc_uid", id);
+    if (!getCookie("tc_uid")) setCookie("tc_uid", id, 365);
+    return id;
+  } catch { return null; }
+}
+
+ensureFbCookies();
 
 export function getSessionId(): string {
   if (typeof sessionStorage === "undefined") return "no-session";
@@ -77,6 +141,10 @@ export function setUserData(u: { email?: string | null; phone?: string | null; f
   if (ph) {
     am.ph = ph;
     am.external_id = ph; // mesma chave do CAPI/N8N → casa entre site, CTWA e portal meu.
+  } else {
+    // [SINAIS 2026-11] sem telefone ainda: id anônimo POR NAVEGADOR (nunca constante)
+    const uid = getAnonId();
+    if (uid) am.external_id = uid;
   }
   const parts = (u.fullName || "").trim().split(/\s+/).filter(Boolean);
   if (parts[0]) am.fn = parts[0].toLowerCase();
@@ -109,6 +177,8 @@ export function getTrackingPayload() {
     event_source_url: typeof location !== "undefined" ? location.href : null,
     referrer: typeof document !== "undefined" ? document.referrer || null : null,
     session_id: getSessionId(),
+    // [SINAIS 2026-11] id anônimo → external_id adicional no CAPI (inclusive no Purchase do webhook)
+    external_id_anon: getAnonId(),
     // [TC-CAPI 2026-06] contexto extra para o CAPI
     page_title: typeof document !== "undefined" ? document.title || null : null,
     viewport_width: typeof window !== "undefined" ? window.innerWidth : null,
@@ -144,6 +214,10 @@ export type Commerce = {
   content_type?: string;
   contents?: Array<{ id: string | number; quantity?: number; item_price?: number; title?: string; description?: string }>;
   num_items?: number;
+  // [SINAIS 2026-11] chave de dedup extra no Purchase (= external_reference do MP)
+  order_id?: string;
+  // [SINAIS 2026-11] usado no Search (sem PII: só "encontrado"/"sob_encomenda")
+  search_string?: string;
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -156,6 +230,9 @@ export const PIXEL_EVENTS: Record<string, Partial<Commerce>> = {
   AddPaymentInfo:   { currency: "BRL",             content_category: "musica_digital", content_type: "product" },
   Purchase:         { currency: "BRL",             content_category: "musica_digital", content_type: "product" },
   ViewContent:      { currency: "BRL",             content_category: "catalogo",       content_type: "product" },
+  // [SINAIS 2026-11] etapas intermediárias do /presente
+  Search:           { currency: "BRL",             content_category: "nome_crianca"                            },
+  AddToCart:        { currency: "BRL",             content_category: "musica_digital", content_type: "product" },
 };
 
 // [TC-CAPI 2026-06] dispara o PIXEL enriquecido (advanced matching + commerce + contexto).
@@ -194,6 +271,18 @@ export function trackCapi(input: CapiInput): void {
   if (!API_URL) return;
   try {
     const t = getTrackingPayload();
+    // [SINAIS 2026-11] BUG corrigido: o Lead do /presente mandava a PII só em
+    // `lead:{}` e o backend lê em/ph/fn/ln — o Lead chegava no CAPI SEM e-mail/
+    // telefone. Agora, se em/ph/fn/ln não vierem, usa os de `lead`.
+    const ld = input.lead;
+    if (ld) {
+      if (!input.em && ld.email) input = { ...input, em: ld.email };
+      if (!input.ph && ld.phone) input = { ...input, ph: ld.phone };
+      if (!input.fn && ld.name) {
+        const p = ld.name.trim().split(/\s+/);
+        input = { ...input, fn: p[0] ?? null, ln: input.ln ?? (p.slice(1).join(" ") || null) };
+      }
+    }
     const normPhone = normalizePhoneBR(input.ph);
 
     // UTM params da URL atual
@@ -252,6 +341,8 @@ export function trackCapi(input: CapiInput): void {
       content_category: input.content_category,
       content_type: input.content_type,
       num_items: input.num_items,
+      order_id: input.order_id,
+      search_string: input.search_string,
       // contexto de rastreio
       fbp: t.fbp,
       fbc: t.fbc,
@@ -259,6 +350,7 @@ export function trackCapi(input: CapiInput): void {
       event_source_url: t.event_source_url,
       referrer: t.referrer,
       session_id: normPhone ?? t.session_id,
+      external_id_anon: t.external_id_anon,
       geo: "BR",
       utm: Object.keys(utm).length ? utm : undefined,
       attribution,
@@ -302,6 +394,8 @@ export function trackBoth(
     content_type: merged.content_type,
     contents: merged.contents,
     num_items: merged.num_items,
+    order_id: merged.order_id,
+    search_string: merged.search_string,
   };
 
   trackPixel(event, commerce, { eventId: merged.event_id, user });

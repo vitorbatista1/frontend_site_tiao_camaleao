@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { initMercadoPago, CardPayment } from '@mercadopago/sdk-react';
 import { CreditCard, QrCode, Lock } from './Icons.tsx';
-import { getTrackingPayload } from '../lib/tracking.ts';
+import { getTrackingPayload, getSessionId, trackPixel, trackCapi } from '../lib/tracking.ts';
 
 
 type CardFormProps = {
@@ -206,6 +206,26 @@ export default function CardForm({
     }, 1000);
   }
 
+  // [SINAIS 2026-11] AddPaymentInfo no momento real: Pix GERADO (event_id por
+  // pedido) ou cartão ENVIADO (1x por sessão). Antes disparava em qualquer
+  // clique na caixa de pagamento (PaymentPage), inclusive só trocar de aba.
+  const aplDisparado = useRef<Set<string>>(new Set());
+  const trackAddPaymentInfo = (method: 'pix' | 'card', eventId: string, value: number) => {
+    if (aplDisparado.current.has(eventId)) return;
+    aplDisparado.current.add(eventId);
+    const ids = (selectedAlbums ?? []).map((a) => a.albumId).filter(Boolean);
+    const contents = (selectedAlbums ?? []).map((a) => ({ id: a.albumId, quantity: 1, item_price: Number(a.price ?? 0) }));
+    const parts = (customerName ?? '').trim().split(/\s+/);
+    const commerce = {
+      value, currency: 'BRL', content_ids: ids.length ? ids : undefined, contents: contents.length ? contents : undefined,
+      content_category: 'musica_digital', content_type: 'product', num_items: ids.length || undefined,
+      content_name: method === 'pix' ? 'pix' : 'cartao',
+    };
+    trackPixel('AddPaymentInfo', commerce, { eventId, user: { email, phone: telefone ?? null, fullName: customerName ?? null } });
+    trackCapi({ event_name: 'AddPaymentInfo', event_id: eventId, ...commerce,
+      em: email ?? null, ph: telefone ?? null, fn: parts[0] || null, ln: parts.slice(1).join(' ') || null });
+  };
+
   const handleGeneratePix = async () => {
     setIsLoadingPix(true);
     setPixError(null);
@@ -230,6 +250,7 @@ export default function CardForm({
           user_agent: tracking.user_agent,
           event_source_url: tracking.event_source_url,
           referrer: tracking.referrer,
+          external_id_anon: tracking.external_id_anon, // [SINAIS 2026-11]
           checkoutDraftId,
         }),
       });
@@ -258,6 +279,7 @@ export default function CardForm({
 
       setPixData(pix);
       startTimer(secondsLeft);
+      trackAddPaymentInfo('pix', `APL_${pix.external_reference}`, Number(pix.amount ?? numericAmount)); // [SINAIS 2026-11]
     } catch (err: any) {
       setPixError(err.message || "Erro ao gerar PIX");
     } finally {
@@ -296,6 +318,7 @@ export default function CardForm({
   const handleCardSubmit = async (param: any) => {
     setIsProcessingCard(true);
     setCardError(null);
+    trackAddPaymentInfo('card', `APL_card_${getSessionId()}`, Number(numericAmount)); // [SINAIS 2026-11]
     try {
       const tracking = getTrackingPayload();
       const res = await fetch(`${API_URL}/api/payments/process-payment`, {
@@ -311,6 +334,7 @@ export default function CardForm({
           user_agent: tracking.user_agent,
           event_source_url: tracking.event_source_url,
           referrer: tracking.referrer,
+          external_id_anon: tracking.external_id_anon, // [SINAIS 2026-11]
           checkoutDraftId,
         }),
       });

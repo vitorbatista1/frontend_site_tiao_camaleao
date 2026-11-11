@@ -471,47 +471,7 @@ export default function PaymentPage() {
   }, []);
 
   const handlePaymentClick = useCallback(() => {
-    if (!paymentInfoFired.current) {
-      paymentInfoFired.current = true;
-      const apiEventId = `br_api_${getSessionId()}_${Date.now()}`;
-      const nameParts = (orderData?.customerData?.fullName ?? '').trim().split(/\s+/);
-      const contentIds = orderData?.children?.flatMap((c: any) => c.selectedAlbums ?? []) ?? [];
-      // [TC-CAPI 2026-06] AddPaymentInfo: advanced matching (PII via setUserData dentro do trackPixel)
-      // + custom_data rico. PII NUNCA entra no params do pixel.
-      const apiContents = contentIds.map((id: string) => ({ id, quantity: 1 }));
-      trackPixel('AddPaymentInfo', {
-        value: calculateTotalWithBumps,
-        currency: 'BRL',
-        content_ids: contentIds.length ? contentIds : undefined,
-        contents: apiContents.length ? apiContents : undefined,
-        content_category: 'musica_digital',
-        content_type: 'product',
-        num_items: orderData?.children?.length,
-      }, {
-        eventId: apiEventId,
-        user: {
-          email: orderData?.customerData?.email ?? null,
-          phone: orderData?.customerData?.telefone ?? null,
-          fullName: orderData?.customerData?.fullName ?? null,
-        },
-      });
-      // [TC-CAPI 2026-06] espelho CAPI do AddPaymentInfo — máximo de dados para match quality.
-      trackCapi({
-        event_name: 'AddPaymentInfo',
-        event_id: apiEventId,
-        value: calculateTotalWithBumps,
-        currency: 'BRL',
-        num_items: orderData?.children?.length,
-        content_ids: contentIds.length > 0 ? contentIds : undefined,
-        content_category: 'musica_digital',
-        content_type: 'product',
-        contents: apiContents.length ? apiContents : undefined,
-        em: orderData?.customerData?.email ?? null,
-        ph: orderData?.customerData?.telefone ?? null,
-        fn: nameParts[0] ?? null,
-        ln: nameParts.slice(1).join(' ') || null,
-      });
-    }
+    // [SINAIS 2026-11] AddPaymentInfo saiu daqui → CardForm (Pix gerado / cartão enviado).
     if (!orderData?.skipOrderBumps && selectedBumps.length === 0 && selectedAlbumBumps.size === 0) setShowBumpModal(true);
   }, [orderData?.skipOrderBumps, selectedBumps.length, selectedAlbumBumps.size, calculateTotalWithBumps]);
 
